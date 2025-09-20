@@ -1,0 +1,35 @@
+{
+    "name": "animalineage/backend",
+    "description": "AnimaLineage - Application de gestion d'élevage - Backend API",
+    "type": "project",
+    "license": "Apache-2.0",
+    "authors": [
+      {
+        "name": "Nicolas Jalibert"
+      }
+    ],
+    "require": {
+        "firebase/php-jwt": "^6.11"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "mockery/mockery": "^1.6",
+        "fakerphp/faker": "^1.23"
+    },
+    "autoload": {
+        "psr-4": {
+            "AnimaLineage\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AnimaLineage\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage",
+        "test-unit": "phpunit --testsuite=Unit",
+        "test-integration": "phpunit --testsuite=Integration"
+    }
+}

@@ -1,0 +1,15 @@
+# Environment files
+.env
+
+# Database files
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+/config/env.php

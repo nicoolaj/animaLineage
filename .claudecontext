@@ -1,0 +1,185 @@
+# AnimaLineage - Application de Gestion d'Élevage
+
+## Vue d'ensemble
+Application web full-stack moderne pour la gestion professionnelle d'élevages avec interface React/TypeScript et API PHP robuste.
+
+## Architecture
+```
+AnimaLineage/
+├── frontend/           # Application React TypeScript (port 3002)
+│   ├── src/
+│   │   ├── components/ # Composants React modulaires
+│   │   │   ├── Auth.tsx              # Authentification
+│   │   │   ├── MainDashboard.tsx     # Tableau de bord principal
+│   │   │   ├── AdminPanel.tsx        # Interface d'administration
+│   │   │   ├── ElevageForm.tsx       # Gestion des élevages
+│   │   │   ├── AnimalForm.tsx        # Gestion des animaux
+│   │   │   ├── AnimalList.tsx        # Liste des animaux
+│   │   │   ├── RaceForm.tsx          # Gestion des races
+│   │   │   └── TypeAnimalForm.tsx    # Types d'animaux
+│   │   ├── contexts/   # Gestion d'état global
+│   │   │   └── AuthContext.tsx       # Contexte d'authentification
+│   │   └── utils/      # Fonctions utilitaires
+│   │       └── auth.ts               # Utilitaires d'authentification
+│   ├── package.json    # Dépendances Node.js
+│   └── build/          # Build de production
+├── backend/            # API REST PHP (port 3001)
+│   ├── controllers/    # Contrôleurs MVC
+│   │   ├── UserController.php        # Gestion utilisateurs
+│   │   ├── AuthController.php        # Authentification
+│   │   ├── AdminController.php       # Administration
+│   │   ├── ElevageController.php     # Gestion élevages
+│   │   └── AnimalController.php      # Gestion animaux
+│   ├── models/         # Modèles de données
+│   │   ├── User.php                  # Modèle utilisateur
+│   │   ├── Animal.php                # Modèle animal
+│   │   ├── Elevage.php               # Modèle élevage
+│   │   ├── Race.php                  # Modèle race
+│   │   └── TypeAnimal.php            # Modèle type animal
+│   ├── config/         # Configuration système
+│   │   ├── database.php              # Configuration BDD
+│   │   └── env.php                   # Variables d'environnement
+│   ├── migrations/     # Migrations de schéma
+│   ├── middleware/     # Middleware sécurité
+│   │   └── AuthMiddleware.php        # Authentification JWT
+│   ├── database/       # Base de données SQLite
+│   └── index.php       # Point d'entrée et routeur API
+├── docs/               # Documentation projet
+│   ├── ARCHITECTURE.md               # Architecture système
+│   └── CONVENTIONS.md                # Conventions de code
+├── scripts/            # Scripts utilitaires
+└── .nvmrc              # Version Node.js recommandée
+```
+
+## Sécurité
+La sécurité est la priorité de tout développement.
+Les actions transmises par le frontend doivent être vérifiées par le backend pour se prémunir d'une tentative de piratage et/ou de corruption de données et/ou d'escalade de droits.
+
+## Stack Technique
+
+### Frontend (React/TypeScript)
+- **React 19.1.1** avec TypeScript 4.9.5
+- **React Testing Library** pour les tests unitaires
+- **CSS modules** pour le styling modulaire
+- **Context API** pour la gestion d'état global
+- **Fetch API** pour les appels HTTP
+- **ESLint & Prettier** pour la qualité du code
+
+### Backend (PHP)
+- **PHP 7.4+** avec architecture MVC orientée objet
+- **PDO** pour l'abstraction base de données
+- **JWT (firebase/php-jwt)** pour l'authentification stateless
+- **Architecture REST** pour l'API
+- **Support multi-SGBD** (SQLite/MySQL/PostgreSQL)
+- **Migrations automatiques** pour le schéma de données
+
+## Modèles de Données
+
+### Entités principales
+- **User** : Utilisateurs avec système de validation par statut
+  - Statuts : `0` (en attente), `1` (validé), `2` (rejeté)
+  - Rôles : administrateur, éleveur, consultant
+  - Authentification JWT sécurisée
+
+- **Elevage** : Structures d'élevage
+  - Informations complètes (nom, adresse, contact)
+  - Liaison avec utilisateurs propriétaires
+  - Gestion multi-élevage par utilisateur
+
+- **Animal** : Animaux individuels
+  - Données complètes (identification, généalogie)
+  - Liaison avec élevage et race
+  - Historique et suivi sanitaire
+
+- **Race** : Races d'animaux
+  - Classification par type d'animal
+  - Caractéristiques spécifiques
+
+- **TypeAnimal** : Types d'animaux
+  - Catégories principales (bovins, ovins, etc.)
+  - Structuration hiérarchique
+
+## Fonctionnalités Principales
+
+### Authentification & Autorisation
+- **Système JWT** avec tokens sécurisés
+- **Middleware d'authentification** sur toutes les routes protégées
+- **Gestion des rôles** avec contrôle d'accès granulaire
+- **Comptes en attente** avec système de validation administrateur
+
+### Gestion d'Élevage
+- **CRUD complet** pour élevages, animaux, races et types
+- **Interface intuitive** avec formulaires validés
+- **Recherche et filtrage** avancés
+- **Tableau de bord** avec vue d'ensemble
+
+### Administration
+- **Panel d'administration** pour la gestion des utilisateurs
+- **Validation des comptes** en attente
+- **Gestion des permissions** et rôles
+- **Monitoring** des activités
+
+### Sécurité & Performance
+- **Validation côté client et serveur**
+- **Échappement des données** avec requêtes préparées
+- **Interface responsive** pour tous les appareils
+- **Gestion d'erreurs** robuste
+
+## Configuration
+
+### Développement
+- Backend: `php -S localhost:3001` dans /backend
+- Frontend: `npm start` dans /frontend (démarre sur port 3002)
+- Base de données: SQLite automatique (backend/database/webapp.db)
+
+### Production
+- Variables d'environnement dans backend/.env
+- Support MySQL/PostgreSQL
+- Build frontend avec `npm run build`
+
+## Scripts disponibles
+- Frontend: start, build, test, eject
+- Backend: migrate.php pour les migrations
+
+## Sécurité
+- Authentification JWT
+- Validation des entrées
+- CORS configuré
+- Middleware d'autorisation
+
+## État Actuel du Projet
+
+### Statut de Développement
+- ✅ **Application fonctionnelle** en production
+- ✅ **Backend sécurisé** sans vulnérabilités connues
+- ✅ **Documentation complète** et à jour
+- ⚠️ **Dépendances frontend** : vulnérabilités mineures identifiées
+- ✅ **Tests unitaires** configurés (React Testing Library)
+
+### Architecture Validée
+- ✅ **Séparation frontend/backend** claire
+- ✅ **API REST** complète et documentée
+- ✅ **Base de données** multi-environnement
+- ✅ **Authentification JWT** robuste
+- ✅ **Interface responsive** validée
+
+## Points d'Attention
+
+### Sécurité
+- 🔒 **Authentification** : JWT avec middleware obligatoire
+- 🔒 **Validation** : côté client ET serveur
+- 🔒 **Base de données** : requêtes préparées exclusivement
+- 🔒 **CORS** : configuration stricte
+
+### Maintenance
+- 📋 **Dépendances** : audit régulier recommandé (voir dependency-audit-2025-09-19.md)
+- 📋 **Configuration** : variables d'environnement via fichiers .env
+- 📋 **Migrations** : automatiques au démarrage
+- 📋 **Documentation** : maintien à jour obligatoire
+- 📋 **Versioning** : commit après chaque modification significative
+
+### Performance
+- ⚡ **Frontend** : optimisation React (memoization, lazy loading)
+- ⚡ **Backend** : requêtes SQL optimisées
+- ⚡ **Base de données** : index appropriés
+
