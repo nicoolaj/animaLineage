@@ -1,0 +1,66 @@
+/*
+ * Copyright 2025 - Nicolas Jalibert
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import React from 'react';
+import './App.css';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Auth from './components/Auth';
+import MainDashboard from './components/MainDashboard';
+import PendingAccountDashboard from './components/PendingAccountDashboard';
+
+const AppContent: React.FC = () => {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="App">
+        <div className="loading-container">
+          <p>Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const renderContent = () => {
+    if (!isAuthenticated) {
+      return <Auth />;
+    }
+
+    // Si l'utilisateur est connecté mais son compte est en attente (status = 0)
+    if (user?.status === 0) {
+      return <PendingAccountDashboard />;
+    }
+
+    // Si l'utilisateur est connecté et validé (status = 1) ou rejeté (status = 2)
+    return <MainDashboard />;
+  };
+
+  return (
+    <div className="App">
+      {renderContent()}
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+export default App;

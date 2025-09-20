@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nom": "Brebis Lacaune",
+    "type_animal_nom": "Mouton",
+    "type_animal_id": 1,
+    "description": "Race de mouton laitier originaire du sud de la France"
+  },
+  {
+    "id": 2,
+    "nom": "Chèvre Alpine",
+    "type_animal_nom": "Chèvre",
+    "type_animal_id": 2,
+    "description": "Race de chèvre laitière des Alpes"
+  },
+  {
+    "id": 3,
+    "nom": "Holstein",
+    "type_animal_nom": "Bovin",
+    "type_animal_id": 3,
+    "description": "Race bovine laitière"
+  }
+]

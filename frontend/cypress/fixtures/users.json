@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "nom": "Utilisateur Test",
+    "email": "test@example.com",
+    "role": 3,
+    "role_name": "Utilisateur",
+    "status": 1,
+    "created_at": "2024-01-10T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "nom": "Admin Test",
+    "email": "admin@example.com",
+    "role": 1,
+    "role_name": "Administrateur",
+    "status": 1,
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 3,
+    "nom": "Modérateur Test",
+    "email": "moderator@example.com",
+    "role": 2,
+    "role_name": "Modérateur",
+    "status": 1,
+    "created_at": "2024-01-05T12:00:00Z"
+  },
+  {
+    "id": 4,
+    "nom": "Utilisateur Pending",
+    "email": "pending@example.com",
+    "role": 3,
+    "role_name": "Utilisateur",
+    "status": 0,
+    "created_at": "2024-01-20T16:30:00Z"
+  }
+]

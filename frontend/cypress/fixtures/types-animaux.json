@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "nom": "Mouton",
+    "description": "Ovins domestiques élevés pour leur laine, viande ou lait"
+  },
+  {
+    "id": 2,
+    "nom": "Chèvre",
+    "description": "Caprins domestiques élevés pour leur lait, viande ou poil"
+  },
+  {
+    "id": 3,
+    "nom": "Bovin",
+    "description": "Bovins domestiques élevés pour leur lait, viande ou travail"
+  },
+  {
+    "id": 4,
+    "nom": "Porc",
+    "description": "Porcins domestiques élevés pour leur viande"
+  }
+]
