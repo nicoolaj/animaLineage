@@ -336,5 +336,31 @@ class Animal {
 
         return false;
     }
+
+    // Vérifier si un utilisateur peut transférer un animal
+    public function canTransfer($animal_id, $user_id, $user_role) {
+        // Les admins peuvent tout transférer
+        if ($user_role == 1) {
+            return true;
+        }
+
+        // Charger les données de l'animal
+        $animal_data = $this->getById($animal_id);
+        if (!$animal_data) {
+            return false;
+        }
+
+        // Vérifier si l'utilisateur est propriétaire de l'élevage actuel
+        if ($animal_data['elevage_id']) {
+            $query = "SELECT user_id FROM elevages WHERE id = :elevage_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':elevage_id', $animal_data['elevage_id']);
+            $stmt->execute();
+            $elevage = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $elevage && $elevage['user_id'] == $user_id;
+        }
+
+        return false;
+    }
 }
 ?>

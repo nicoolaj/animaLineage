@@ -2,6 +2,21 @@
 
 Application web full-stack moderne pour la gestion professionnelle d'élevages avec interface React/TypeScript et API PHP robuste.
 
+## 🆕 Dernières mises à jour
+
+### v2.1.1 (2025-09-21) - Patch Critique
+- 🐛 **Filtrage animaux corrigé** - Les admins voient maintenant uniquement les animaux de l'élevage consulté
+
+### v2.1.0 (2025-09-21) - Fonctionnalités majeures
+- ✅ **Migration Tailwind CSS** - Interface moderne avec thème sombre unifié
+- ✅ **Sélection intelligente des parents** - Limitée à la même espèce (Ovin, Bovin, etc.)
+- ✅ **Gestion des transferts d'animaux** - Système complet de demandes
+- ✅ **Contrôles d'accès renforcés** - Types & Races réservés aux administrateurs
+- ✅ **Logo intégré** - Interface professionelle avec branding
+- ✅ **Infrastructure multilingue** - Préparation i18n avec React
+
+📖 [Voir le changelog complet](./CHANGELOG.md)
+
 ## Architecture du Projet
 
 ```
@@ -29,10 +44,12 @@ AnimaLineage/
 
 ### Environnement de Développement
 - **Node.js** v18+ (voir .nvmrc pour la version recommandée)
-- **PHP** v7.4+ avec extensions :
+- **PHP** v8.4+ avec extensions :
   - PDO SQLite (développement)
   - PDO MySQL/PostgreSQL (production)
   - JSON
+  - OpenSSL (pour JWT)
+  - mbstring
 - **Composer** pour les dépendances PHP
 
 ### Environnement de Production
@@ -87,8 +104,10 @@ The application will automatically create the required `users` table for all dat
 
 2. Start PHP development server:
    ```bash
-   php -S localhost:3001
+   php -S 0.0.0.0:3001 index.php
    ```
+
+   ⚠️ **Important**: Utilisez `0.0.0.0:3001` au lieu de `localhost:3001` pour éviter les erreurs de connexion
 
    Or configure your web server to serve the backend directory on port 3001.
 
@@ -112,6 +131,12 @@ The application will automatically create the required `users` table for all dat
    The React app will run on http://localhost:3002
 
 ## Fonctionnalités Principales
+
+### 🌐 Internationalisation
+- **Support multilingue** : Français et Anglais
+- **Traduction dynamique** des codes d'erreur
+- **Changement de langue** en temps réel
+- **Sélecteur de langue** intégré dans l'interface
 
 ### Gestion d'Authentification
 - **Système JWT** avec tokens sécurisés
@@ -173,6 +198,7 @@ The application will automatically create the required `users` table for all dat
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Architecture détaillée du système
 - **[CONVENTIONS.md](docs/CONVENTIONS.md)** - Conventions de code et bonnes pratiques
 - **[DATABASE.md](backend/DATABASE.md)** - Configuration et gestion de la base de données
+- **[PHP_8.4_MIGRATION.md](backend/PHP_8.4_MIGRATION.md)** - Guide de migration vers PHP 8.4
 
 ### Configuration Base de Données
 L'application détecte automatiquement l'environnement :
@@ -306,7 +332,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
     }

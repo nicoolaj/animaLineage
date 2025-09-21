@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import TransferRequestDialog from './TransferRequestDialog';
 
 interface Race {
     id: number;
@@ -46,6 +47,10 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
     const [parentsFemelles, setParentsFemelles] = useState<Animal[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [animalExistsWarning, setAnimalExistsWarning] = useState<string>('');
+    const [checkingAnimal, setCheckingAnimal] = useState(false);
+    const [existingAnimal, setExistingAnimal] = useState<any>(null);
+    const [showTransferDialog, setShowTransferDialog] = useState(false);
 
     const loadRaces = useCallback(async () => {
         try {
@@ -102,6 +107,23 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
             const token = sessionStorage.getItem('token');
             if (!token) return;
 
+            // Si aucune race sélectionnée, vider les listes de parents
+            if (!formData.race_id) {
+                setParentsMales([]);
+                setParentsFemelles([]);
+                return;
+            }
+
+            // Trouver le type d'animal de la race sélectionnée
+            const selectedRace = races.find(r => r.id === Number(formData.race_id));
+            if (!selectedRace) {
+                setParentsMales([]);
+                setParentsFemelles([]);
+                return;
+            }
+
+            console.log(`Filtrage des parents pour le type d'animal: ${selectedRace.type_animal_nom}`);
+
             // Charger tous les animaux accessibles pour la généalogie
             const response = await fetch('http://localhost:3001/api/animaux', {
                 headers: {
@@ -111,15 +133,32 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
 
             if (response.ok) {
                 const data = await response.json();
-                // Filtrer seulement les animaux vivants pour les parents
-                const animauxVivants = data.filter((a: Animal) => !a.date_deces && a.id !== animal?.id);
-                setParentsMales(animauxVivants.filter((a: Animal) => a.sexe === 'M'));
-                setParentsFemelles(animauxVivants.filter((a: Animal) => a.sexe === 'F'));
+
+                // Filtrer les animaux vivants, exclure l'animal actuel, et filtrer par type d'animal
+                const animauxVivants = data.filter((a: Animal) => {
+                    // Exclure les animaux morts et l'animal actuel
+                    if (a.date_deces || a.id === animal?.id) return false;
+
+                    // Trouver la race de cet animal pour vérifier le type
+                    const animalRace = races.find(r => r.id === a.race_id);
+                    if (!animalRace) return false;
+
+                    // Ne garder que les animaux du même type (espèce)
+                    return animalRace.type_animal_nom === selectedRace.type_animal_nom;
+                });
+
+                const malesFiltered = animauxVivants.filter((a: Animal) => a.sexe === 'M');
+                const femellesFiltered = animauxVivants.filter((a: Animal) => a.sexe === 'F');
+
+                console.log(`Parents potentiels trouvés: ${malesFiltered.length} mâles, ${femellesFiltered.length} femelles (même espèce: ${selectedRace.type_animal_nom})`);
+
+                setParentsMales(malesFiltered);
+                setParentsFemelles(femellesFiltered);
             }
         } catch (error) {
             console.error('Erreur lors du chargement des animaux:', error);
         }
-    }, [animal?.id]);
+    }, [animal?.id, formData.race_id, races.length]);
 
     useEffect(() => {
         loadRaces();
@@ -133,6 +172,84 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
             ...prev,
             [name]: value === '' ? (name.includes('_id') ? undefined : '') : value
         }));
+
+        // Vérifier l'existence de l'animal si l'identifiant change
+        if (name === 'identifiant_officiel' && value.trim() && !animal?.id) {
+            checkAnimalExists(value.trim());
+        }
+    };
+
+    const checkAnimalExists = useCallback(async (identifiant: string) => {
+        if (!identifiant || checkingAnimal) return;
+
+        setCheckingAnimal(true);
+        setAnimalExistsWarning('');
+
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) return;
+
+            const response = await fetch(`http://localhost:3001/api/animaux?check=1&identifiant=${encodeURIComponent(identifiant)}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.exists && data.animal.elevage_id) {
+                    setExistingAnimal(data.animal);
+                    setAnimalExistsWarning(
+                        `⚠️ Cet animal existe déjà dans l'élevage "${data.animal.elevage_nom}". ` +
+                        (data.animal.can_transfer
+                            ? 'Vous pouvez demander un transfert.'
+                            : 'Contactez un administrateur pour un transfert.')
+                    );
+                } else {
+                    setExistingAnimal(null);
+                }
+            }
+        } catch (error) {
+            console.error('Erreur lors de la vérification de l\'animal:', error);
+        } finally {
+            setCheckingAnimal(false);
+        }
+    }, [checkingAnimal, animal?.id]);
+
+    const handleTransferRequest = async (toElevageId: number, message: string) => {
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token || !existingAnimal) return;
+
+            const response = await fetch('http://localhost:3001/api/transfer-requests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    animal_id: existingAnimal.id,
+                    to_elevage_id: toElevageId,
+                    message
+                })
+            });
+
+            if (response.ok) {
+                setShowTransferDialog(false);
+                setAnimalExistsWarning('✅ Demande de transfert envoyée avec succès !');
+                // Optionally clear the form or notify parent
+                setTimeout(() => {
+                    setAnimalExistsWarning('');
+                    setExistingAnimal(null);
+                }, 3000);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erreur lors de la création de la demande');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            throw error;
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -164,17 +281,17 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
     };
 
     return (
-        <div id="animal-form-container" className="animal-form">
-            <h3 id="animal-form-title">{animal ? 'Modifier l\'animal' : 'Nouvel animal'}</h3>
+        <div className="bg-gray-700 rounded-xl p-6 text-white max-w-4xl mx-auto border border-gray-600">
+            <h3 className="m-0 mb-6 text-white text-2xl font-semibold">{animal ? 'Modifier l\'animal' : 'Nouvel animal'}</h3>
 
-            {error && <div id="animal-form-error" className="error-message">{error}</div>}
+            {error && <div className="bg-red-600 text-white px-3 py-2.5 rounded-md mb-5">{error}</div>}
 
-            <form id="animal-form" onSubmit={handleSubmit}>
-                <div id="animal-form-row-1" className="form-row">
-                    <div id="animal-form-group-identifiant" className="form-group">
-                        <label htmlFor="identifiant_officiel">
+            <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="identifiant_officiel" className="text-gray-100 font-medium text-sm">
                             Identifiant officiel *
-                            <span className="field-description">Numéro unique d'identification de l'animal (ex: numéro de boucle)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Numéro unique d'identification de l'animal (ex: numéro de boucle)</span>
                         </label>
                         <input
                             type="text"
@@ -184,13 +301,33 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             onChange={handleChange}
                             required
                             placeholder="Ex: FR123456789 ou 001234"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
                         />
+                        {checkingAnimal && (
+                            <div className="mt-2 px-3 py-2 border border-primary-300 bg-primary-50 text-primary-700 rounded-md text-sm">
+                                🔍 Vérification en cours...
+                            </div>
+                        )}
+                        {animalExistsWarning && (
+                            <div className="text-yellow-700 bg-yellow-100 border border-yellow-300 px-3 py-2.5 rounded-md mt-2 text-sm">
+                                {animalExistsWarning}
+                                {existingAnimal && existingAnimal.can_transfer && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowTransferDialog(true)}
+                                        className="inline-block mt-2.5 px-3 py-1.5 bg-blue-600 text-white border-0 rounded-md cursor-pointer text-xs hover:bg-blue-700 transition-colors duration-200"
+                                    >
+                                        🔄 Demander un transfert
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
 
-                    <div id="animal-form-group-nom" className="form-group">
-                        <label htmlFor="nom">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="nom" className="text-gray-100 font-medium text-sm">
                             Nom de l'animal
-                            <span className="field-description">Nom donné à l'animal (facultatif)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Nom donné à l'animal (facultatif)</span>
                         </label>
                         <input
                             type="text"
@@ -199,15 +336,16 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             value={formData.nom || ''}
                             onChange={handleChange}
                             placeholder="Ex: Bella, Rex, Mouton123..."
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
                         />
                     </div>
                 </div>
 
-                <div id="animal-form-row-2" className="form-row">
-                    <div id="animal-form-group-sexe" className="form-group">
-                        <label htmlFor="sexe">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="sexe" className="text-gray-100 font-medium text-sm">
                             Sexe de l'animal *
-                            <span className="field-description">Sexe biologique de l'animal</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Sexe biologique de l'animal</span>
                         </label>
                         <select
                             id="sexe"
@@ -215,16 +353,17 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             value={formData.sexe}
                             onChange={handleChange}
                             required
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="M">♂️ Mâle</option>
                             <option value="F">♀️ Femelle</option>
                         </select>
                     </div>
 
-                    <div id="animal-form-group-race" className="form-group">
-                        <label htmlFor="race_id">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="race_id" className="text-gray-100 font-medium text-sm">
                             Race *
-                            <span className="field-description">Race et type d'animal (mouton, chèvre, etc.)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Race et type d'animal (mouton, chèvre, etc.)</span>
                         </label>
                         <select
                             id="race_id"
@@ -232,6 +371,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             value={formData.race_id}
                             onChange={handleChange}
                             required
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Choisir une race --</option>
                             {races.map(race => (
@@ -243,17 +383,18 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                     </div>
                 </div>
 
-                <div id="animal-form-row-3" className="form-row">
-                    <div id="animal-form-group-pere" className="form-group">
-                        <label htmlFor="pere_id">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="pere_id" className="text-gray-100 font-medium text-sm">
                             Père géniteur
-                            <span className="field-description">Animal mâle ayant engendré cet animal (généalogie)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Animal mâle ayant engendré cet animal (généalogie)</span>
                         </label>
                         <select
                             id="pere_id"
                             name="pere_id"
                             value={formData.pere_id || ''}
                             onChange={handleChange}
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Père non renseigné --</option>
                             {parentsMales.map(parent => (
@@ -264,16 +405,17 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                         </select>
                     </div>
 
-                    <div id="animal-form-group-mere" className="form-group">
-                        <label htmlFor="mere_id">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="mere_id" className="text-gray-100 font-medium text-sm">
                             Mère génitrice
-                            <span className="field-description">Animal femelle ayant donné naissance à cet animal</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Animal femelle ayant donné naissance à cet animal</span>
                         </label>
                         <select
                             id="mere_id"
                             name="mere_id"
                             value={formData.mere_id || ''}
                             onChange={handleChange}
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Mère non renseignée --</option>
                             {parentsFemelles.map(parent => (
@@ -285,11 +427,11 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                     </div>
                 </div>
 
-                <div id="animal-form-row-4" className="form-row">
-                    <div id="animal-form-group-date-naissance" className="form-group">
-                        <label htmlFor="date_naissance">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="date_naissance" className="text-gray-100 font-medium text-sm">
                             Date de naissance
-                            <span className="field-description">Date de mise bas de l'animal</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Date de mise bas de l'animal</span>
                         </label>
                         <input
                             type="date"
@@ -297,13 +439,14 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             name="date_naissance"
                             value={formData.date_naissance || ''}
                             onChange={handleChange}
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                     </div>
 
-                    <div id="animal-form-group-date-bouclage" className="form-group">
-                        <label htmlFor="date_bouclage">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="date_bouclage" className="text-gray-100 font-medium text-sm">
                             Date de bouclage
-                            <span className="field-description">Date de pose de la boucle d'identification officielle</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Date de pose de la boucle d'identification officielle</span>
                         </label>
                         <input
                             type="date"
@@ -311,15 +454,16 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             name="date_bouclage"
                             value={formData.date_bouclage || ''}
                             onChange={handleChange}
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                     </div>
                 </div>
 
-                <div id="animal-form-row-5" className="form-row">
-                    <div id="animal-form-group-date-deces" className="form-group">
-                        <label htmlFor="date_deces">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="date_deces" className="text-gray-100 font-medium text-sm">
                             Date de décès
-                            <span className="field-description">Date de mort de l'animal (retire automatiquement de l'élevage)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Date de mort de l'animal (retire automatiquement de l'élevage)</span>
                         </label>
                         <input
                             type="date"
@@ -327,16 +471,17 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             name="date_deces"
                             value={formData.date_deces || ''}
                             onChange={handleChange}
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
-                        <div id="animalform-field-note-1" className="field-note">
+                        <div className="text-xs text-yellow-400 mt-1.5 px-2 py-2 bg-yellow-900 bg-opacity-20 rounded-md border-l-3 border-yellow-400">
                             ⚠️ Renseigner cette date retire automatiquement l'animal de son élevage
                         </div>
                     </div>
 
-                    <div id="animal-form-group-elevage" className="form-group">
-                        <label htmlFor="elevage_id">
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="elevage_id" className="text-gray-100 font-medium text-sm">
                             Élevage d'appartenance {!formData.date_deces && '*'}
-                            <span className="field-description">Élevage où se trouve actuellement l'animal vivant</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Élevage où se trouve actuellement l'animal vivant</span>
                         </label>
                         <select
                             id="elevage_id"
@@ -345,6 +490,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             onChange={handleChange}
                             disabled={!!formData.date_deces}
                             required={!formData.date_deces}
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed"
                         >
                             <option value="">
                                 {formData.date_deces ? '-- Animal décédé (hors élevage) --' : '-- Choisir un élevage --'}
@@ -358,10 +504,10 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                     </div>
                 </div>
 
-                <div id="animal-form-group-notes" className="form-group">
-                    <label htmlFor="notes">
+                <div className="flex flex-col gap-2 mb-5">
+                    <label htmlFor="notes" className="text-gray-100 font-medium text-sm">
                         Notes et observations
-                        <span className="field-description">Informations complémentaires sur l'animal (santé, comportement, etc.)</span>
+                        <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Informations complémentaires sur l'animal (santé, comportement, etc.)</span>
                     </label>
                     <textarea
                         id="notes"
@@ -370,181 +516,39 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                         onChange={handleChange}
                         rows={3}
                         placeholder="Ex: Santé fragile, très docile, problème de patte droite..."
+                        className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-vertical placeholder-gray-400"
                     />
                 </div>
 
-                <div id="animal-form-actions" className="form-actions">
-                    <button id="animal-form-cancel-btn" type="button" onClick={onCancel} disabled={loading}>
+                <div className="flex gap-4 justify-end mt-8 pt-5 border-t border-gray-600">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        disabled={loading}
+                        className="btn-secondary min-w-[120px] disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
                         Annuler
                     </button>
-                    <button id="animal-form-submit-btn" type="submit" disabled={loading}>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn-primary min-w-[120px] disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
                         {loading ? 'Enregistrement...' : (animal ? 'Modifier' : 'Créer')}
                     </button>
                 </div>
             </form>
 
-            <style>{`
-                .animal-form {
-                    background-color: #374151;
-                    border-radius: 12px;
-                    padding: 25px;
-                    color: white;
-                    max-width: 800px;
-                    margin: 0 auto;
-                }
+            {/* CSS is now handled by Tailwind CSS classes */}
 
-                .animal-form h3 {
-                    margin: 0 0 25px 0;
-                    color: white;
-                    font-size: 1.5rem;
-                }
-
-                .form-row {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 20px;
-                    margin-bottom: 20px;
-                }
-
-                .form-group {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-
-                .form-group label {
-                    color: #f3f4f6;
-                    font-weight: 500;
-                    font-size: 14px;
-                }
-
-                .form-group input,
-                .form-group select,
-                .form-group textarea {
-                    width: 100%;
-                    padding: 12px;
-                    border: 1px solid #4b5563;
-                    border-radius: 6px;
-                    background-color: #1f2937;
-                    color: #f3f4f6;
-                    font-size: 14px;
-                    transition: border-color 0.2s;
-                    box-sizing: border-box;
-                }
-
-                .form-group input:focus,
-                .form-group select:focus,
-                .form-group textarea:focus {
-                    outline: none;
-                    border-color: #3b82f6;
-                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-                }
-
-                .form-group input:disabled,
-                .form-group select:disabled {
-                    background-color: #374151;
-                    color: #9ca3af;
-                    cursor: not-allowed;
-                }
-
-                .form-group input::placeholder,
-                .form-group textarea::placeholder {
-                    color: #9ca3af;
-                }
-
-                .field-description {
-                    font-size: 12px;
-                    color: #9ca3af;
-                    font-weight: normal;
-                    margin-top: 4px;
-                    line-height: 1.4;
-                }
-
-                .field-note {
-                    font-size: 12px;
-                    color: #f59e0b;
-                    margin-top: 6px;
-                    padding: 8px;
-                    background-color: rgba(245, 158, 11, 0.1);
-                    border-radius: 4px;
-                    border-left: 3px solid #f59e0b;
-                }
-
-                .form-actions {
-                    display: flex;
-                    gap: 15px;
-                    justify-content: flex-end;
-                    margin-top: 30px;
-                    padding-top: 20px;
-                    border-top: 1px solid #4b5563;
-                }
-
-                .form-actions button {
-                    padding: 12px 24px;
-                    border-radius: 6px;
-                    font-size: 14px;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    min-width: 120px;
-                }
-
-                .form-actions button[type="button"] {
-                    background: #6b7280;
-                    color: white;
-                    border: 1px solid #6b7280;
-                }
-
-                .form-actions button[type="button"]:hover:not(:disabled) {
-                    background: #4b5563;
-                    border-color: #4b5563;
-                }
-
-                .form-actions button[type="submit"] {
-                    background: #3b82f6;
-                    color: white;
-                    border: 1px solid #3b82f6;
-                }
-
-                .form-actions button[type="submit"]:hover:not(:disabled) {
-                    background: #2563eb;
-                    border-color: #2563eb;
-                }
-
-                .form-actions button:disabled {
-                    opacity: 0.6;
-                    cursor: not-allowed;
-                }
-
-                .error-message {
-                    background: #dc2626;
-                    color: white;
-                    padding: 12px;
-                    border-radius: 6px;
-                    margin-bottom: 20px;
-                    font-size: 0.9rem;
-                }
-
-                @media (max-width: 768px) {
-                    .form-row {
-                        grid-template-columns: 1fr;
-                        gap: 15px;
-                    }
-
-                    .animal-form {
-                        padding: 20px;
-                        margin: 0 10px;
-                    }
-
-                    .form-actions {
-                        flex-direction: column;
-                    }
-
-                    .form-actions button {
-                        width: 100%;
-                    }
-                }
-            `}</style>
+            {/* Dialogue de demande de transfert */}
+            {showTransferDialog && existingAnimal && (
+                <TransferRequestDialog
+                    animal={existingAnimal}
+                    onClose={() => setShowTransferDialog(false)}
+                    onSubmit={handleTransferRequest}
+                />
+            )}
         </div>
     );
 };

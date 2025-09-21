@@ -37,6 +37,7 @@ require_once 'controllers/AdminController.php';
 require_once 'controllers/SimpleAdminController.php';
 require_once 'controllers/ElevageController.php';
 require_once 'controllers/AnimalController.php';
+require_once 'controllers/TransferRequestController.php';
 require_once 'middleware/AuthMiddleware.php';
 
 $database = new Database();
@@ -49,6 +50,7 @@ $adminController = new AdminController($user, $database);
 $simpleAdminController = new SimpleAdminController($user, $database);
 $elevageController = new ElevageController($database);
 $animalController = new AnimalController($db, $database);
+$transferRequestController = new TransferRequestController($db, $database);
 $authMiddleware = new AuthMiddleware($database);
 
 $request_method = $_SERVER['REQUEST_METHOD'];
@@ -206,20 +208,52 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
         if (isset($path_parts[2])) {
             $elevage_id = $path_parts[2];
 
-            switch ($request_method) {
-                case 'GET':
-                    $elevageController->getElevage($elevage_id);
-                    break;
-                case 'PUT':
-                    $elevageController->updateElevage($elevage_id);
-                    break;
-                case 'DELETE':
-                    $elevageController->deleteElevage($elevage_id);
-                    break;
-                default:
-                    http_response_code(405);
-                    echo json_encode(['message' => 'Method not allowed']);
-                    break;
+            // Routes pour la gestion des utilisateurs d'un élevage
+            if (isset($path_parts[3]) && $path_parts[3] === 'users') {
+                if (isset($path_parts[4])) {
+                    // DELETE /api/elevages/{id}/users/{userId}
+                    $user_id = $path_parts[4];
+                    switch ($request_method) {
+                        case 'DELETE':
+                            $elevageController->removeUserFromElevage($elevage_id, $user_id);
+                            break;
+                        default:
+                            http_response_code(405);
+                            echo json_encode(['message' => 'Method not allowed']);
+                            break;
+                    }
+                } else {
+                    // GET/POST /api/elevages/{id}/users
+                    switch ($request_method) {
+                        case 'GET':
+                            $elevageController->getElevageUsers($elevage_id);
+                            break;
+                        case 'POST':
+                            $elevageController->addUserToElevage($elevage_id);
+                            break;
+                        default:
+                            http_response_code(405);
+                            echo json_encode(['message' => 'Method not allowed']);
+                            break;
+                    }
+                }
+            } else {
+                // Routes CRUD standards pour les élevages
+                switch ($request_method) {
+                    case 'GET':
+                        $elevageController->getElevage($elevage_id);
+                        break;
+                    case 'PUT':
+                        $elevageController->updateElevage($elevage_id);
+                        break;
+                    case 'DELETE':
+                        $elevageController->deleteElevage($elevage_id);
+                        break;
+                    default:
+                        http_response_code(405);
+                        echo json_encode(['message' => 'Method not allowed']);
+                        break;
+                }
             }
         } else {
             switch ($request_method) {
@@ -241,7 +275,20 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
             }
         }
     } elseif (isset($path_parts[1]) && $path_parts[1] === 'types-animaux') {
-        // Routes pour les types d'animaux
+        // Routes pour les types d'animaux - nécessitent authentification Admin
+        $currentUser = $authMiddleware->getCurrentUser();
+        if (!$currentUser) {
+            http_response_code(401);
+            echo json_encode(['message' => 'Authentification requise']);
+            return;
+        }
+
+        if ($currentUser['role'] !== 1) {
+            http_response_code(403);
+            echo json_encode(['message' => 'Accès réservé aux administrateurs']);
+            return;
+        }
+
         if (isset($path_parts[2])) {
             $type_id = $path_parts[2];
             switch ($request_method) {
@@ -271,11 +318,17 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
             }
         }
     } elseif (isset($path_parts[1]) && $path_parts[1] === 'races') {
-        // Routes pour les races - nécessitent une authentification
+        // Routes pour les races - nécessitent authentification Admin
         $currentUser = $authMiddleware->getCurrentUser();
         if (!$currentUser) {
             http_response_code(401);
             echo json_encode(['message' => 'Authentification requise']);
+            return;
+        }
+
+        if ($currentUser['role'] !== 1) {
+            http_response_code(403);
+            echo json_encode(['message' => 'Accès réservé aux administrateurs']);
             return;
         }
 
@@ -380,6 +433,17 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
             }
         } else {
             // Routes générales pour les animaux
+            // Vérifier si c'est la route de vérification
+            if (isset($_GET['check']) && isset($_GET['identifiant'])) {
+                if ($request_method === 'GET') {
+                    $animalController->checkAnimalExists($_GET['identifiant'], $user_id, $user_role);
+                } else {
+                    http_response_code(405);
+                    echo json_encode(['message' => 'Method not allowed']);
+                }
+                return;
+            }
+
             switch ($request_method) {
                 case 'GET':
                     $animalController->getAnimaux($user_id, $user_role);
@@ -394,16 +458,47 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                     break;
             }
         }
-    } elseif (isset($path_parts[1]) && $path_parts[1] === 'users') {
-        // Routes pour les utilisateurs (pour formulaires)
-        switch ($request_method) {
-            case 'GET':
-                $elevageController->getUsers();
-                break;
-            default:
-                http_response_code(405);
-                echo json_encode(['message' => 'Method not allowed']);
-                break;
+    } elseif (isset($path_parts[1]) && $path_parts[1] === 'transfer-requests') {
+        // Routes pour les demandes de transfert - nécessitent une authentification
+        $currentUser = $authMiddleware->getCurrentUser();
+        if (!$currentUser) {
+            http_response_code(401);
+            echo json_encode(['message' => 'Authentification requise']);
+            return;
+        }
+
+        $user_id = $currentUser['id'];
+        $user_role = $currentUser['role'];
+
+        if (isset($path_parts[2])) {
+            $request_id = $path_parts[2];
+
+            // Traiter une demande spécifique
+            switch ($request_method) {
+                case 'PUT':
+                    $data = json_decode(file_get_contents('php://input'), true);
+                    $transferRequestController->processTransferRequest($request_id, $data, $user_id, $user_role);
+                    break;
+                default:
+                    http_response_code(405);
+                    echo json_encode(['message' => 'Method not allowed']);
+                    break;
+            }
+        } else {
+            // Routes générales pour les demandes de transfert
+            switch ($request_method) {
+                case 'GET':
+                    $transferRequestController->getTransferRequests($user_id, $user_role);
+                    break;
+                case 'POST':
+                    $data = json_decode(file_get_contents('php://input'), true);
+                    $transferRequestController->createTransferRequest($data, $user_id, $user_role);
+                    break;
+                default:
+                    http_response_code(405);
+                    echo json_encode(['message' => 'Method not allowed']);
+                    break;
+            }
         }
     } else {
         http_response_code(404);

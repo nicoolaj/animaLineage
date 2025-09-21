@@ -15,7 +15,7 @@ const mockAuthContext = {
     id: 1,
     name: 'Test User',
     email: 'test@example.com',
-    role: 2,
+    role: 1,
     role_name: 'Admin',
     status: 1
   },

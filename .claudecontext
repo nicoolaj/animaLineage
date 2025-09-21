@@ -16,11 +16,19 @@ AnimaLineage/
 │   │   │   ├── AnimalForm.tsx        # Gestion des animaux
 │   │   │   ├── AnimalList.tsx        # Liste des animaux
 │   │   │   ├── RaceForm.tsx          # Gestion des races
-│   │   │   └── TypeAnimalForm.tsx    # Types d'animaux
+│   │   │   ├── TypeAnimalForm.tsx    # Types d'animaux
+│   │   │   ├── TransferRequestManager.tsx # Gestion demandes transfert
+│   │   │   ├── LanguageSelector.tsx  # Sélecteur de langue
+│   │   │   └── ElevageUsersManagement.tsx # Gestion utilisateurs élevage
 │   │   ├── contexts/   # Gestion d'état global
 │   │   │   └── AuthContext.tsx       # Contexte d'authentification
+│   │   ├── i18n/       # Internationalisation
+│   │   ├── store/      # Store Redux
+│   │   ├── hooks/      # Hooks personnalisés
 │   │   └── utils/      # Fonctions utilitaires
-│   │       └── auth.ts               # Utilitaires d'authentification
+│   │       ├── auth.ts               # Utilitaires d'authentification
+│   │       ├── errorHandler.ts       # Gestion d'erreurs
+│   │       └── errorCodes.ts         # Codes d'erreur
 │   ├── package.json    # Dépendances Node.js
 │   └── build/          # Build de production
 ├── backend/            # API REST PHP (port 3001)
@@ -28,14 +36,17 @@ AnimaLineage/
 │   │   ├── UserController.php        # Gestion utilisateurs
 │   │   ├── AuthController.php        # Authentification
 │   │   ├── AdminController.php       # Administration
+│   │   ├── SimpleAdminController.php # Administration simplifiée
 │   │   ├── ElevageController.php     # Gestion élevages
-│   │   └── AnimalController.php      # Gestion animaux
+│   │   ├── AnimalController.php      # Gestion animaux
+│   │   └── TransferRequestController.php # Demandes de transfert
 │   ├── models/         # Modèles de données
 │   │   ├── User.php                  # Modèle utilisateur
 │   │   ├── Animal.php                # Modèle animal
 │   │   ├── Elevage.php               # Modèle élevage
 │   │   ├── Race.php                  # Modèle race
-│   │   └── TypeAnimal.php            # Modèle type animal
+│   │   ├── TypeAnimal.php            # Modèle type animal
+│   │   └── TransferRequest.php       # Modèle demande de transfert
 │   ├── config/         # Configuration système
 │   │   ├── database.php              # Configuration BDD
 │   │   └── env.php                   # Variables d'environnement
@@ -60,10 +71,13 @@ Les actions transmises par le frontend doivent être vérifiées par le backend 
 ### Frontend (React/TypeScript)
 - **React 19.1.1** avec TypeScript 4.9.5
 - **React Testing Library** pour les tests unitaires
-- **CSS modules** pour le styling modulaire
+- **Tailwind CSS v3.4.0** avec PostCSS pour le styling modulaire
 - **Context API** pour la gestion d'état global
 - **Fetch API** pour les appels HTTP
 - **ESLint & Prettier** pour la qualité du code
+- **Redux toolkit** pour gérer les états avec React de manière standardisée
+- **react-i18next** pour l'internationalisation
+- **PostCSS** avec Autoprefixer pour la gestion des styles CSS
 
 ### Backend (PHP)
 - **PHP 7.4+** avec architecture MVC orientée objet
@@ -112,12 +126,22 @@ Les actions transmises par le frontend doivent être vérifiées par le backend 
 - **Interface intuitive** avec formulaires validés
 - **Recherche et filtrage** avancés
 - **Tableau de bord** avec vue d'ensemble
+- **Gestion des demandes de transfert** d'animaux entre élevages
+- **Sélection intelligente des parents** (même espèce uniquement)
+- **Filtrage automatique** des utilisateurs validés uniquement
+- **Filtrage correct par élevage** (correction v2.1.1 - admins voient uniquement les animaux de l'élevage consulté)
+- **Gestion des utilisateurs d'élevage** : Système complet d'ajout/suppression avec permissions
 
 ### Administration
 - **Panel d'administration** pour la gestion des utilisateurs
 - **Validation des comptes** en attente
 - **Gestion des permissions** et rôles
 - **Monitoring** des activités
+- **Contrôles d'accès granulaires** :
+  - Types & Races : Admin uniquement (rôle 1)
+  - Animaux & Transferts : Admin et Modérateurs (rôle ≤ 2)
+  - Élevages : Tous les utilisateurs validés
+  - Gestion utilisateurs élevage : Admin (tous élevages) et Modérateurs (leurs élevages)
 
 ### Sécurité & Performance
 - **Validation côté client et serveur**
@@ -128,9 +152,10 @@ Les actions transmises par le frontend doivent être vérifiées par le backend 
 ## Configuration
 
 ### Développement
-- Backend: `php -S localhost:3001` dans /backend
+- Backend: `php -S 0.0.0.0:3001 index.php` dans /backend (important: 0.0.0.0 pour éviter les erreurs de connexion)
 - Frontend: `npm start` dans /frontend (démarre sur port 3002)
-- Base de données: SQLite automatique (backend/database/webapp.db)
+- Base de données: SQLite automatique (backend/database.sqlite)
+- Logo: Intégré dans MainDashboard (/logo_full.svg)
 
 ### Production
 - Variables d'environnement dans backend/.env
@@ -146,6 +171,35 @@ Les actions transmises par le frontend doivent être vérifiées par le backend 
 - Validation des entrées
 - CORS configuré
 - Middleware d'autorisation
+
+## Récentes Améliorations (2025-09-21)
+
+### Interface Utilisateur
+- ✅ **Migration vers Tailwind CSS** : Refactoring complet des styles des composants animaux
+- ✅ **Logo intégré** : Remplacement du titre h1 par le logo SVG dans MainDashboard
+- ✅ **Harmonisation du thème sombre** : Uniformisation des couleurs (#282c34, #374151, #1f2937)
+- ✅ **Formulaires améliorés** : Sélection propriétaire fonctionnelle dans ElevageForm
+
+### Sécurité & Accès
+- ✅ **Restriction Types & Races** : Accès Admin uniquement (frontend + backend)
+- ✅ **Filtrage utilisateurs validés** : Seuls les utilisateurs status=1 disponibles dans les formulaires
+- ✅ **Correction authentification** : Migration localStorage → sessionStorage pour cohérence
+- ✅ **Validation parentale** : Sélection parents limitée à la même espèce (type d'animal)
+- ✅ **Gestion utilisateurs élevage** : Système complet de permissions pour modérateurs et administrateurs
+
+### Fonctionnalités Métier
+- ✅ **Gestion demandes de transfert** : Nouveau système complet (TransferRequestController)
+- ✅ **Sélection intelligente parents** : Filtre automatique par type d'animal (Ovin, Bovin, etc.)
+- ✅ **Gestion multi-langues** : Infrastructure i18n avec LanguageSelector
+- ✅ **Store Redux** : Architecture d'état centralisée mise en place
+- ✅ **Gestion utilisateurs élevage** : Ajout/suppression d'utilisateurs avec contrôles de permissions
+
+### Corrections Techniques
+- ✅ **UserController** : Correction accès propriété database privée
+- ✅ **Boucles infinies** : Optimisation dépendances useCallback dans AnimalForm
+- ✅ **Serveur PHP** : Configuration 0.0.0.0:3001 pour éviter erreurs connexion
+- ✅ **Tests** : Ajout tests unitaires pour ElevageList, MainDashboard, AuthContext
+- ✅ **Filtrage animaux** : Correction du filtrage par élevage pour les administrateurs
 
 ## État Actuel du Projet
 

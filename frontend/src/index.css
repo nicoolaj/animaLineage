@@ -1,13 +1,73 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-md transition-colors duration-200 border border-blue-600 hover:border-blue-700;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-5 rounded-md transition-colors duration-200 border border-gray-600 hover:border-gray-700;
+  }
+
+  .btn-outline {
+    @apply border-2 border-blue-600 bg-transparent text-blue-600 hover:bg-blue-600 hover:text-white font-medium py-2.5 px-5 rounded-md transition-all duration-300;
+  }
+
+  .form-input {
+    @apply w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400;
+  }
+
+  .form-select {
+    @apply w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+
+  .form-textarea {
+    @apply w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical placeholder-gray-400;
+  }
+
+  .form-label {
+    @apply text-gray-300 font-medium text-sm mb-2 block;
+  }
+
+  .error-message {
+    @apply bg-red-600 text-white px-3 py-2.5 rounded-md mb-5 border border-red-700;
+  }
+
+  .status-badge {
+    @apply px-2 py-1 rounded-full text-xs font-bold;
+  }
+
+  .status-badge-alive {
+    @apply bg-green-600 text-white;
+  }
+
+  .status-badge-dead {
+    @apply bg-red-600 text-white;
+  }
+
+  .sexe-badge {
+    @apply text-lg;
+  }
+
+  .table-header {
+    @apply bg-gray-800 text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600 transition-colors duration-150;
+  }
 }

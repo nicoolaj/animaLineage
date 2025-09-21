@@ -36,15 +36,15 @@ class AnimalController {
     // Lister tous les animaux (admin) ou par élevage (utilisateur)
     public function getAnimaux($user_id, $user_role) {
         try {
-            if ($user_role == 1) {
-                // Admin : voir tous les animaux
-                $stmt = $this->animal->getAll();
-            } else {
-                // Utilisateur : voir seulement ses animaux
-                $elevage_id = isset($_GET['elevage_id']) ? $_GET['elevage_id'] : null;
+            $elevage_id = isset($_GET['elevage_id']) ? $_GET['elevage_id'] : null;
 
-                if ($elevage_id) {
-                    // Vérifier que l'élevage appartient à l'utilisateur
+            if ($elevage_id) {
+                // Filtrer par élevage spécifique (admin ou utilisateur)
+                if ($user_role == 1) {
+                    // Admin : peut voir n'importe quel élevage
+                    $stmt = $this->animal->getByElevageId($elevage_id);
+                } else {
+                    // Utilisateur : vérifier que l'élevage lui appartient
                     $elevage_data = $this->elevage->getById($elevage_id);
                     if (!$elevage_data || $elevage_data['user_id'] != $user_id) {
                         http_response_code(403);
@@ -52,6 +52,12 @@ class AnimalController {
                         return;
                     }
                     $stmt = $this->animal->getByElevageId($elevage_id);
+                }
+            } else {
+                // Pas d'élevage spécifique
+                if ($user_role == 1) {
+                    // Admin : voir tous les animaux
+                    $stmt = $this->animal->getAll();
                 } else {
                     // Récupérer tous les animaux des élevages de l'utilisateur
                     $elevagesStmt = $this->elevage->getByUserId($user_id);
@@ -450,6 +456,43 @@ class AnimalController {
             $stats = $this->animal->getStatsReproduction();
 
             echo json_encode($stats);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+    }
+
+    // Vérifier l'existence d'un animal par identifiant officiel
+    public function checkAnimalExists($identifiant_officiel, $user_id, $user_role) {
+        try {
+            $animal_data = $this->animal->getByIdentifiant($identifiant_officiel);
+
+            if (!$animal_data) {
+                echo json_encode([
+                    'exists' => false,
+                    'message' => 'Animal non trouvé'
+                ]);
+                return;
+            }
+
+            // Récupérer les informations de l'élevage
+            $elevage_data = null;
+            if ($animal_data['elevage_id']) {
+                $elevage_data = $this->elevage->getById($animal_data['elevage_id']);
+            }
+
+            echo json_encode([
+                'exists' => true,
+                'animal' => [
+                    'id' => $animal_data['id'],
+                    'identifiant_officiel' => $animal_data['identifiant_officiel'],
+                    'nom' => $animal_data['nom'],
+                    'elevage_id' => $animal_data['elevage_id'],
+                    'elevage_nom' => $elevage_data ? $elevage_data['nom'] : null,
+                    'can_transfer' => $this->animal->canTransfer($animal_data['id'], $user_id, $user_role)
+                ]
+            ]);
 
         } catch (Exception $e) {
             http_response_code(500);

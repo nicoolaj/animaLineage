@@ -1,445 +1,773 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '../../test-utils/test-helpers';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import AnimalForm from '../AnimalForm';
 
-// Mock du composant AnimalForm pour simplifier les tests
-const MockAnimalForm = ({ elevageId, animalId, onSave, onCancel }: any) => {
-  const [formData, setFormData] = React.useState({
-    identifiant_officiel: '',
-    nom: '',
-    sexe: '',
-    race_id: '',
-    pere_id: '',
-    mere_id: '',
-    date_naissance: '',
-    poids_naissance: '',
-    description: ''
-  });
+// Mock fetch global
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
 
-  const [errors, setErrors] = React.useState<{[key: string]: string}>({});
+// Mock sessionStorage
+const mockSessionStorage = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+};
+Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
 
-  const races = [
-    { id: 1, nom: 'Brebis Lacaune', type_animal_nom: 'Mouton' },
-    { id: 2, nom: 'Chèvre Alpine', type_animal_nom: 'Chèvre' }
-  ];
+// Mock atob for JWT decoding
+global.atob = jest.fn().mockImplementation((str) => {
+  try {
+    return JSON.stringify({
+      user: { id: 1, role: 1 }
+    });
+  } catch {
+    return '{}';
+  }
+});
 
-  const animaux = [
-    { id: 1, identifiant_officiel: 'FR001', nom: 'Animal Parent 1', sexe: 'M' },
-    { id: 2, identifiant_officiel: 'FR002', nom: 'Animal Parent 2', sexe: 'F' }
-  ];
+// Mock données pour les tests
+const mockRaces = [
+  {
+    id: 1,
+    nom: 'Holstein',
+    type_animal_nom: 'Bovin'
+  },
+  {
+    id: 2,
+    nom: 'Lacaune',
+    type_animal_nom: 'Ovin'
+  }
+];
 
-  React.useEffect(() => {
-    if (animalId) {
-      // Simuler le chargement des données d'un animal existant
-      setTimeout(() => {
-        setFormData({
-          identifiant_officiel: 'FR001',
-          nom: 'Animal Test',
-          sexe: 'M',
-          race_id: '1',
-          pere_id: '',
-          mere_id: '',
-          date_naissance: '2024-01-15',
-          poids_naissance: '3.5',
-          description: 'Description test'
-        });
-      }, 0);
-    }
-  }, [animalId]);
+const mockElevages = [
+  {
+    id: 1,
+    nom: 'Ferme du Test'
+  },
+  {
+    id: 2,
+    nom: 'Élevage Bio'
+  }
+];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newErrors: {[key: string]: string} = {};
+const mockAnimals = [
+  {
+    id: 10,
+    identifiant_officiel: 'FR001',
+    nom: 'Taureau Alpha',
+    sexe: 'M' as const,
+    race_id: 1,
+    elevage_id: 1
+  },
+  {
+    id: 11,
+    identifiant_officiel: 'FR002',
+    nom: 'Vache Beta',
+    sexe: 'F' as const,
+    race_id: 1,
+    elevage_id: 1
+  }
+];
 
-    if (!formData.identifiant_officiel.trim()) {
-      newErrors.identifiant_officiel = 'Identifiant requis';
-    }
-    if (!formData.nom.trim()) {
-      newErrors.nom = 'Nom requis';
-    }
-    if (!formData.sexe) {
-      newErrors.sexe = 'Sexe requis';
-    }
-    if (!formData.race_id) {
-      newErrors.race_id = 'Race requise';
-    }
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      onSave?.(formData);
-    }
-  };
-
-  return (
-    <div>
-      <h2>{animalId ? 'Modifier l\'animal' : 'Nouvel animal'}</h2>
-
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="identifiant_officiel">Identifiant officiel</label>
-          <input
-            id="identifiant_officiel"
-            type="text"
-            value={formData.identifiant_officiel}
-            onChange={(e) => setFormData({...formData, identifiant_officiel: e.target.value})}
-            required
-          />
-          {errors.identifiant_officiel && <span className="error">{errors.identifiant_officiel}</span>}
-        </div>
-
-        <div>
-          <label htmlFor="nom">Nom de l'animal</label>
-          <input
-            id="nom"
-            type="text"
-            value={formData.nom}
-            onChange={(e) => setFormData({...formData, nom: e.target.value})}
-            required
-          />
-          {errors.nom && <span className="error">{errors.nom}</span>}
-        </div>
-
-        <div>
-          <label htmlFor="sexe">Sexe</label>
-          <select
-            id="sexe"
-            value={formData.sexe}
-            onChange={(e) => setFormData({...formData, sexe: e.target.value})}
-            required
-          >
-            <option value="">Sélectionner un sexe</option>
-            <option value="M">Mâle</option>
-            <option value="F">Femelle</option>
-          </select>
-          {errors.sexe && <span className="error">{errors.sexe}</span>}
-        </div>
-
-        <div>
-          <label htmlFor="race_id">Race</label>
-          <select
-            id="race_id"
-            value={formData.race_id}
-            onChange={(e) => setFormData({...formData, race_id: e.target.value})}
-            required
-          >
-            <option value="">Sélectionner une race</option>
-            {races.map((race) => (
-              <option key={race.id} value={race.id}>
-                {race.nom} ({race.type_animal_nom})
-              </option>
-            ))}
-          </select>
-          {errors.race_id && <span className="error">{errors.race_id}</span>}
-        </div>
-
-        <div>
-          <label htmlFor="pere_id">Père</label>
-          <select
-            id="pere_id"
-            value={formData.pere_id}
-            onChange={(e) => setFormData({...formData, pere_id: e.target.value})}
-          >
-            <option value="">Sélectionner un père</option>
-            {animaux.filter(a => a.sexe === 'M').map((animal) => (
-              <option key={animal.id} value={animal.id}>
-                {animal.identifiant_officiel} - {animal.nom}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="mere_id">Mère</label>
-          <select
-            id="mere_id"
-            value={formData.mere_id}
-            onChange={(e) => setFormData({...formData, mere_id: e.target.value})}
-          >
-            <option value="">Sélectionner une mère</option>
-            {animaux.filter(a => a.sexe === 'F').map((animal) => (
-              <option key={animal.id} value={animal.id}>
-                {animal.identifiant_officiel} - {animal.nom}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="date_naissance">Date de naissance</label>
-          <input
-            id="date_naissance"
-            type="date"
-            value={formData.date_naissance}
-            onChange={(e) => setFormData({...formData, date_naissance: e.target.value})}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="poids_naissance">Poids de naissance (kg)</label>
-          <input
-            id="poids_naissance"
-            type="number"
-            step="0.1"
-            value={formData.poids_naissance}
-            onChange={(e) => setFormData({...formData, poids_naissance: e.target.value})}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-          />
-        </div>
-
-        <div>
-          <button type="submit">
-            {animalId ? 'Modifier' : 'Créer'}
-          </button>
-          <button type="button" onClick={() => onCancel?.()}>
-            Annuler
-          </button>
-        </div>
-      </form>
-
-      <div style={{ display: 'none' }}>
-        {/* Éléments pour les tests */}
-        {races.map(race => (
-          <span key={race.id} data-testid={`race-${race.id}`}>
-            {race.nom}
-          </span>
-        ))}
-        <span data-testid="error-loading-races" style={{ display: 'none' }}>
-          Erreur lors du chargement des races
-        </span>
-      </div>
-    </div>
-  );
+const mockAnimal = {
+  id: 1,
+  identifiant_officiel: 'FR123',
+  nom: 'Test Animal',
+  sexe: 'M' as const,
+  race_id: 1,
+  date_naissance: '2023-01-15',
+  elevage_id: 1
 };
 
-// Mock du vrai composant
-jest.mock('../AnimalForm', () => MockAnimalForm);
-
 describe('AnimalForm Component', () => {
-  const mockProps = {
-    elevageId: 1,
-    animalId: null,
-    onSave: jest.fn(),
-    onCancel: jest.fn()
-  };
+  const mockOnSubmit = jest.fn();
+  const mockOnCancel = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetch.mockClear();
+    mockSessionStorage.getItem.mockReturnValue('mock-token');
+
+    // Setup default fetch responses
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockRaces)
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockElevages)
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockAnimals)
+      });
   });
 
   describe('Rendu du composant', () => {
-    test('affiche le formulaire de création', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('affiche le formulaire de création d\'animal', async () => {
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-      expect(screen.getByText(/nouvel animal/i)).toBeInTheDocument();
+      expect(screen.getByText('Nouvel animal')).toBeInTheDocument();
       expect(screen.getByLabelText(/identifiant officiel/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/nom de l'animal/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/sexe/i)).toBeInTheDocument();
-    });
-
-    test('affiche les boutons d\'action', async () => {
-      render(<MockAnimalForm {...mockProps} />);
-
+      expect(screen.getByLabelText(/sexe de l'animal/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/race/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /créer/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /annuler/i })).toBeInTheDocument();
     });
 
-    test('affiche le titre correct en mode édition', async () => {
-      const editProps = { ...mockProps, animalId: 1 };
+    test('affiche le formulaire de modification d\'animal', async () => {
+      render(
+        <AnimalForm
+          animal={mockAnimal}
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-      render(<MockAnimalForm {...editProps} />);
-
-      expect(screen.getByText(/modifier l'animal/i)).toBeInTheDocument();
+      expect(screen.getByText('Modifier l\'animal')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('FR123')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('Test Animal')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /modifier/i })).toBeInTheDocument();
+    });
+
+    test('charge les races depuis l\'API', async () => {
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:3001/api/races',
+          expect.objectContaining({
+            headers: {
+              'Authorization': 'Bearer mock-token'
+            }
+          })
+        );
+      });
+    });
+
+    test('charge les élevages depuis l\'API', async () => {
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:3001/api/elevages',
+          expect.objectContaining({
+            headers: {
+              'Authorization': 'Bearer mock-token'
+            }
+          })
+        );
+      });
     });
   });
 
-  describe('Interaction utilisateur', () => {
-    test('met à jour les valeurs des champs lors de la saisie', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+  describe('Gestion des champs de formulaire', () => {
+    test('met à jour l\'identifiant officiel', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await userEvent.type(identifiantInput, 'FR123');
+      await user.clear(identifiantInput);
+      await user.type(identifiantInput, 'FR999');
 
-      expect(identifiantInput).toHaveValue('FR123');
+      expect(identifiantInput).toHaveValue('FR999');
     });
 
-    test('appelle onCancel lors du clic sur annuler', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('met à jour le nom de l\'animal', async () => {
+      const user = userEvent.setup();
 
-      const cancelButton = screen.getByRole('button', { name: /annuler/i });
-      await userEvent.click(cancelButton);
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-      expect(mockProps.onCancel).toHaveBeenCalled();
+      const nomInput = screen.getByLabelText(/nom de l'animal/i);
+      await user.type(nomInput, 'Nouveau Nom');
+
+      expect(nomInput).toHaveValue('Nouveau Nom');
+    });
+
+    test('met à jour le sexe de l\'animal', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      const sexeSelect = screen.getByLabelText(/sexe de l'animal/i);
+      await user.selectOptions(sexeSelect, 'F');
+
+      expect(sexeSelect).toHaveValue('F');
+    });
+
+    test('met à jour les notes', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      const notesTextarea = screen.getByLabelText(/notes et observations/i);
+      await user.type(notesTextarea, 'Animal très docile');
+
+      expect(notesTextarea).toHaveValue('Animal très docile');
     });
   });
 
   describe('Validation du formulaire', () => {
-    test('affiche une erreur pour un identifiant vide', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('affiche une erreur si l\'identifiant est manquant', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await userEvent.click(submitButton);
+      await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/identifiant requis/i)).toBeInTheDocument();
+        expect(screen.getByText('L\'identifiant officiel est requis')).toBeInTheDocument();
       });
+      expect(mockOnSubmit).not.toHaveBeenCalled();
     });
 
-    test('affiche une erreur pour un nom vide', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('affiche une erreur si la race est manquante', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await userEvent.type(identifiantInput, 'FR123');
+      await user.type(identifiantInput, 'FR123');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await userEvent.click(submitButton);
+      await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/nom requis/i)).toBeInTheDocument();
+        expect(screen.getByText('La race est requise')).toBeInTheDocument();
       });
+      expect(mockOnSubmit).not.toHaveBeenCalled();
     });
 
-    test('appelle onSave avec les données valides', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('affiche une erreur si l\'élevage est manquant pour un animal vivant', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      const nomInput = screen.getByLabelText(/nom de l'animal/i);
-      const sexeSelect = screen.getByLabelText(/sexe/i);
+      await user.type(identifiantInput, 'FR123');
+
+      // Attendre que les races soient chargées
+      await waitFor(() => {
+        const raceSelect = screen.getByLabelText(/race/i);
+        expect(raceSelect.children.length).toBeGreaterThan(1);
+      });
+
       const raceSelect = screen.getByLabelText(/race/i);
-
-      await userEvent.type(identifiantInput, 'FR123');
-      await userEvent.type(nomInput, 'Animal Test');
-      await userEvent.selectOptions(sexeSelect, 'M');
-      await userEvent.selectOptions(raceSelect, '1');
+      await user.selectOptions(raceSelect, '1');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await userEvent.click(submitButton);
+      await user.click(submitButton);
 
       await waitFor(() => {
-        expect(mockProps.onSave).toHaveBeenCalledWith(expect.objectContaining({
+        expect(screen.getByText('Un animal vivant doit être associé à un élevage')).toBeInTheDocument();
+      });
+      expect(mockOnSubmit).not.toHaveBeenCalled();
+    });
+
+    test('soumet le formulaire avec des données valides', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // Remplir le formulaire
+      const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
+      await user.type(identifiantInput, 'FR123');
+
+      const nomInput = screen.getByLabelText(/nom de l'animal/i);
+      await user.type(nomInput, 'Test Animal');
+
+      // Attendre que les races soient chargées
+      await waitFor(() => {
+        const raceSelect = screen.getByLabelText(/race/i);
+        expect(raceSelect.children.length).toBeGreaterThan(1);
+      });
+
+      const raceSelect = screen.getByLabelText(/race/i);
+      await user.selectOptions(raceSelect, '1');
+
+      // Attendre que les élevages soient chargés
+      await waitFor(() => {
+        const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
+        expect(elevageSelect.children.length).toBeGreaterThan(1);
+      });
+
+      const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
+      await user.selectOptions(elevageSelect, '1');
+
+      const submitButton = screen.getByRole('button', { name: /créer/i });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
           identifiant_officiel: 'FR123',
-          nom: 'Animal Test',
-          sexe: 'M',
-          race_id: '1'
+          nom: 'Test Animal',
+          race_id: '1',
+          elevage_id: '1'
         }));
       });
     });
   });
 
-  describe('Sélection de race', () => {
-    test('affiche les races disponibles', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+  describe('Vérification d\'existence d\'animal', () => {
+    test('vérifie l\'existence d\'un animal lors de la saisie de l\'identifiant', async () => {
+      const user = userEvent.setup();
 
-      expect(screen.getByTestId('race-1')).toBeInTheDocument();
-      expect(screen.getByTestId('race-2')).toBeInTheDocument();
+      // Mock pour la vérification d'existence
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ exists: false })
+      });
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
+      await user.type(identifiantInput, 'FR999');
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:3001/api/animaux?check=1&identifiant=FR999',
+          expect.objectContaining({
+            headers: {
+              'Authorization': 'Bearer mock-token'
+            }
+          })
+        );
+      });
     });
 
-    test('permet de sélectionner une race', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('affiche un avertissement si l\'animal existe déjà', async () => {
+      const user = userEvent.setup();
 
-      const raceSelect = screen.getByLabelText(/race/i);
-      await userEvent.selectOptions(raceSelect, '1');
+      // Mock pour un animal existant
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          exists: true,
+          animal: {
+            id: 999,
+            elevage_nom: 'Autre Élevage',
+            can_transfer: true
+          }
+        })
+      });
 
-      expect(raceSelect).toHaveValue('1');
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
+      await user.type(identifiantInput, 'FR999');
+
+      await waitFor(() => {
+        expect(screen.getByText(/cet animal existe déjà/i)).toBeInTheDocument();
+        expect(screen.getByText(/demander un transfert/i)).toBeInTheDocument();
+      });
+    });
+
+    test('affiche le message de vérification en cours', async () => {
+      const user = userEvent.setup();
+
+      // Mock pour simuler une vérification lente
+      let resolvePromise: any;
+      const slowPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      mockFetch.mockReturnValueOnce(slowPromise);
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
+      await user.type(identifiantInput, 'FR999');
+
+      // Vérifier que le message de vérification s'affiche
+      await waitFor(() => {
+        expect(screen.getByText(/vérification en cours/i)).toBeInTheDocument();
+      });
+
+      // Résoudre la promesse
+      resolvePromise({
+        ok: true,
+        json: () => Promise.resolve({ exists: false })
+      });
     });
   });
 
   describe('Gestion des parents', () => {
-    test('affiche les champs de sélection des parents', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('charge les parents potentiels quand une race est sélectionnée', async () => {
+      const user = userEvent.setup();
 
-      expect(screen.getByLabelText(/père/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/mère/i)).toBeInTheDocument();
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // Attendre que les races soient chargées
+      await waitFor(() => {
+        const raceSelect = screen.getByLabelText(/race/i);
+        expect(raceSelect.children.length).toBeGreaterThan(1);
+      });
+
+      const raceSelect = screen.getByLabelText(/race/i);
+      await user.selectOptions(raceSelect, '1');
+
+      // Vérifier que l'API des animaux est appelée pour charger les parents
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:3001/api/animaux',
+          expect.objectContaining({
+            headers: {
+              'Authorization': 'Bearer mock-token'
+            }
+          })
+        );
+      });
     });
 
-    test('filtre les parents par sexe', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('vide les listes de parents si aucune race n\'est sélectionnée', async () => {
+      const user = userEvent.setup();
 
-      const pereSelect = screen.getByLabelText(/père/i);
-      const mereSelect = screen.getByLabelText(/mère/i);
+      render(
+        <AnimalForm
+          animal={mockAnimal}
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-      expect(pereSelect).toBeInTheDocument();
-      expect(mereSelect).toBeInTheDocument();
+      // Attendre que les races soient chargées
+      await waitFor(() => {
+        const raceSelect = screen.getByLabelText(/race/i);
+        expect(raceSelect.children.length).toBeGreaterThan(1);
+      });
 
-      // Vérifier que les options sont disponibles dans les selects
-      expect(pereSelect.querySelectorAll('option')).toHaveLength(2); // Une option vide + une option mâle
-      expect(mereSelect.querySelectorAll('option')).toHaveLength(2); // Une option vide + une option femelle
+      const raceSelect = screen.getByLabelText(/race/i);
+      await user.selectOptions(raceSelect, '');
+
+      // Les selects de parents devraient être vides
+      const pereSelect = screen.getByLabelText(/père géniteur/i);
+      const mereSelect = screen.getByLabelText(/mère génitrice/i);
+
+      expect(pereSelect.children.length).toBe(1); // Seulement l'option par défaut
+      expect(mereSelect.children.length).toBe(1); // Seulement l'option par défaut
     });
   });
 
-  describe('Champs additionnels', () => {
-    test('affiche les champs de date et poids', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+  describe('Gestion des élevages', () => {
+    test('charge tous les élevages pour un administrateur', async () => {
+      global.atob = jest.fn().mockReturnValue(JSON.stringify({
+        user: { role: 1 } // Administrateur
+      }));
 
-      expect(screen.getByLabelText(/date de naissance/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/poids de naissance/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:3001/api/elevages',
+          expect.any(Object)
+        );
+      });
     });
 
-    test('permet de saisir la date de naissance', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('charge seulement les élevages de l\'utilisateur pour un non-administrateur', async () => {
+      global.atob = jest.fn().mockReturnValue(JSON.stringify({
+        user: { role: 2 } // Non-administrateur
+      }));
 
-      const dateInput = screen.getByLabelText(/date de naissance/i);
-      await userEvent.type(dateInput, '2024-01-15');
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-      expect(dateInput).toHaveValue('2024-01-15');
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:3001/api/elevages?my=true',
+          expect.any(Object)
+        );
+      });
     });
 
-    test('permet de saisir le poids de naissance', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('désactive le champ élevage si l\'animal est décédé', async () => {
+      const user = userEvent.setup();
 
-      const poidsInput = screen.getByLabelText(/poids de naissance/i);
-      await userEvent.type(poidsInput, '3.5');
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-      expect(poidsInput).toHaveValue(3.5);
+      const dateDeces = screen.getByLabelText(/date de décès/i);
+      await user.type(dateDeces, '2023-12-31');
+
+      const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
+      expect(elevageSelect).toBeDisabled();
     });
   });
 
-  describe('Accessibilité', () => {
-    test('les champs ont des labels appropriés', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+  describe('Actions du formulaire', () => {
+    test('appelle onCancel lors du clic sur annuler', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      const cancelButton = screen.getByRole('button', { name: /annuler/i });
+      await user.click(cancelButton);
+
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    });
+
+    test('désactive les boutons pendant le chargement', async () => {
+      const user = userEvent.setup();
+
+      // Mock pour simuler une soumission lente
+      let resolveSubmit: any;
+      const slowSubmit = jest.fn().mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolveSubmit = resolve;
+        });
+      });
+
+      render(
+        <AnimalForm
+          onSubmit={slowSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // Remplir le formulaire rapidement
+      const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
+      await user.type(identifiantInput, 'FR123');
+
+      await waitFor(() => {
+        const raceSelect = screen.getByLabelText(/race/i);
+        expect(raceSelect.children.length).toBeGreaterThan(1);
+      });
+
+      const raceSelect = screen.getByLabelText(/race/i);
+      await user.selectOptions(raceSelect, '1');
+
+      await waitFor(() => {
+        const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
+        expect(elevageSelect.children.length).toBeGreaterThan(1);
+      });
+
+      const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
+      await user.selectOptions(elevageSelect, '1');
+
+      const submitButton = screen.getByRole('button', { name: /créer/i });
+      await user.click(submitButton);
+
+      // Vérifier que les boutons sont désactivés
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /enregistrement/i })).toBeDisabled();
+        expect(screen.getByRole('button', { name: /annuler/i })).toBeDisabled();
+      });
+
+      // Résoudre la soumission
+      resolveSubmit();
+    });
+  });
+
+  describe('Gestion des erreurs', () => {
+    test('gère les erreurs de chargement des races', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Erreur lors du chargement des races:',
+          expect.any(Error)
+        );
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    test('gère les erreurs HTTP lors du chargement des races', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: () => Promise.resolve('Server error')
+      });
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Erreur lors du chargement des races:',
+          500,
+          'Server error'
+        );
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    test('gère l\'absence de token', async () => {
+      mockSessionStorage.getItem.mockReturnValue(null);
+
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // Le composant devrait gérer l'absence de token sans planter
+      expect(screen.getByText('Nouvel animal')).toBeInTheDocument();
+    });
+  });
+
+  describe('Accessibilité et UX', () => {
+    test('affiche des labels appropriés pour tous les champs', () => {
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
       expect(screen.getByLabelText(/identifiant officiel/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/nom de l'animal/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/sexe/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/sexe de l'animal/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/race/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/père géniteur/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/mère génitrice/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/date de naissance/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/date de bouclage/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/date de décès/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/élevage d'appartenance/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/notes et observations/i)).toBeInTheDocument();
     });
 
-    test('les champs requis sont marqués comme tels', async () => {
-      render(<MockAnimalForm {...mockProps} />);
+    test('affiche des placeholders appropriés', () => {
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-      expect(screen.getByLabelText(/identifiant officiel/i)).toBeRequired();
-      expect(screen.getByLabelText(/nom de l'animal/i)).toBeRequired();
-      expect(screen.getByLabelText(/sexe/i)).toBeRequired();
-      expect(screen.getByLabelText(/race/i)).toBeRequired();
+      expect(screen.getByPlaceholderText(/FR123456789/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/Bella, Rex/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/santé fragile/i)).toBeInTheDocument();
     });
-  });
 
-  describe('Mode édition', () => {
-    test('pré-remplit les champs en mode édition', async () => {
-      const editProps = { ...mockProps, animalId: 1 };
+    test('affiche des informations d\'aide pour les champs', () => {
+      render(
+        <AnimalForm
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-      render(<MockAnimalForm {...editProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByDisplayValue('FR001')).toBeInTheDocument();
-        expect(screen.getByDisplayValue('Animal Test')).toBeInTheDocument();
-      }, { timeout: 2000 });
-
-      // Vérifier que le select sexe a la bonne valeur
-      const sexeSelect = screen.getByLabelText(/sexe/i) as HTMLSelectElement;
-      await waitFor(() => {
-        expect(sexeSelect.value).toBe('M');
-      });
+      expect(screen.getByText(/numéro unique d'identification/i)).toBeInTheDocument();
+      expect(screen.getByText(/nom donné à l'animal/i)).toBeInTheDocument();
+      expect(screen.getByText(/sexe biologique/i)).toBeInTheDocument();
+      expect(screen.getByText(/race et type d'animal/i)).toBeInTheDocument();
     });
   });
 });

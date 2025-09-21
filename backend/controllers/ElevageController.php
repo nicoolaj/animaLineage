@@ -24,12 +24,15 @@ class ElevageController {
     private $typeAnimal;
     private $race;
     private $authMiddleware;
+    private $database;
+    private $db;
 
     public function __construct($database) {
-        $db = $database->getConnection();
-        $this->elevage = new Elevage($db, $database);
-        $this->typeAnimal = new TypeAnimal($db, $database);
-        $this->race = new Race($db, $database);
+        $this->database = $database;
+        $this->db = $database->getConnection();
+        $this->elevage = new Elevage($this->db, $database);
+        $this->typeAnimal = new TypeAnimal($this->db, $database);
+        $this->race = new Race($this->db, $database);
         $this->authMiddleware = new AuthMiddleware($database);
     }
 
@@ -271,7 +274,7 @@ class ElevageController {
 
     // Lister tous les types d'animaux
     public function getTypesAnimaux() {
-        if (!$this->authMiddleware->requireAuth()) {
+        if (!$this->authMiddleware->requireAdmin()) {
             return;
         }
 
@@ -395,7 +398,7 @@ class ElevageController {
 
     // Lister toutes les races
     public function getRaces() {
-        if (!$this->authMiddleware->requireAuth()) {
+        if (!$this->authMiddleware->requireAdmin()) {
             return;
         }
 
@@ -417,7 +420,7 @@ class ElevageController {
 
     // Lister les races d'un type d'animal
     public function getRacesByType($type_id) {
-        if (!$this->authMiddleware->requireAuth()) {
+        if (!$this->authMiddleware->requireAdmin()) {
             return;
         }
 
@@ -544,30 +547,231 @@ class ElevageController {
         }
     }
 
-    // ========== UTILISATEURS ==========
+    // ========== GESTION UTILISATEURS ÉLEVAGE ==========
 
-    // Lister tous les utilisateurs (pour sélection dans formulaire élevage)
-    public function getUsers() {
+    // Obtenir la liste des utilisateurs d'un élevage
+    public function getElevageUsers($elevage_id) {
         if (!$this->authMiddleware->requireAuth()) {
             return;
         }
 
+        $currentUser = $this->authMiddleware->getCurrentUser();
+
         try {
-            $query = "SELECT id, name, email FROM users WHERE status = 1 ORDER BY name ASC";
-            $stmt = $this->elevage->database->getConnection()->prepare($query);
+            // Vérifier que l'élevage existe
+            $elevageData = $this->elevage->getById($elevage_id);
+            if (!$elevageData) {
+                http_response_code(404);
+                echo json_encode(array("message" => "Élevage non trouvé."));
+                return;
+            }
+
+            // Vérifier les permissions (admin ou propriétaire/modérateur de l'élevage)
+            if (!$this->canManageElevageUsers($elevage_id, $currentUser)) {
+                http_response_code(403);
+                echo json_encode(array("message" => "Accès refusé pour voir les utilisateurs de cet élevage."));
+                return;
+            }
+
+            // Récupérer les utilisateurs de l'élevage
+            $query = "SELECT eu.user_id, eu.role_in_elevage, eu.added_at, u.name as user_name, u.email as user_email
+                      FROM elevage_users eu
+                      JOIN users u ON eu.user_id = u.id
+                      WHERE eu.elevage_id = :elevage_id
+                      ORDER BY eu.role_in_elevage = 'owner' DESC, u.name ASC";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':elevage_id', $elevage_id);
             $stmt->execute();
 
             $users = array();
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                array_push($users, $row);
+                $users[] = $row;
             }
 
             http_response_code(200);
             echo json_encode($users);
+
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(array("message" => "Erreur lors de la récupération des utilisateurs.", "error" => $e->getMessage()));
         }
     }
+
+    // Ajouter un utilisateur à un élevage
+    public function addUserToElevage($elevage_id) {
+        if (!$this->authMiddleware->requireAuth()) {
+            return;
+        }
+
+        $currentUser = $this->authMiddleware->getCurrentUser();
+        $data = json_decode(file_get_contents("php://input"));
+
+        try {
+            // Vérifier que l'élevage existe
+            $elevageData = $this->elevage->getById($elevage_id);
+            if (!$elevageData) {
+                http_response_code(404);
+                echo json_encode(array("message" => "Élevage non trouvé."));
+                return;
+            }
+
+            // Vérifier les permissions (admin ou propriétaire/modérateur de l'élevage)
+            if (!$this->canManageElevageUsers($elevage_id, $currentUser)) {
+                http_response_code(403);
+                echo json_encode(array("message" => "Accès refusé pour gérer les utilisateurs de cet élevage."));
+                return;
+            }
+
+            // Valider les données
+            if (empty($data->user_id)) {
+                http_response_code(400);
+                echo json_encode(array("message" => "L'ID utilisateur est requis."));
+                return;
+            }
+
+            $role_in_elevage = isset($data->role_in_elevage) ? $data->role_in_elevage : 'collaborator';
+            if (!in_array($role_in_elevage, ['owner', 'collaborator'])) {
+                $role_in_elevage = 'collaborator';
+            }
+
+            // Vérifier que l'utilisateur existe et est actif (status = 1)
+            $userQuery = "SELECT id, name FROM users WHERE id = :user_id AND status = 1";
+            $userStmt = $this->db->prepare($userQuery);
+            $userStmt->bindParam(':user_id', $data->user_id);
+            $userStmt->execute();
+            $userData = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$userData) {
+                http_response_code(400);
+                echo json_encode(array("message" => "Utilisateur non trouvé ou non validé."));
+                return;
+            }
+
+            // Vérifier que l'utilisateur n'est pas déjà dans l'élevage
+            $checkQuery = "SELECT id FROM elevage_users WHERE elevage_id = :elevage_id AND user_id = :user_id";
+            $checkStmt = $this->db->prepare($checkQuery);
+            $checkStmt->bindParam(':elevage_id', $elevage_id);
+            $checkStmt->bindParam(':user_id', $data->user_id);
+            $checkStmt->execute();
+
+            if ($checkStmt->fetch()) {
+                http_response_code(400);
+                echo json_encode(array("message" => "Cet utilisateur est déjà ajouté à l'élevage."));
+                return;
+            }
+
+            // Ajouter l'utilisateur à l'élevage
+            $insertQuery = "INSERT INTO elevage_users (elevage_id, user_id, role_in_elevage, added_by_user_id, added_at)
+                           VALUES (:elevage_id, :user_id, :role_in_elevage, :added_by_user_id, datetime('now'))";
+            $insertStmt = $this->db->prepare($insertQuery);
+            $insertStmt->bindParam(':elevage_id', $elevage_id);
+            $insertStmt->bindParam(':user_id', $data->user_id);
+            $insertStmt->bindParam(':role_in_elevage', $role_in_elevage);
+            $insertStmt->bindParam(':added_by_user_id', $currentUser['id']);
+
+            if ($insertStmt->execute()) {
+                http_response_code(201);
+                echo json_encode(array(
+                    "message" => "Utilisateur ajouté avec succès à l'élevage.",
+                    "user_name" => $userData['name']
+                ));
+            } else {
+                http_response_code(500);
+                echo json_encode(array("message" => "Impossible d'ajouter l'utilisateur."));
+            }
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(array("message" => "Erreur lors de l'ajout de l'utilisateur.", "error" => $e->getMessage()));
+        }
+    }
+
+    // Retirer un utilisateur d'un élevage
+    public function removeUserFromElevage($elevage_id, $user_id) {
+        if (!$this->authMiddleware->requireAuth()) {
+            return;
+        }
+
+        $currentUser = $this->authMiddleware->getCurrentUser();
+
+        try {
+            // Vérifier que l'élevage existe
+            $elevageData = $this->elevage->getById($elevage_id);
+            if (!$elevageData) {
+                http_response_code(404);
+                echo json_encode(array("message" => "Élevage non trouvé."));
+                return;
+            }
+
+            // Vérifier les permissions (admin ou propriétaire/modérateur de l'élevage)
+            if (!$this->canManageElevageUsers($elevage_id, $currentUser)) {
+                http_response_code(403);
+                echo json_encode(array("message" => "Accès refusé pour gérer les utilisateurs de cet élevage."));
+                return;
+            }
+
+            // Vérifier que l'utilisateur est dans l'élevage
+            $checkQuery = "SELECT role_in_elevage FROM elevage_users WHERE elevage_id = :elevage_id AND user_id = :user_id";
+            $checkStmt = $this->db->prepare($checkQuery);
+            $checkStmt->bindParam(':elevage_id', $elevage_id);
+            $checkStmt->bindParam(':user_id', $user_id);
+            $checkStmt->execute();
+            $userElevage = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$userElevage) {
+                http_response_code(404);
+                echo json_encode(array("message" => "Utilisateur non trouvé dans cet élevage."));
+                return;
+            }
+
+            // Empêcher la suppression du propriétaire
+            if ($userElevage['role_in_elevage'] === 'owner') {
+                http_response_code(400);
+                echo json_encode(array("message" => "Impossible de retirer le propriétaire de l'élevage."));
+                return;
+            }
+
+            // Supprimer l'utilisateur de l'élevage
+            $deleteQuery = "DELETE FROM elevage_users WHERE elevage_id = :elevage_id AND user_id = :user_id";
+            $deleteStmt = $this->db->prepare($deleteQuery);
+            $deleteStmt->bindParam(':elevage_id', $elevage_id);
+            $deleteStmt->bindParam(':user_id', $user_id);
+
+            if ($deleteStmt->execute()) {
+                http_response_code(200);
+                echo json_encode(array("message" => "Utilisateur retiré avec succès de l'élevage."));
+            } else {
+                http_response_code(500);
+                echo json_encode(array("message" => "Impossible de retirer l'utilisateur."));
+            }
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(array("message" => "Erreur lors de la suppression de l'utilisateur.", "error" => $e->getMessage()));
+        }
+    }
+
+    // Méthode utilitaire pour vérifier les permissions de gestion des utilisateurs d'élevage
+    private function canManageElevageUsers($elevage_id, $currentUser) {
+        // Admin peut tout gérer
+        if ($currentUser['role'] == 1) {
+            return true;
+        }
+
+        // Modérateur peut gérer ses élevages (vérifier s'il est propriétaire)
+        if ($currentUser['role'] == 2) {
+            $ownerQuery = "SELECT id FROM elevage_users WHERE elevage_id = :elevage_id AND user_id = :user_id AND role_in_elevage = 'owner'";
+            $ownerStmt = $this->db->prepare($ownerQuery);
+            $ownerStmt->bindParam(':elevage_id', $elevage_id);
+            $ownerStmt->bindParam(':user_id', $currentUser['id']);
+            $ownerStmt->execute();
+
+            return $ownerStmt->fetch() !== false;
+        }
+
+        return false;
+    }
+
 }
 ?>

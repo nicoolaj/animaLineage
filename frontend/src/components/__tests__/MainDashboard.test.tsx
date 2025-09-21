@@ -109,7 +109,7 @@ describe('MainDashboard Component', () => {
     test('affiche le titre principal avec le nom du projet', () => {
       render(<MainDashboard />);
 
-      expect(screen.getByRole('heading', { name: /🦕 animalineage - gestion d'élevage/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /animalineage/i })).toBeInTheDocument();
     });
 
     test('affiche les informations utilisateur', () => {
@@ -138,6 +138,30 @@ describe('MainDashboard Component', () => {
       render(<MainDashboard />);
 
       expect(screen.getByRole('button', { name: /👥 utilisateurs/i })).toBeInTheDocument();
+    });
+
+    test('cache l\'onglet utilisateurs pour les modérateurs', () => {
+      // Mock un utilisateur modérateur - utilise le système de mock du composant
+      const { mockAuthContext } = require('../../test-utils/test-helpers');
+
+      // Temporairement override le mock pour être un modérateur
+      const originalUser = mockAuthContext.user;
+      const originalCanAdministrate = mockAuthContext.canAdministrate;
+
+      mockAuthContext.user = {
+        ...originalUser,
+        role: 2,
+        role_name: 'Moderator'
+      };
+      mockAuthContext.canAdministrate = () => false;
+
+      render(<MainDashboard />);
+
+      expect(screen.queryByRole('button', { name: /👥 utilisateurs/i })).not.toBeInTheDocument();
+
+      // Restaurer les valeurs originales
+      mockAuthContext.user = originalUser;
+      mockAuthContext.canAdministrate = originalCanAdministrate;
     });
 
     test('change d\'onglet lors du clic', async () => {

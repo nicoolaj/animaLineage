@@ -5,7 +5,14 @@
       "Bash(php migrations:*)",
       "Bash(sqlite3:*)",
       "Bash(npm install)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(curl:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(lsof:*)",
+      "Bash(php:*)",
+      "Bash(kill:*)"
     ],
     "deny": [],
     "ask": []

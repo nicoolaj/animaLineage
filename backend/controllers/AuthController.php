@@ -14,23 +14,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types=1);
+
 require_once __DIR__ . '/../middleware/AuthMiddleware.php';
 
-class AuthController {
-    private $user;
-    private $authMiddleware;
+readonly class LoginRequest
+{
+    public function __construct(
+        public string $email,
+        public string $password
+    ) {}
+}
 
-    public function __construct(User $user, $database = null) {
+readonly class RegisterRequest
+{
+    public function __construct(
+        public string $name,
+        public string $email,
+        public string $password
+    ) {}
+}
+
+class AuthController
+{
+    private readonly User $user;
+    private readonly ?AuthMiddleware $authMiddleware;
+
+    public function __construct(User $user, ?object $database = null)
+    {
         $this->user = $user;
-        if ($database) {
-            $this->authMiddleware = new AuthMiddleware($database);
-        }
+        $this->authMiddleware = $database ? new AuthMiddleware($database) : null;
     }
 
-    public function login() {
+    public function login(): void
+    {
         $data = json_decode(file_get_contents("php://input"));
 
-        if (!empty($data->email) && !empty($data->password)) {
+        try {
+            $request = new LoginRequest(
+                email: $data->email ?? '',
+                password: $data->password ?? ''
+            );
+
+            if (empty($request->email) || empty($request->password)) {
+                throw new InvalidArgumentException("Email and password are required.");
+            }
             $this->user->email = $data->email;
             $userData = $this->user->getUserByEmail();
 
@@ -60,9 +89,12 @@ class AuthController {
                 http_response_code(401);
                 echo json_encode(array("message" => "Invalid email or password."));
             }
-        } else {
+        } catch (InvalidArgumentException $e) {
             http_response_code(400);
-            echo json_encode(array("message" => "Email and password are required."));
+            echo json_encode(array("message" => $e->getMessage()));
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(array("message" => "An error occurred during login."));
         }
     }
 

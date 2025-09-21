@@ -9,8 +9,10 @@ import TypesAnimauxList from './TypesAnimauxList';
 import TypeAnimalForm from './TypeAnimalForm';
 import RacesList from './RacesList';
 import RaceForm from './RaceForm';
+import AnimalDashboard from './AnimalDashboard';
+import TransferRequestManager from './TransferRequestManager';
 
-type TabType = 'elevages' | 'users' | 'types-races' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form';
+type TabType = 'elevages' | 'animals' | 'users' | 'types-races' | 'transfer-requests' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form';
 
 interface TabData {
   id: TabType;
@@ -102,15 +104,28 @@ const MainDashboard: React.FC = () => {
       icon: '🚜'
     },
     {
+      id: 'animals',
+      label: 'Animaux',
+      icon: '🐄',
+      requiredRole: 2 // Admin et modérateurs
+    },
+    {
       id: 'types-races',
       label: 'Types & Races',
-      icon: '🏷️'
+      icon: '🏷️',
+      requiredRole: 1 // Admin uniquement
+    },
+    {
+      id: 'transfer-requests',
+      label: 'Demandes de transfert',
+      icon: '🔄',
+      requiredRole: 2 // Admin et modérateurs
     },
     {
       id: 'users',
       label: 'Utilisateurs',
       icon: '👥',
-      requiredRole: 2 // Modérateur et admin
+      requiredRole: 1 // Admin uniquement
     }
   ];
 
@@ -122,6 +137,12 @@ const MainDashboard: React.FC = () => {
     switch (activeTab) {
       case 'elevages':
         return <ElevageList onNewElevage={handleNewElevage} onEditElevage={handleEditElevage} onViewAnimaux={handleViewAnimaux} />;
+
+      case 'animals':
+        return <AnimalDashboard />;
+
+      case 'transfer-requests':
+        return <TransferRequestManager />;
 
       case 'elevage-detail':
         return selectedElevageId ? (
@@ -210,7 +231,12 @@ const MainDashboard: React.FC = () => {
   return (
     <div id="maindashboard-dashboard-7" className="dashboard">
       <header className="dashboard-header">
-        <h1>AnimaLineage</h1>
+        <img
+          src="/logo_full.svg"
+          alt="AnimaLineage"
+          className="dashboard-logo"
+          style={{ height: '40px', width: 'auto' }}
+        />
         <div id="maindashboard-user-info-8" className="user-info">
           <div id="maindashboard-user-details-9" className="user-details">
             <span>Bienvenue, {user?.name}!</span>

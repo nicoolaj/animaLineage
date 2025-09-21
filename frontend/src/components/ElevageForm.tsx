@@ -32,7 +32,6 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
 
   const [races, setRaces] = useState<Race[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [userSearch, setUserSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [isEdit, setIsEdit] = useState(false);
@@ -48,6 +47,7 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Races disponibles chargées:', data);
         setRaces(data);
       }
     } catch (error) {
@@ -63,6 +63,7 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Users chargés:', data);
         setUsers(data);
       }
     } catch (error) {
@@ -80,13 +81,22 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
 
       if (response.ok) {
         const data = await response.json();
-        setFormData({
+        console.log('Élevage chargé:', data);
+        console.log('Users disponibles:', users);
+        console.log('Races de l\'élevage:', data.races);
+        const racesIds = data.races?.map((r: Race) => r.id) || [];
+        console.log('Races IDs extraits:', racesIds);
+
+        const newFormData = {
           nom: data.nom || '',
           adresse: data.adresse || '',
-          user_id: data.user_id ? data.user_id.toString() : '',
+          user_id: data.user_id ? String(data.user_id) : '',
           description: data.description || '',
-          races_ids: data.races?.map((r: Race) => r.id) || []
-        });
+          races_ids: racesIds
+        };
+        console.log('FormData mise à jour:', newFormData);
+        console.log('user_id sélectionné:', newFormData.user_id);
+        setFormData(newFormData);
       } else {
         setError('Erreur lors du chargement de l\'élevage.');
       }
@@ -94,16 +104,34 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
       console.error('Error fetching elevage:', error);
       setError('Erreur de connexion lors du chargement.');
     }
-  }, [elevageId, getAuthHeaders]);
+  }, [elevageId, getAuthHeaders, users]);
 
   useEffect(() => {
+    // Charger les données de référence
     fetchRaces();
     fetchUsers();
-    if (elevageId) {
+  }, [fetchRaces, fetchUsers]);
+
+  useEffect(() => {
+    // Charger l'élevage seulement quand elevageId change ET que les users sont chargés
+    if (elevageId && users.length > 0) {
       setIsEdit(true);
       fetchElevage();
+    } else if (elevageId && users.length === 0) {
+      setIsEdit(true);
+      // On attend que les users soient chargés
+    } else {
+      setIsEdit(false);
+      // Reset form when creating new
+      setFormData({
+        nom: '',
+        adresse: '',
+        user_id: '',
+        description: '',
+        races_ids: []
+      });
     }
-  }, [elevageId, fetchElevage, fetchRaces, fetchUsers]);
+  }, [elevageId, fetchElevage, users.length]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -218,23 +246,20 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
             id="user_id"
             name="user_id"
             value={formData.user_id}
-            onChange={handleInputChange}
+            onChange={(e) => {
+              console.log('Changement de propriétaire:', e.target.value);
+              handleInputChange(e);
+            }}
             required
           >
             <option value="">Sélectionner un utilisateur</option>
-            {users
-              .filter(user =>
-                userSearch === '' ||
-                user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-                user.email.toLowerCase().includes(userSearch.toLowerCase())
-              )
-              .map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name} ({user.email})
-                </option>
-              ))
-            }
+            {users.map((user) => (
+              <option key={user.id} value={String(user.id)}>
+                {user.name} ({user.email})
+              </option>
+            ))}
           </select>
+          {/* Temporarily disabled search
           <input
             type="text"
             placeholder="Rechercher un utilisateur..."
@@ -242,6 +267,7 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
             onChange={(e) => setUserSearch(e.target.value)}
             className="user-search"
           />
+          */}
         </div>
 
         <div id="elevageform-form-group-7" className="form-group">
@@ -259,13 +285,16 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
         <div id="elevageform-form-group-8" className="form-group">
           <label>Races d'animaux</label>
           <div id="elevageform-races-checkbox-group-9" className="races-checkbox-group">
-            {races.map((race) => (
-              <label key={race.id} className="checkbox-item">
-                <input
-                  type="checkbox"
-                  checked={formData.races_ids.includes(race.id)}
-                  onChange={(e) => handleRaceChange(race.id, e.target.checked)}
-                />
+            {races.map((race) => {
+              const isChecked = formData.races_ids.includes(race.id);
+              console.log(`Race ${race.nom} (ID: ${race.id}) - checked: ${isChecked}, races_ids:`, formData.races_ids);
+              return (
+                <label key={race.id} className="checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => handleRaceChange(race.id, e.target.checked)}
+                  />
                 <span className="checkbox-label">
                   {race.nom}
                   <small className="race-type">
@@ -278,7 +307,8 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
                   )}
                 </span>
               </label>
-            ))}
+              );
+            })}
           </div>
         </div>
 

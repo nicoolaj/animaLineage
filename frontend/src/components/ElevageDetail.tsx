@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AnimalForm from './AnimalForm';
+import ElevageUsersManagement from './ElevageUsersManagement';
 
 interface Race {
     id: number;
@@ -51,7 +52,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     const [animaux, setAnimaux] = useState<Animal[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [currentView, setCurrentView] = useState<'list' | 'form' | 'descendants'>('list');
+    const [currentView, setCurrentView] = useState<'list' | 'form' | 'descendants' | 'users'>('list');
     const [editingAnimal, setEditingAnimal] = useState<Animal | undefined>();
     const [descendants, setDescendants] = useState<Animal[]>([]);
     const [selectedAnimalForDescendants, setSelectedAnimalForDescendants] = useState<string>('');
@@ -326,13 +327,22 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                             📋 Liste
                         </button>
                         {canEditElevage() && (
-                            <button
-                                id="elevage-add-animal-btn"
-                                onClick={handleCreateAnimal}
-                                className={currentView === 'form' && !editingAnimal ? 'active' : ''}
-                            >
-                                ➕ Ajouter un animal
-                            </button>
+                            <>
+                                <button
+                                    id="elevage-add-animal-btn"
+                                    onClick={handleCreateAnimal}
+                                    className={currentView === 'form' && !editingAnimal ? 'active' : ''}
+                                >
+                                    ➕ Ajouter un animal
+                                </button>
+                                <button
+                                    id="elevage-manage-users-btn"
+                                    onClick={() => setCurrentView('users')}
+                                    className={currentView === 'users' ? 'active' : ''}
+                                >
+                                    👥 Gérer les utilisateurs
+                                </button>
+                            </>
                         )}
                         {isReader() && !canEditElevage() && (
                             <div id="elevagedetail-read-only-notice-4" className="read-only-notice">
@@ -543,6 +553,14 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                             </div>
                         )}
                     </div>
+                )}
+
+                {currentView === 'users' && elevage && (
+                    <ElevageUsersManagement
+                        elevageId={elevage.id}
+                        elevageName={elevage.nom}
+                        onClose={() => setCurrentView('list')}
+                    />
                 )}
             </div>
 

@@ -1,14 +1,14 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthContext';
+import { isTokenExpired } from '../../utils/auth';
 
 // Mock fetch pour les tests
 const mockFetch = jest.fn();
-global.fetch = mockFetch;
 
 // Mock de la fonction isTokenExpired
 jest.mock('../../utils/auth', () => ({
-  isTokenExpired: jest.fn(() => false) // Par défaut, les tokens ne sont pas expirés
+  isTokenExpired: jest.fn(() => false)
 }));
 
 // Mock localStorage et sessionStorage
@@ -37,12 +37,15 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('AuthContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    global.fetch = mockFetch;
+    mockFetch.mockClear();
     mockLocalStorage.getItem.mockReturnValue(null);
     mockSessionStorage.getItem.mockReturnValue(null);
     mockLocalStorage.setItem.mockClear();
     mockSessionStorage.setItem.mockClear();
     mockLocalStorage.removeItem.mockClear();
     mockSessionStorage.removeItem.mockClear();
+    (isTokenExpired as jest.Mock).mockReturnValue(false);
   });
 
   describe('État initial', () => {
@@ -114,16 +117,27 @@ describe('AuthContext', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: () => Promise.resolve(mockResponse)
-      });
+      } as Response);
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
+      let success;
       await act(async () => {
-        const success = await result.current.login('test@example.com', 'password123');
-        expect(success).toBe(true);
+        success = await result.current.login('test@example.com', 'password123');
       });
 
+      // Vérifier que l'API a bien été appelée
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
+      });
+
+      expect(success).toBe(true);
       expect(result.current.isAuthenticated).toBe(true);
       expect(result.current.user).toEqual(mockUser);
       expect(result.current.token).toBe('mock-jwt-token');
@@ -184,16 +198,27 @@ describe('AuthContext', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: () => Promise.resolve(mockResponse)
-      });
+      } as Response);
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
+      let success;
       await act(async () => {
-        const success = await result.current.register('New User', 'newuser@example.com', 'password123');
-        expect(success).toBe(true);
+        success = await result.current.register('New User', 'newuser@example.com', 'password123');
       });
 
+      // Vérifier que l'API a bien été appelée
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: 'New User', email: 'newuser@example.com', password: 'password123' }),
+      });
+
+      expect(success).toBe(true);
       expect(result.current.isAuthenticated).toBe(true);
       expect(result.current.user).toEqual(mockUser);
       expect(result.current.token).toBe('mock-jwt-token');
@@ -329,19 +354,31 @@ describe('AuthContext', () => {
 
   describe('getAuthHeaders', () => {
     test('retourne les headers d\'authentification', async () => {
+      const mockUser = {
+        id: 1,
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 2,
+        role_name: 'Admin',
+        status: 1
+      };
+
       mockSessionStorage.getItem.mockImplementation((key: string) => {
         if (key === 'token') return 'mock-token';
+        if (key === 'user') return JSON.stringify(mockUser);
         return null;
       });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
       await waitFor(() => {
-        const headers = result.current.getAuthHeaders();
-        expect(headers).toEqual({
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer mock-token'
-        });
+        expect(result.current.token).toBe('mock-token');
+      });
+
+      const headers = result.current.getAuthHeaders();
+      expect(headers).toEqual({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer mock-token'
       });
     });
 
@@ -359,8 +396,10 @@ describe('AuthContext', () => {
     test('gère les tokens expirés', async () => {
       const expiredToken = 'expired-token';
 
+      (isTokenExpired as jest.Mock).mockReturnValue(true);
       mockSessionStorage.getItem.mockImplementation((key: string) => {
         if (key === 'token') return expiredToken;
+        if (key === 'user') return JSON.stringify({ id: 1, name: 'Test' });
         return null;
       });
 
@@ -369,7 +408,29 @@ describe('AuthContext', () => {
       // Le composant devrait détecter le token expiré et déconnecter l'utilisateur
       await waitFor(() => {
         expect(result.current.isAuthenticated).toBe(false);
+        expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('token');
+        expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('user');
       });
+    });
+
+    test('gère les erreurs réseau lors de l\'inscription', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        const success = await result.current.register('New User', 'test@example.com', 'password123');
+        expect(success).toBe(false);
+      });
+
+      expect(result.current.isAuthenticated).toBe(false);
+    });
+
+    test('lance une erreur si useAuth est utilisé hors du AuthProvider', () => {
+      // Test du hook hors du provider
+      expect(() => {
+        renderHook(() => useAuth());
+      }).toThrow('useAuth must be used within an AuthProvider');
     });
   });
 });

@@ -31,7 +31,7 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
   const [error, setError] = useState<string>('');
   const [showMyOnly, setShowMyOnly] = useState(false);
 
-  const { getAuthHeaders, user, isAdmin } = useAuth();
+  const { getAuthHeaders, user, isAdmin, canModerate } = useAuth();
   const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchElevages = useCallback(async () => {
@@ -103,15 +103,18 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
       <div id="elevagelist-elevage-header-3" className="elevage-header">
         <h2>Gestion des Élevages</h2>
         <div id="elevagelist-elevage-controls-4" className="elevage-controls">
-          <label>
-            <input
-              type="checkbox"
-              checked={showMyOnly}
-              onChange={(e) => setShowMyOnly(e.target.checked)}
-            />
-            Afficher seulement mes élevages
-          </label>
-          {isAdmin() && (
+          {/* Afficher le filtre pour les admins et modérateurs */}
+          {(isAdmin() || canModerate()) && (
+            <label>
+              <input
+                type="checkbox"
+                checked={showMyOnly}
+                onChange={(e) => setShowMyOnly(e.target.checked)}
+              />
+              {isAdmin() ? 'Afficher seulement mes élevages' : 'Mes élevages uniquement'}
+            </label>
+          )}
+          {(isAdmin() || canModerate()) && (
             <button
               className="btn-primary"
               onClick={onNewElevage}

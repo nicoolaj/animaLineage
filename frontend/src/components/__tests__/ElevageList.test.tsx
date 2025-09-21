@@ -137,7 +137,7 @@ describe('ElevageList Component', () => {
       expect(screen.getByLabelText(/afficher seulement mes élevages/i)).toBeInTheDocument();
     });
 
-    test('affiche le bouton nouveau élevage pour les admins', () => {
+    test('affiche le bouton nouveau élevage pour les admins et modérateurs', () => {
       render(<MockElevageList {...mockProps} />);
 
       expect(screen.getByRole('button', { name: /nouveau élevage/i })).toBeInTheDocument();

@@ -41,7 +41,7 @@ const AnimalDashboard: React.FC = () => {
     const [descendants, setDescendants] = useState<Descendant[]>([]);
     const [selectedAnimalForDescendants, setSelectedAnimalForDescendants] = useState<string>('');
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const [loading, setLoading] = useState(false);
+    const [, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const handleCreateAnimal = () => {
@@ -57,7 +57,7 @@ const AnimalDashboard: React.FC = () => {
     const handleSubmitAnimal = async (animalData: any) => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
 
             if (!token) {
                 throw new Error('Token d\'authentification manquant');
@@ -114,7 +114,7 @@ const AnimalDashboard: React.FC = () => {
     const handleViewDescendants = async (animalId: number) => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
 
             if (!token) {
                 throw new Error('Token d\'authentification manquant');
@@ -162,27 +162,26 @@ const AnimalDashboard: React.FC = () => {
     };
 
     return (
-        <div id="animaldashboard-animal-dashboard-1" className="animal-dashboard">
-            <div id="animaldashboard-dashboard-header-2" className="dashboard-header">
-                <h1>Gestion des Animaux</h1>
-
-                <div id="animaldashboard-dashboard-nav-3" className="dashboard-nav">
+        <div className="p-5 max-w-6xl mx-auto bg-gray-800 min-h-screen text-white">
+            <div className="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-600">
+                <h2 className="m-0 text-white text-2xl font-semibold">Gestion des Animaux</h2>
+                <div className="flex gap-3 items-center">
                     <button
                         onClick={() => setCurrentView('list')}
-                        className={currentView === 'list' ? 'active' : ''}
+                        className={`btn-outline ${currentView === 'list' ? 'bg-primary-500 text-white' : ''}`}
                     >
                         📋 Liste des animaux
                     </button>
                     <button
                         onClick={handleCreateAnimal}
-                        className={currentView === 'form' && !editingAnimal ? 'active' : ''}
+                        className={`btn-primary ${currentView === 'form' && !editingAnimal ? 'ring-2 ring-primary-300' : ''}`}
                     >
                         ➕ Nouvel animal
                     </button>
                 </div>
             </div>
 
-            {error && <div id="animaldashboard-error-message-4" className="error-message">{error}</div>}
+            {error && <div className="error-message">{error}</div>}
 
             {currentView === 'list' && (
                 <AnimalList
@@ -195,7 +194,7 @@ const AnimalDashboard: React.FC = () => {
             )}
 
             {currentView === 'form' && (
-                <div id="animaldashboard-form-container-5" className="form-container">
+                <div className="max-w-4xl mx-auto bg-gray-700 p-8 rounded-lg shadow-card">
                     <AnimalForm
                         animal={editingAnimal}
                         onSubmit={handleSubmitAnimal}
@@ -205,45 +204,48 @@ const AnimalDashboard: React.FC = () => {
             )}
 
             {currentView === 'descendants' && (
-                <div id="animaldashboard-descendants-view-6" className="descendants-view">
-                    <div id="animaldashboard-descendants-header-7" className="descendants-header">
-                        <h2>Descendants de {selectedAnimalForDescendants}</h2>
-                        <button onClick={() => setCurrentView('list')} className="back-btn">
+                <div className="bg-gray-700 rounded-lg shadow-card overflow-hidden">
+                    <div className="flex justify-between items-center p-5 bg-gray-800 border-b border-gray-600">
+                        <h2 className="m-0 text-white text-xl font-semibold">Descendants de {selectedAnimalForDescendants}</h2>
+                        <button
+                            onClick={() => setCurrentView('list')}
+                            className="btn-secondary text-sm py-2 px-4"
+                        >
                             ← Retour à la liste
                         </button>
                     </div>
 
                     {descendants.length === 0 ? (
-                        <div id="animaldashboard-no-descendants-8" className="no-descendants">
+                        <div className="py-10 px-5 text-center text-gray-400 italic">
                             Cet animal n'a pas de descendants connus.
                         </div>
                     ) : (
-                        <div id="animaldashboard-descendants-table-container-9" className="descendants-table-container">
-                            <table className="descendants-table">
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse bg-gray-700">
                                 <thead>
                                     <tr>
-                                        <th>Identifiant</th>
-                                        <th>Nom</th>
-                                        <th>Sexe</th>
-                                        <th>Race</th>
-                                        <th>Date de naissance</th>
-                                        <th>Statut</th>
+                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Identifiant</th>
+                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Nom</th>
+                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Sexe</th>
+                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Race</th>
+                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Date de naissance</th>
+                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Statut</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {descendants.map(descendant => (
-                                        <tr key={descendant.id} className={descendant.statut === 'mort' ? 'deceased' : ''}>
-                                            <td className="font-mono">{descendant.identifiant_officiel}</td>
-                                            <td>{descendant.nom || '-'}</td>
-                                            <td>
-                                                <span className={`sexe-badge ${descendant.sexe.toLowerCase()}`}>
+                                        <tr key={descendant.id} className={`border-b border-gray-600 text-white ${descendant.statut === 'mort' ? 'bg-red-900 bg-opacity-20' : ''}`}>
+                                            <td className="px-4 py-3 font-mono font-bold">{descendant.identifiant_officiel}</td>
+                                            <td className="px-4 py-3">{descendant.nom || '-'}</td>
+                                            <td className="px-4 py-3">
+                                                <span className="sexe-badge">
                                                     {descendant.sexe === 'M' ? '♂️' : '♀️'}
                                                 </span>
                                             </td>
-                                            <td>{descendant.race_nom}</td>
-                                            <td>{formatDate(descendant.date_naissance)}</td>
-                                            <td>
-                                                <span className={`status-badge ${descendant.statut}`}>
+                                            <td className="px-4 py-3">{descendant.race_nom}</td>
+                                            <td className="px-4 py-3">{formatDate(descendant.date_naissance)}</td>
+                                            <td className="px-4 py-3">
+                                                <span className={`status-badge ${descendant.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
                                                     {descendant.statut === 'vivant' ? '✅ Vivant' : '💀 Décédé'}
                                                 </span>
                                             </td>
@@ -256,177 +258,21 @@ const AnimalDashboard: React.FC = () => {
                 </div>
             )}
 
+            {/* Responsive styles are now handled by Tailwind CSS classes */}
             <style>{`
-                .animal-dashboard {
-                    padding: 20px;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                }
-
-                .dashboard-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 30px;
-                    padding-bottom: 20px;
-                    border-bottom: 2px solid #eee;
-                }
-
-                .dashboard-header h1 {
-                    margin: 0;
-                    color: #333;
-                }
-
-                .dashboard-nav {
-                    display: flex;
-                    gap: 10px;
-                }
-
-                .dashboard-nav button {
-                    padding: 10px 20px;
-                    border: 2px solid #007bff;
-                    background: white;
-                    color: #007bff;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-weight: 500;
-                    transition: all 0.3s ease;
-                }
-
-                .dashboard-nav button:hover {
-                    background: #007bff;
-                    color: white;
-                }
-
-                .dashboard-nav button.active {
-                    background: #007bff;
-                    color: white;
-                }
-
-                .form-container {
-                    max-width: 800px;
-                    margin: 0 auto;
-                    background: white;
-                    padding: 30px;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                }
-
-                .descendants-view {
-                    background: white;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                    overflow: hidden;
-                }
-
-                .descendants-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 20px;
-                    background: #f8f9fa;
-                    border-bottom: 1px solid #dee2e6;
-                }
-
-                .descendants-header h2 {
-                    margin: 0;
-                    color: #495057;
-                }
-
-                .back-btn {
-                    background: #6c757d;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-
-                .back-btn:hover {
-                    background: #5a6268;
-                }
-
-                .no-descendants {
-                    padding: 40px;
-                    text-align: center;
-                    color: #6c757d;
-                    font-style: italic;
-                }
-
-                .descendants-table-container {
-                    overflow-x: auto;
-                }
-
-                .descendants-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-
-                .descendants-table th,
-                .descendants-table td {
-                    padding: 12px 16px;
-                    text-align: left;
-                    border-bottom: 1px solid #dee2e6;
-                }
-
-                .descendants-table th {
-                    background: #f8f9fa;
-                    font-weight: bold;
-                    color: #495057;
-                }
-
-                .descendants-table tr.deceased {
-                    background: #fff3cd;
-                }
-
-                .font-mono {
-                    font-family: 'Courier New', monospace;
-                    font-weight: bold;
-                }
-
-                .sexe-badge {
-                    font-size: 18px;
-                }
-
-                .status-badge {
-                    padding: 4px 8px;
-                    border-radius: 12px;
-                    font-size: 12px;
-                    font-weight: bold;
-                }
-
-                .status-badge.vivant {
-                    background: #d4edda;
-                    color: #155724;
-                }
-
-                .status-badge.mort {
-                    background: #f8d7da;
-                    color: #721c24;
-                }
-
-                .error-message {
-                    background: #f8d7da;
-                    color: #721c24;
-                    padding: 12px;
-                    border-radius: 4px;
-                    margin-bottom: 20px;
-                    border: 1px solid #f5c6cb;
-                }
-
                 @media (max-width: 768px) {
-                    .dashboard-header {
+                    .animal-header {
                         flex-direction: column;
                         align-items: flex-start;
                         gap: 15px;
                     }
 
-                    .dashboard-nav {
+                    .animal-controls {
                         width: 100%;
                         justify-content: center;
                     }
 
-                    .dashboard-nav button {
+                    .animal-controls button {
                         flex: 1;
                         text-align: center;
                     }
@@ -435,11 +281,6 @@ const AnimalDashboard: React.FC = () => {
                         flex-direction: column;
                         align-items: flex-start;
                         gap: 15px;
-                    }
-
-                    .form-container {
-                        margin: 0 -10px;
-                        border-radius: 0;
                     }
                 }
             `}</style>

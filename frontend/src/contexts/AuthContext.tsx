@@ -55,8 +55,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (savedToken && savedUser) {
       // Check if token is still valid
       if (!isTokenExpired(savedToken)) {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
+        try {
+          setToken(savedToken);
+          setUser(JSON.parse(savedUser));
+        } catch (error) {
+          // Invalid JSON in storage, clear it
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
+        }
       } else {
         // Token expired, clear storage
         sessionStorage.removeItem('token');
