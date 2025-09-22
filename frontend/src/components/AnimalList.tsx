@@ -172,7 +172,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
     return (
         <div className="p-5 bg-gray-800 min-h-screen text-white">
             <div className="flex justify-between items-center mb-5">
-                <h2 className="text-xl font-semibold text-white">Liste des animaux ({filteredAndSortedAnimaux.length})</h2>
+                <h2 className="text-xl font-semibold text-white">Liste des animaux 🦕 ({filteredAndSortedAnimaux.length})</h2>
                 <button onClick={loadAnimaux} className="btn-primary text-sm py-2 px-4">
                     Actualiser
                 </button>

@@ -164,19 +164,19 @@ const AnimalDashboard: React.FC = () => {
     return (
         <div className="p-5 max-w-6xl mx-auto bg-gray-800 min-h-screen text-white">
             <div className="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-600">
-                <h2 className="m-0 text-white text-2xl font-semibold">Gestion des Animaux</h2>
+                <h2 className="m-0 text-white text-2xl font-semibold">🦕 Gestion des Animaux</h2>
                 <div className="flex gap-3 items-center">
                     <button
                         onClick={() => setCurrentView('list')}
                         className={`btn-outline ${currentView === 'list' ? 'bg-primary-500 text-white' : ''}`}
                     >
-                        📋 Liste des animaux
+                        📋 Liste des animaux 🦕
                     </button>
                     <button
                         onClick={handleCreateAnimal}
                         className={`btn-primary ${currentView === 'form' && !editingAnimal ? 'ring-2 ring-primary-300' : ''}`}
                     >
-                        ➕ Nouvel animal
+                        🦕 Nouvel animal
                     </button>
                 </div>
             </div>

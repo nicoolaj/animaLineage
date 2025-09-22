@@ -155,7 +155,7 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
                   <button
                     className="btn-edit"
                     onClick={() => onViewAnimaux?.(elevage.id)}
-                    title="Gestion des animaux et utilisateurs"
+                    title="Gestion des animaux 🦕 et utilisateurs"
                   >
                     ✏️
                   </button>
@@ -195,7 +195,7 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
               </div>
 
               <div id="elevagelist-races-animaux-14" className="races-animaux">
-                <strong>Races d'animaux:</strong>
+                <strong>Races d'animaux 🦕:</strong>
                 {elevage.races.length > 0 ? (
                   <div id="elevagelist-races-tags-15" className="races-tags">
                     {elevage.races.map((race) => (

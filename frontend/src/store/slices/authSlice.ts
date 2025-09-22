@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { extractErrorCode, createCodedError } from '../../utils/errorHandler';
 import { CodedError, ERROR_CODES } from '../../utils/errorCodes';
 

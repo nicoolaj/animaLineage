@@ -283,7 +283,7 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
         </div>
 
         <div id="elevageform-form-group-8" className="form-group">
-          <label>Races d'animaux</label>
+          <label>Races d'animaux 🦕</label>
           <div id="elevageform-races-checkbox-group-9" className="races-checkbox-group">
             {races.map((race) => {
               const isChecked = formData.races_ids.includes(race.id);

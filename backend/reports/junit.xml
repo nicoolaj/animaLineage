@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="AuthMiddlewareTest" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" tests="15" assertions="45" errors="1" failures="1" skipped="0" time="0.038286">
+    <testcase name="testConstructor" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="49" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="1" time="0.005691"/>
+    <testcase name="testHasRoleWithValidRole" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="54" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="3" time="0.000781"/>
+    <testcase name="testHasRoleWithInvalidData" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="66" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="3" time="0.000419"/>
+    <testcase name="testGenerateTokenWithValidData" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="79" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="3" time="0.006836"/>
+    <testcase name="testVerifyTokenWithValidToken" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="91" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="5" time="0.001554"/>
+    <testcase name="testVerifyTokenWithInvalidToken" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="103" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="2" time="0.013820">
+      <error type="TypeError">AuthMiddlewareTest::testVerifyTokenWithInvalidToken
+TypeError: Firebase\JWT\JWT::decode(): Argument #1 ($jwt) must be of type string, null given, called in /Users/njalibert/Downloads/AnimaLineage/backend/middleware/AuthMiddleware.php on line 82
+
+/Users/njalibert/Downloads/AnimaLineage/backend/vendor/firebase/php-jwt/src/JWT.php:96
+/Users/njalibert/Downloads/AnimaLineage/backend/middleware/AuthMiddleware.php:82
+/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php:107</error>
+    </testcase>
+    <testcase name="testVerifyTokenWithExpiredToken" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="110" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="1" time="0.003593"/>
+    <testcase name="testRefreshTokenWithValidToken" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="124" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="2" time="0.003427">
+      <failure type="PHPUnit\Framework\ExpectationFailedException">AuthMiddlewareTest::testRefreshTokenWithValidToken
+Failed asserting that 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhbmltYWxpbmVhZ2UtYXBwIiwiaWF0IjoxNzU4NTU0MTY2LCJleHAiOjE3NTg1NTc3NjYsInVzZXIiOnsiaWQiOjEsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOjIsIm5hbWUiOiJUZXN0IFVzZXIifX0.AD2Hg8wMdnp6rAxrjQJ8oJehvnOnvZwddb58ivkVcQI' is not equal to 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhbmltYWxpbmVhZ2UtYXBwIiwiaWF0IjoxNzU4NTU0MTY2LCJleHAiOjE3NTg1NTc3NjYsInVzZXIiOnsiaWQiOjEsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOjIsIm5hbWUiOiJUZXN0IFVzZXIifX0.AD2Hg8wMdnp6rAxrjQJ8oJehvnOnvZwddb58ivkVcQI'.
+
+/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php:130</failure>
+    </testcase>
+    <testcase name="testRefreshTokenWithInvalidToken" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="137" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="2" time="0.000334"/>
+    <testcase name="testGetRoleName" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="143" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="3" time="0.000304"/>
+    <testcase name="testCanManageRoleAdmin" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="151" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="3" time="0.000297"/>
+    <testcase name="testCanManageRoleModerator" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="159" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="3" time="0.000293"/>
+    <testcase name="testCanManageRoleReader" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="167" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="3" time="0.000284"/>
+    <testcase name="testRoleHierarchy" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="175" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="9" time="0.000282"/>
+    <testcase name="testJWTConfiguration" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AuthMiddlewareTest.php" line="197" class="AuthMiddlewareTest" classname="AuthMiddlewareTest" assertions="2" time="0.000371"/>
+  </testsuite>
+</testsuites>

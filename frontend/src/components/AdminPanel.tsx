@@ -56,7 +56,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
     } finally {
       setLoading(false);
     }
-  }, [user, getAuthHeaders]);
+  }, [getAuthHeaders]);
 
   const fetchRoles = useCallback(async () => {
     try {
@@ -70,7 +70,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
     } catch (error) {
       console.error('Error fetching roles:', error);
     }
-  }, [user, getAuthHeaders]);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     if (canModerate()) {

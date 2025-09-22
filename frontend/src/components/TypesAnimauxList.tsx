@@ -51,7 +51,7 @@ const TypesAnimauxList: React.FC<TypesAnimauxListProps> = ({ onNewType, onEditTy
   }, [fetchTypes]);
 
   const deleteType = async (id: number) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce type d\'animal ?')) {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce type d\'animal 🦕 ?')) {
       return;
     }
 
@@ -74,13 +74,13 @@ const TypesAnimauxList: React.FC<TypesAnimauxListProps> = ({ onNewType, onEditTy
   };
 
   if (loading) {
-    return <div id="typesanimauxlist-loading-1" className="loading">Chargement des types d'animaux...</div>;
+    return <div id="typesanimauxlist-loading-1" className="loading">Chargement des types d'animaux 🦕...</div>;
   }
 
   return (
     <div id="typesanimauxlist-types-animaux-list-2" className="types-animaux-list">
       <div id="typesanimauxlist-types-header-3" className="types-header">
-        <h2>Gestion des Types d'Animaux</h2>
+        <h2>🦕 Gestion des Types d'Animaux</h2>
         <div id="typesanimauxlist-types-controls-4" className="types-controls">
           {isAdmin() && (
             <button
@@ -101,7 +101,7 @@ const TypesAnimauxList: React.FC<TypesAnimauxListProps> = ({ onNewType, onEditTy
 
       {types.length === 0 ? (
         <div id="typesanimauxlist-empty-state-6" className="empty-state">
-          <p>Aucun type d'animal trouvé.</p>
+          <p>Aucun type d'animal 🦕 trouvé.</p>
         </div>
       ) : (
         <div id="typesanimauxlist-types-grid-7" className="types-grid">

@@ -282,7 +282,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
 
     return (
         <div className="bg-gray-700 rounded-xl p-6 text-white max-w-4xl mx-auto border border-gray-600">
-            <h3 className="m-0 mb-6 text-white text-2xl font-semibold">{animal ? 'Modifier l\'animal' : 'Nouvel animal'}</h3>
+            <h3 className="m-0 mb-6 text-white text-2xl font-semibold">{animal ? '🦕 Modifier l\'animal' : '🦕 Nouvel animal'}</h3>
 
             {error && <div className="bg-red-600 text-white px-3 py-2.5 rounded-md mb-5">{error}</div>}
 
@@ -326,8 +326,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
 
                     <div className="flex flex-col gap-2">
                         <label htmlFor="nom" className="text-gray-100 font-medium text-sm">
-                            Nom de l'animal
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Nom donné à l'animal (facultatif)</span>
+                            Nom de l'animal 🦕
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Nom donné à l'animal 🦕 (facultatif)</span>
                         </label>
                         <input
                             type="text"

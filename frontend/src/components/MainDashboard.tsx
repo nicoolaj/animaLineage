@@ -11,8 +11,9 @@ import RacesList from './RacesList';
 import RaceForm from './RaceForm';
 import AnimalDashboard from './AnimalDashboard';
 import TransferRequestManager from './TransferRequestManager';
+import CompatibilityTester from './CompatibilityTester';
 
-type TabType = 'elevages' | 'animals' | 'users' | 'types-races' | 'transfer-requests' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form';
+type TabType = 'elevages' | 'animals' | 'users' | 'types-races' | 'transfer-requests' | 'compatibility-tester' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form';
 
 interface TabData {
   id: TabType;
@@ -122,6 +123,12 @@ const MainDashboard: React.FC = () => {
       requiredRole: 2 // Admin et modérateurs
     },
     {
+      id: 'compatibility-tester',
+      label: 'Compatibilité Reproduction',
+      icon: '🧬'
+      // Pas de requiredRole - accessible à tous
+    },
+    {
       id: 'users',
       label: 'Utilisateurs',
       icon: '👥',
@@ -143,6 +150,9 @@ const MainDashboard: React.FC = () => {
 
       case 'transfer-requests':
         return <TransferRequestManager />;
+
+      case 'compatibility-tester':
+        return <CompatibilityTester />;
 
       case 'elevage-detail':
         return selectedElevageId ? (

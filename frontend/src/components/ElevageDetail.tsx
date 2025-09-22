@@ -333,7 +333,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                     onClick={handleCreateAnimal}
                                     className={currentView === 'form' && !editingAnimal ? 'active' : ''}
                                 >
-                                    ➕ Ajouter un animal
+                                    🦕 Nouvel animal
                                 </button>
                                 <button
                                     id="elevage-manage-users-btn"

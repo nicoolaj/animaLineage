@@ -126,7 +126,7 @@ const TransferRequestDialog: React.FC<TransferRequestDialogProps> = ({
                                 id="transfer-message"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Expliquez pourquoi vous souhaitez transférer cet animal..."
+                                placeholder="Expliquez pourquoi vous souhaitez transférer cet animal 🦕..."
                                 rows={4}
                             />
                         </div>

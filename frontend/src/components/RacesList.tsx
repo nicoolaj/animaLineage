@@ -178,7 +178,7 @@ const RacesList: React.FC<RacesListProps> = ({ onNewRace, onEditRace }) => {
 
               <div id="raceslist-race-info-10" className="race-info">
                 <div id="raceslist-info-item-11" className="info-item">
-                  <strong>Type d'animal:</strong> {race.type_animal_nom}
+                  <strong>Type d'animal 🦕:</strong> {race.type_animal_nom}
                 </div>
                 {race.description && (
                   <div id="raceslist-info-item-12" className="info-item">

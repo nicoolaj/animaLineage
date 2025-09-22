@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../../test-utils/test-helpers';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import LanguageSelector from '../LanguageSelector';

@@ -100,16 +100,22 @@ jest.mock('../RaceForm', () => {
   };
 });
 
+jest.mock('../CompatibilityTester', () => {
+  return function CompatibilityTester() {
+    return <div data-testid="compatibility-tester">CompatibilityTester Component</div>;
+  };
+});
+
 describe('MainDashboard Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Rendu du composant', () => {
-    test('affiche le titre principal avec le nom du projet', () => {
+    test('affiche le logo du projet', () => {
       render(<MainDashboard />);
 
-      expect(screen.getByRole('heading', { name: /animalineage/i })).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: /animalineage/i })).toBeInTheDocument();
     });
 
     test('affiche les informations utilisateur', () => {
@@ -132,6 +138,7 @@ describe('MainDashboard Component', () => {
 
       expect(screen.getByRole('button', { name: /🚜 élevages/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /🏷️ types & races/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /🧬 compatibilité reproduction/i })).toBeInTheDocument();
     });
 
     test('affiche l\'onglet utilisateurs pour les administrateurs', () => {
@@ -220,6 +227,17 @@ describe('MainDashboard Component', () => {
       await userEvent.click(typesRacesTab);
 
       expect(screen.getByTestId('types-animaux-list')).toBeInTheDocument();
+    });
+  });
+
+  describe('Test de compatibilité', () => {
+    test('affiche CompatibilityTester dans l\'onglet compatibilité reproduction', async () => {
+      render(<MainDashboard />);
+
+      const compatibilityTab = screen.getByRole('button', { name: /🧬 compatibilité reproduction/i });
+      await userEvent.click(compatibilityTab);
+
+      expect(screen.getByTestId('compatibility-tester')).toBeInTheDocument();
     });
   });
 
