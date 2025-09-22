@@ -70,4 +70,16 @@
   .table-header {
     @apply bg-gray-800 text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600 transition-colors duration-150;
   }
+
+  .btn-edit {
+    @apply bg-transparent hover:bg-gray-600 text-white border-none rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200;
+  }
+
+  .btn-delete {
+    @apply bg-transparent hover:bg-red-600 text-white border-none rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200;
+  }
+
+  .btn-view-animals {
+    @apply bg-green-600 hover:bg-green-700 text-white border-none rounded-md px-3 py-1.5 text-sm cursor-pointer font-medium transition-colors duration-200;
+  }
 }
