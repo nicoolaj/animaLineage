@@ -181,7 +181,7 @@ describe('AnimalForm Component', () => {
 
   describe('Gestion des champs de formulaire', () => {
     test('met à jour l\'identifiant officiel', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -191,14 +191,14 @@ describe('AnimalForm Component', () => {
       );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await user.clear(identifiantInput);
-      await user.type(identifiantInput, 'FR999');
+      await userEvent.clear(identifiantInput);
+      await userEvent.type(identifiantInput, 'FR999');
 
       expect(identifiantInput).toHaveValue('FR999');
     });
 
     test('met à jour le nom de l\'animal', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -208,13 +208,13 @@ describe('AnimalForm Component', () => {
       );
 
       const nomInput = screen.getByLabelText(/nom de l'animal/i);
-      await user.type(nomInput, 'Nouveau Nom');
+      await userEvent.type(nomInput, 'Nouveau Nom');
 
       expect(nomInput).toHaveValue('Nouveau Nom');
     });
 
     test('met à jour le sexe de l\'animal', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -224,13 +224,13 @@ describe('AnimalForm Component', () => {
       );
 
       const sexeSelect = screen.getByLabelText(/sexe de l'animal/i);
-      await user.selectOptions(sexeSelect, 'F');
+      await userEvent.selectOptions(sexeSelect, 'F');
 
       expect(sexeSelect).toHaveValue('F');
     });
 
     test('met à jour les notes', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -240,7 +240,7 @@ describe('AnimalForm Component', () => {
       );
 
       const notesTextarea = screen.getByLabelText(/notes et observations/i);
-      await user.type(notesTextarea, 'Animal très docile');
+      await userEvent.type(notesTextarea, 'Animal très docile');
 
       expect(notesTextarea).toHaveValue('Animal très docile');
     });
@@ -248,7 +248,7 @@ describe('AnimalForm Component', () => {
 
   describe('Validation du formulaire', () => {
     test('affiche une erreur si l\'identifiant est manquant', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -258,7 +258,7 @@ describe('AnimalForm Component', () => {
       );
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText('L\'identifiant officiel est requis')).toBeInTheDocument();
@@ -267,7 +267,7 @@ describe('AnimalForm Component', () => {
     });
 
     test('affiche une erreur si la race est manquante', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -277,10 +277,10 @@ describe('AnimalForm Component', () => {
       );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await user.type(identifiantInput, 'FR123');
+      await userEvent.type(identifiantInput, 'FR123');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText('La race est requise')).toBeInTheDocument();
@@ -289,7 +289,7 @@ describe('AnimalForm Component', () => {
     });
 
     test('affiche une erreur si l\'élevage est manquant pour un animal vivant', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -299,7 +299,7 @@ describe('AnimalForm Component', () => {
       );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await user.type(identifiantInput, 'FR123');
+      await userEvent.type(identifiantInput, 'FR123');
 
       // Attendre que les races soient chargées
       await waitFor(() => {
@@ -308,10 +308,10 @@ describe('AnimalForm Component', () => {
       });
 
       const raceSelect = screen.getByLabelText(/race/i);
-      await user.selectOptions(raceSelect, '1');
+      await userEvent.selectOptions(raceSelect, '1');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText('Un animal vivant doit être associé à un élevage')).toBeInTheDocument();
@@ -320,7 +320,7 @@ describe('AnimalForm Component', () => {
     });
 
     test('soumet le formulaire avec des données valides', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -331,10 +331,10 @@ describe('AnimalForm Component', () => {
 
       // Remplir le formulaire
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await user.type(identifiantInput, 'FR123');
+      await userEvent.type(identifiantInput, 'FR123');
 
       const nomInput = screen.getByLabelText(/nom de l'animal/i);
-      await user.type(nomInput, 'Test Animal');
+      await userEvent.type(nomInput, 'Test Animal');
 
       // Attendre que les races soient chargées
       await waitFor(() => {
@@ -343,7 +343,7 @@ describe('AnimalForm Component', () => {
       });
 
       const raceSelect = screen.getByLabelText(/race/i);
-      await user.selectOptions(raceSelect, '1');
+      await userEvent.selectOptions(raceSelect, '1');
 
       // Attendre que les élevages soient chargés
       await waitFor(() => {
@@ -352,10 +352,10 @@ describe('AnimalForm Component', () => {
       });
 
       const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
-      await user.selectOptions(elevageSelect, '1');
+      await userEvent.selectOptions(elevageSelect, '1');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
@@ -370,7 +370,7 @@ describe('AnimalForm Component', () => {
 
   describe('Vérification d\'existence d\'animal', () => {
     test('vérifie l\'existence d\'un animal lors de la saisie de l\'identifiant', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       // Mock pour la vérification d'existence
       mockFetch.mockResolvedValueOnce({
@@ -386,7 +386,7 @@ describe('AnimalForm Component', () => {
       );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await user.type(identifiantInput, 'FR999');
+      await userEvent.type(identifiantInput, 'FR999');
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -401,7 +401,7 @@ describe('AnimalForm Component', () => {
     });
 
     test('affiche un avertissement si l\'animal existe déjà', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       // Mock pour un animal existant
       mockFetch.mockResolvedValueOnce({
@@ -424,7 +424,7 @@ describe('AnimalForm Component', () => {
       );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await user.type(identifiantInput, 'FR999');
+      await userEvent.type(identifiantInput, 'FR999');
 
       await waitFor(() => {
         expect(screen.getByText(/cet animal existe déjà/i)).toBeInTheDocument();
@@ -433,7 +433,7 @@ describe('AnimalForm Component', () => {
     });
 
     test('affiche le message de vérification en cours', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       // Mock pour simuler une vérification lente
       let resolvePromise: any;
@@ -451,7 +451,7 @@ describe('AnimalForm Component', () => {
       );
 
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await user.type(identifiantInput, 'FR999');
+      await userEvent.type(identifiantInput, 'FR999');
 
       // Vérifier que le message de vérification s'affiche
       await waitFor(() => {
@@ -468,7 +468,7 @@ describe('AnimalForm Component', () => {
 
   describe('Gestion des parents', () => {
     test('charge les parents potentiels quand une race est sélectionnée', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -484,7 +484,7 @@ describe('AnimalForm Component', () => {
       });
 
       const raceSelect = screen.getByLabelText(/race/i);
-      await user.selectOptions(raceSelect, '1');
+      await userEvent.selectOptions(raceSelect, '1');
 
       // Vérifier que l'API des animaux est appelée pour charger les parents
       await waitFor(() => {
@@ -500,7 +500,7 @@ describe('AnimalForm Component', () => {
     });
 
     test('vide les listes de parents si aucune race n\'est sélectionnée', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -517,7 +517,7 @@ describe('AnimalForm Component', () => {
       });
 
       const raceSelect = screen.getByLabelText(/race/i);
-      await user.selectOptions(raceSelect, '');
+      await userEvent.selectOptions(raceSelect, '');
 
       // Les selects de parents devraient être vides
       const pereSelect = screen.getByLabelText(/père géniteur/i);
@@ -570,7 +570,7 @@ describe('AnimalForm Component', () => {
     });
 
     test('désactive le champ élevage si l\'animal est décédé', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -580,7 +580,7 @@ describe('AnimalForm Component', () => {
       );
 
       const dateDeces = screen.getByLabelText(/date de décès/i);
-      await user.type(dateDeces, '2023-12-31');
+      await userEvent.type(dateDeces, '2023-12-31');
 
       const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
       expect(elevageSelect).toBeDisabled();
@@ -589,7 +589,7 @@ describe('AnimalForm Component', () => {
 
   describe('Actions du formulaire', () => {
     test('appelle onCancel lors du clic sur annuler', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       render(
         <AnimalForm
@@ -599,13 +599,13 @@ describe('AnimalForm Component', () => {
       );
 
       const cancelButton = screen.getByRole('button', { name: /annuler/i });
-      await user.click(cancelButton);
+      await userEvent.click(cancelButton);
 
       expect(mockOnCancel).toHaveBeenCalledTimes(1);
     });
 
     test('désactive les boutons pendant le chargement', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       // Mock pour simuler une soumission lente
       let resolveSubmit: any;
@@ -624,7 +624,7 @@ describe('AnimalForm Component', () => {
 
       // Remplir le formulaire rapidement
       const identifiantInput = screen.getByLabelText(/identifiant officiel/i);
-      await user.type(identifiantInput, 'FR123');
+      await userEvent.type(identifiantInput, 'FR123');
 
       await waitFor(() => {
         const raceSelect = screen.getByLabelText(/race/i);
@@ -632,7 +632,7 @@ describe('AnimalForm Component', () => {
       });
 
       const raceSelect = screen.getByLabelText(/race/i);
-      await user.selectOptions(raceSelect, '1');
+      await userEvent.selectOptions(raceSelect, '1');
 
       await waitFor(() => {
         const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
@@ -640,10 +640,10 @@ describe('AnimalForm Component', () => {
       });
 
       const elevageSelect = screen.getByLabelText(/élevage d'appartenance/i);
-      await user.selectOptions(elevageSelect, '1');
+      await userEvent.selectOptions(elevageSelect, '1');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       // Vérifier que les boutons sont désactivés
       await waitFor(() => {

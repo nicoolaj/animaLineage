@@ -192,7 +192,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || {
+        state.error = action.payload ?? {
           code: ERROR_CODES.SYS_010,
           message: 'Unknown login error'
         };
@@ -212,7 +212,7 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || {
+        state.error = action.payload ?? {
           code: ERROR_CODES.SYS_010,
           message: 'Unknown registration error'
         };
@@ -231,7 +231,7 @@ const authSlice = createSlice({
       .addCase(initializeAuth.rejected, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = false;
-        state.error = action.payload || {
+        state.error = action.payload ?? {
           code: ERROR_CODES.AUTH_006,
           message: 'Authentication initialization failed'
         };

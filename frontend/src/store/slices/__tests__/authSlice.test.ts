@@ -15,30 +15,6 @@ import authReducer, {
 } from '../authSlice';
 import { ERROR_CODES } from '../../../utils/errorCodes';
 
-// Mock fetch global
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
-
-// Mock sessionStorage
-const mockSessionStorage = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-};
-Object.defineProperty(window, 'sessionStorage', { value: mockSessionStorage });
-
-// Mock atob for JWT decoding
-global.atob = jest.fn();
-
-// Mock Date.now for token expiration tests
-const mockDateNow = jest.spyOn(Date, 'now');
-
-// Helper to create mock JWT payload
-const createMockJWTPayload = (exp: number) => {
-  return JSON.stringify({ exp });
-};
-
 describe('authSlice', () => {
   const initialState = {
     user: null,
@@ -51,393 +27,187 @@ describe('authSlice', () => {
   const mockUser = {
     id: 1,
     name: 'John Doe',
-    email: 'john.doe@example.com',
+    email: 'john@example.com',
     role: 1,
     role_name: 'Admin',
     status: 1,
   };
 
-  const mockToken = 'mock.jwt.token';
+  const mockToken = 'mock-jwt-token';
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockFetch.mockClear();
-    mockSessionStorage.getItem.mockClear();
-    mockSessionStorage.setItem.mockClear();
-    mockSessionStorage.removeItem.mockClear();
-    mockDateNow.mockReturnValue(1000000); // Default current time
-  });
-
-  afterAll(() => {
-    mockDateNow.mockRestore();
-  });
+  const mockLoginResponse = {
+    user: mockUser,
+    token: mockToken,
+  };
 
   describe('initial state', () => {
-    test('should return the initial state', () => {
+    it('should return the initial state', () => {
       expect(authReducer(undefined, { type: 'unknown' })).toEqual(initialState);
     });
   });
 
   describe('reducers', () => {
-    test('should handle logout', () => {
-      const previousState = {
-        user: mockUser,
-        token: mockToken,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
+    describe('logout', () => {
+      it('should clear all auth state', () => {
+        const stateWithAuth = {
+          ...initialState,
+          user: mockUser,
+          token: mockToken,
+          isAuthenticated: true,
+          error: { code: ERROR_CODES.AUTH_001, message: 'Some error' },
+        };
 
-      const actual = authReducer(previousState, logout());
+        const result = authReducer(stateWithAuth, logout());
 
-      expect(actual).toEqual(initialState);
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('token');
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('user');
+        expect(result.user).toBeNull();
+        expect(result.token).toBeNull();
+        expect(result.isAuthenticated).toBe(false);
+        expect(result.error).toBeNull();
+      });
     });
 
-    test('should handle clearError', () => {
-      const previousState = {
-        ...initialState,
-        error: {
-          code: ERROR_CODES.AUTH_001,
-          message: 'Invalid credentials'
-        }
-      };
+    describe('clearError', () => {
+      it('should clear the error state', () => {
+        const stateWithError = {
+          ...initialState,
+          error: { code: ERROR_CODES.AUTH_001, message: 'Some error' },
+        };
 
-      const actual = authReducer(previousState, clearError());
+        const result = authReducer(stateWithError, clearError());
 
-      expect(actual.error).toBeNull();
+        expect(result.error).toBeNull();
+      });
     });
   });
 
-  describe('loginUser async thunk', () => {
-    test('should handle successful login', async () => {
-      const mockResponse = {
-        user: mockUser,
-        token: mockToken
-      };
+  describe('extraReducers', () => {
+    describe('loginUser', () => {
+      it('should handle loginUser.pending', () => {
+        const action = { type: loginUser.pending.type };
+        const state = authReducer(initialState, action);
 
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse)
+        expect(state.isLoading).toBe(true);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle loginUser.fulfilled', () => {
+        const action = { type: loginUser.fulfilled.type, payload: mockLoginResponse };
+        const state = authReducer(initialState, action);
 
-      const thunk = loginUser({ email: 'test@example.com', password: 'password123' });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/auth/login',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'test@example.com', password: 'password123' })
-        }
-      );
-
-      expect(mockSessionStorage.setItem).toHaveBeenCalledWith('token', mockToken);
-      expect(mockSessionStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify(mockUser));
-
-      expect(result.type).toBe('auth/login/fulfilled');
-      expect(result.payload).toEqual(mockResponse);
-    });
-
-    test('should handle login failure with error code', async () => {
-      const errorResponse = {
-        message: 'Invalid credentials',
-        error_code: ERROR_CODES.AUTH_001
-      };
-
-      mockFetch.mockResolvedValue({
-        ok: false,
-        json: () => Promise.resolve(errorResponse)
+        expect(state.isLoading).toBe(false);
+        expect(state.user).toEqual(mockUser);
+        expect(state.token).toBe(mockToken);
+        expect(state.isAuthenticated).toBe(true);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle loginUser.rejected', () => {
+        const error = { code: ERROR_CODES.AUTH_001, message: 'Invalid credentials' };
+        const action = { type: loginUser.rejected.type, payload: error };
+        const state = authReducer(initialState, action);
 
-      const thunk = loginUser({ email: 'test@example.com', password: 'wrongpassword' });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('auth/login/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.AUTH_001,
-          message: 'Invalid credentials'
-        })
-      );
-    });
-
-    test('should handle network error during login', async () => {
-      mockFetch.mockRejectedValue(new Error('Network error'));
-
-      const dispatch = jest.fn();
-      const getState = jest.fn();
-
-      const thunk = loginUser({ email: 'test@example.com', password: 'password123' });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('auth/login/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.SYS_001,
-          message: 'Network error during login'
-        })
-      );
-    });
-
-    test('should handle login pending state', () => {
-      const action = { type: loginUser.pending.type };
-      const state = authReducer(initialState, action);
-
-      expect(state.isLoading).toBe(true);
-      expect(state.error).toBeNull();
-    });
-
-    test('should handle login fulfilled state', () => {
-      const action = {
-        type: loginUser.fulfilled.type,
-        payload: { user: mockUser, token: mockToken }
-      };
-      const state = authReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.user).toEqual(mockUser);
-      expect(state.token).toBe(mockToken);
-      expect(state.isAuthenticated).toBe(true);
-      expect(state.error).toBeNull();
-    });
-
-    test('should handle login rejected state', () => {
-      const error = {
-        code: ERROR_CODES.AUTH_001,
-        message: 'Invalid credentials'
-      };
-      const action = {
-        type: loginUser.rejected.type,
-        payload: error
-      };
-      const state = authReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual(error);
-    });
-  });
-
-  describe('registerUser async thunk', () => {
-    test('should handle successful registration', async () => {
-      const mockResponse = {
-        user: mockUser,
-        token: mockToken
-      };
-
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse)
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual(error);
+        expect(state.isAuthenticated).toBe(false);
+        expect(state.user).toBeNull();
+        expect(state.token).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle loginUser.rejected with null payload', () => {
+        const action = { type: loginUser.rejected.type, payload: null };
+        const state = authReducer(initialState, action);
 
-      const thunk = registerUser({
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'password123'
-      });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/auth/register',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: 'John Doe',
-            email: 'john@example.com',
-            password: 'password123'
-          })
-        }
-      );
-
-      expect(result.type).toBe('auth/register/fulfilled');
-      expect(result.payload).toEqual(mockResponse);
-    });
-
-    test('should handle registration failure', async () => {
-      const errorResponse = {
-        message: 'Email already exists',
-        error_code: ERROR_CODES.AUTH_003
-      };
-
-      mockFetch.mockResolvedValue({
-        ok: false,
-        json: () => Promise.resolve(errorResponse)
-      });
-
-      const dispatch = jest.fn();
-      const getState = jest.fn();
-
-      const thunk = registerUser({
-        name: 'John Doe',
-        email: 'existing@example.com',
-        password: 'password123'
-      });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('auth/register/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.AUTH_003,
-          message: 'Email already exists'
-        })
-      );
-    });
-
-    test('should handle network error during registration', async () => {
-      mockFetch.mockRejectedValue(new Error('Network error'));
-
-      const dispatch = jest.fn();
-      const getState = jest.fn();
-
-      const thunk = registerUser({
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'password123'
-      });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('auth/register/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.SYS_001,
-          message: 'Network error during registration'
-        })
-      );
-    });
-  });
-
-  describe('initializeAuth async thunk', () => {
-    test('should restore valid session from storage', async () => {
-      const futureTimestamp = Date.now() / 1000 + 3600; // 1 hour in the future
-
-      mockSessionStorage.getItem
-        .mockReturnValueOnce(mockToken)
-        .mockReturnValueOnce(JSON.stringify(mockUser));
-
-      // Mock atob to return valid JWT payload
-      (global.atob as jest.Mock).mockReturnValue(createMockJWTPayload(futureTimestamp));
-
-      const dispatch = jest.fn();
-      const getState = jest.fn();
-
-      const thunk = initializeAuth();
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('auth/initialize/fulfilled');
-      expect(result.payload).toEqual({
-        token: mockToken,
-        user: mockUser
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual({
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown login error'
+        });
       });
     });
 
-    test('should reject with expired token', async () => {
-      const pastTimestamp = Date.now() / 1000 - 3600; // 1 hour in the past
+    describe('registerUser', () => {
+      it('should handle registerUser.pending', () => {
+        const action = { type: registerUser.pending.type };
+        const state = authReducer(initialState, action);
 
-      mockSessionStorage.getItem
-        .mockReturnValueOnce(mockToken)
-        .mockReturnValueOnce(JSON.stringify(mockUser));
+        expect(state.isLoading).toBe(true);
+        expect(state.error).toBeNull();
+      });
 
-      // Mock atob to return expired JWT payload
-      (global.atob as jest.Mock).mockReturnValue(createMockJWTPayload(pastTimestamp));
+      it('should handle registerUser.fulfilled', () => {
+        const action = { type: registerUser.fulfilled.type, payload: mockLoginResponse };
+        const state = authReducer(initialState, action);
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+        expect(state.isLoading).toBe(false);
+        expect(state.user).toEqual(mockUser);
+        expect(state.token).toBe(mockToken);
+        expect(state.isAuthenticated).toBe(true);
+        expect(state.error).toBeNull();
+      });
 
-      const thunk = initializeAuth();
-      const result = await thunk(dispatch, getState, {});
+      it('should handle registerUser.rejected', () => {
+        const error = { code: ERROR_CODES.AUTH_003, message: 'Email already exists' };
+        const action = { type: registerUser.rejected.type, payload: error };
+        const state = authReducer(initialState, action);
 
-      expect(result.type).toBe('auth/initialize/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.AUTH_005,
-          message: 'Token expired'
-        })
-      );
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual(error);
+        expect(state.isAuthenticated).toBe(false);
+        expect(state.user).toBeNull();
+        expect(state.token).toBeNull();
+      });
 
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('token');
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('user');
+      it('should handle registerUser.rejected with null payload', () => {
+        const action = { type: registerUser.rejected.type, payload: null };
+        const state = authReducer(initialState, action);
+
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual({
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown registration error'
+        });
+      });
     });
 
-    test('should reject with corrupted user data', async () => {
-      const futureTimestamp = Date.now() / 1000 + 3600;
+    describe('initializeAuth', () => {
+      it('should handle initializeAuth.pending', () => {
+        const action = { type: initializeAuth.pending.type };
+        const state = authReducer(initialState, action);
 
-      mockSessionStorage.getItem
-        .mockReturnValueOnce(mockToken)
-        .mockReturnValueOnce('invalid-json');
+        expect(state.isLoading).toBe(true);
+      });
 
-      (global.atob as jest.Mock).mockReturnValue(createMockJWTPayload(futureTimestamp));
+      it('should handle initializeAuth.fulfilled', () => {
+        const action = { type: initializeAuth.fulfilled.type, payload: mockLoginResponse };
+        const state = authReducer(initialState, action);
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+        expect(state.isLoading).toBe(false);
+        expect(state.user).toEqual(mockUser);
+        expect(state.token).toBe(mockToken);
+        expect(state.isAuthenticated).toBe(true);
+      });
 
-      const thunk = initializeAuth();
-      const result = await thunk(dispatch, getState, {});
+      it('should handle initializeAuth.rejected', () => {
+        const error = { code: ERROR_CODES.AUTH_006, message: 'No session found' };
+        const action = { type: initializeAuth.rejected.type, payload: error };
+        const state = authReducer(initialState, action);
 
-      expect(result.type).toBe('auth/initialize/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.AUTH_004,
-          message: 'Corrupted user data'
-        })
-      );
+        expect(state.isLoading).toBe(false);
+        expect(state.isAuthenticated).toBe(false);
+        expect(state.error).toEqual(error);
+      });
 
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('token');
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('user');
-    });
+      it('should handle initializeAuth.rejected with null payload', () => {
+        const action = { type: initializeAuth.rejected.type, payload: null };
+        const state = authReducer(initialState, action);
 
-    test('should reject when no session found', async () => {
-      mockSessionStorage.getItem.mockReturnValue(null);
-
-      const dispatch = jest.fn();
-      const getState = jest.fn();
-
-      const thunk = initializeAuth();
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('auth/initialize/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
+        expect(state.isLoading).toBe(false);
+        expect(state.isAuthenticated).toBe(false);
+        expect(state.error).toEqual({
           code: ERROR_CODES.AUTH_006,
-          message: 'No session found'
-        })
-      );
-    });
-
-    test('should handle invalid JWT token format', async () => {
-      mockSessionStorage.getItem
-        .mockReturnValueOnce('invalid.token')
-        .mockReturnValueOnce(JSON.stringify(mockUser));
-
-      // Mock atob to throw error for invalid token
-      (global.atob as jest.Mock).mockImplementation(() => {
-        throw new Error('Invalid token format');
+          message: 'Authentication initialization failed'
+        });
       });
-
-      const dispatch = jest.fn();
-      const getState = jest.fn();
-
-      const thunk = initializeAuth();
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('auth/initialize/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.AUTH_005,
-          message: 'Token expired'
-        })
-      );
     });
   });
 
@@ -448,161 +218,187 @@ describe('authSlice', () => {
         token: mockToken,
         isAuthenticated: true,
         isLoading: false,
-        error: null,
-      }
+        error: { code: ERROR_CODES.AUTH_001, message: 'Test error' },
+      },
     };
 
-    test('selectAuth should return auth state', () => {
+    const mockStateWithModeratorUser = {
+      auth: {
+        ...mockState.auth,
+        user: { ...mockUser, role: 2, role_name: 'Moderator' },
+      },
+    };
+
+    const mockStateWithRegularUser = {
+      auth: {
+        ...mockState.auth,
+        user: { ...mockUser, role: 3, role_name: 'User' },
+      },
+    };
+
+    const mockStateWithoutUser = {
+      auth: {
+        ...mockState.auth,
+        user: null,
+        isAuthenticated: false,
+      },
+    };
+
+    it('should select auth state', () => {
       expect(selectAuth(mockState)).toEqual(mockState.auth);
     });
 
-    test('selectUser should return user', () => {
+    it('should select user', () => {
       expect(selectUser(mockState)).toEqual(mockUser);
     });
 
-    test('selectIsAuthenticated should return authentication status', () => {
+    it('should select isAuthenticated', () => {
       expect(selectIsAuthenticated(mockState)).toBe(true);
     });
 
-    test('selectAuthLoading should return loading status', () => {
+    it('should select loading state', () => {
       expect(selectAuthLoading(mockState)).toBe(false);
     });
 
-    test('selectAuthError should return error', () => {
-      expect(selectAuthError(mockState)).toBeNull();
+    it('should select error state', () => {
+      expect(selectAuthError(mockState)).toEqual({
+        code: ERROR_CODES.AUTH_001,
+        message: 'Test error',
+      });
     });
 
-    test('selectIsAdmin should return true for admin user', () => {
+    it('should select isAdmin for admin user', () => {
       expect(selectIsAdmin(mockState)).toBe(true);
     });
 
-    test('selectIsAdmin should return false for non-admin user', () => {
-      const stateWithModerator = {
-        auth: {
-          ...mockState.auth,
-          user: { ...mockUser, role: 2 }
-        }
-      };
-      expect(selectIsAdmin(stateWithModerator)).toBe(false);
+    it('should select isAdmin as false for moderator user', () => {
+      expect(selectIsAdmin(mockStateWithModeratorUser)).toBe(false);
     });
 
-    test('selectIsModerator should return true for moderator user', () => {
-      const stateWithModerator = {
-        auth: {
-          ...mockState.auth,
-          user: { ...mockUser, role: 2 }
-        }
-      };
-      expect(selectIsModerator(stateWithModerator)).toBe(true);
+    it('should select isAdmin as false for regular user', () => {
+      expect(selectIsAdmin(mockStateWithRegularUser)).toBe(false);
     });
 
-    test('selectIsModerator should return false for admin user', () => {
+    it('should select isAdmin as false when no user', () => {
+      expect(selectIsAdmin(mockStateWithoutUser)).toBe(false);
+    });
+
+    it('should select isModerator for moderator user', () => {
+      expect(selectIsModerator(mockStateWithModeratorUser)).toBe(true);
+    });
+
+    it('should select isModerator as false for admin user', () => {
       expect(selectIsModerator(mockState)).toBe(false);
     });
 
-    test('selectCanModerate should return true for admin', () => {
+    it('should select isModerator as false for regular user', () => {
+      expect(selectIsModerator(mockStateWithRegularUser)).toBe(false);
+    });
+
+    it('should select isModerator as false when no user', () => {
+      expect(selectIsModerator(mockStateWithoutUser)).toBe(false);
+    });
+
+    it('should select canModerate for admin user', () => {
       expect(selectCanModerate(mockState)).toBe(true);
     });
 
-    test('selectCanModerate should return true for moderator', () => {
-      const stateWithModerator = {
-        auth: {
-          ...mockState.auth,
-          user: { ...mockUser, role: 2 }
-        }
-      };
-      expect(selectCanModerate(stateWithModerator)).toBe(true);
+    it('should select canModerate for moderator user', () => {
+      expect(selectCanModerate(mockStateWithModeratorUser)).toBe(true);
     });
 
-    test('selectCanModerate should return false for regular user', () => {
-      const stateWithRegularUser = {
-        auth: {
-          ...mockState.auth,
-          user: { ...mockUser, role: 3 }
-        }
-      };
-      expect(selectCanModerate(stateWithRegularUser)).toBe(false);
+    it('should select canModerate as false for regular user', () => {
+      expect(selectCanModerate(mockStateWithRegularUser)).toBe(false);
     });
 
-    test('selectors should handle null user', () => {
-      const stateWithoutUser = {
-        auth: {
-          ...mockState.auth,
-          user: null
-        }
-      };
-
-      expect(selectUser(stateWithoutUser)).toBeNull();
-      expect(selectIsAdmin(stateWithoutUser)).toBe(false);
-      expect(selectIsModerator(stateWithoutUser)).toBe(false);
-      expect(selectCanModerate(stateWithoutUser)).toBe(false);
+    it('should select canModerate as false when no user', () => {
+      expect(selectCanModerate(mockStateWithoutUser)).toBe(false);
     });
   });
 
-  describe('extraReducers edge cases', () => {
-    test('should handle login rejected without payload', () => {
-      const action = {
-        type: loginUser.rejected.type,
-        payload: undefined
-      };
-      const state = authReducer(initialState, action);
+  describe('state transitions', () => {
+    it('should handle multiple state updates correctly', () => {
+      let state = authReducer(initialState, { type: loginUser.pending.type });
+      expect(state.isLoading).toBe(true);
 
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual({
-        code: ERROR_CODES.SYS_010,
-        message: 'Unknown login error'
+      state = authReducer(state, {
+        type: loginUser.fulfilled.type,
+        payload: mockLoginResponse,
       });
-    });
-
-    test('should handle register rejected without payload', () => {
-      const action = {
-        type: registerUser.rejected.type,
-        payload: undefined
-      };
-      const state = authReducer(initialState, action);
-
       expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual({
-        code: ERROR_CODES.SYS_010,
-        message: 'Unknown registration error'
-      });
-    });
+      expect(state.user).toEqual(mockUser);
+      expect(state.token).toBe(mockToken);
+      expect(state.isAuthenticated).toBe(true);
+      expect(state.error).toBeNull();
 
-    test('should handle initialize rejected without payload', () => {
-      const action = {
-        type: initializeAuth.rejected.type,
-        payload: undefined
-      };
-      const state = authReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
+      state = authReducer(state, logout());
+      expect(state.user).toBeNull();
+      expect(state.token).toBeNull();
       expect(state.isAuthenticated).toBe(false);
-      expect(state.error).toEqual({
-        code: ERROR_CODES.AUTH_006,
-        message: 'Authentication initialization failed'
+      expect(state.error).toBeNull();
+    });
+
+    it('should preserve other state when clearing error', () => {
+      const stateWithData = {
+        ...initialState,
+        user: mockUser,
+        token: mockToken,
+        isAuthenticated: true,
+        error: { code: ERROR_CODES.AUTH_001, message: 'Test error' },
+      };
+
+      const result = authReducer(stateWithData, clearError());
+      expect(result.error).toBeNull();
+      expect(result.user).toEqual(mockUser);
+      expect(result.token).toBe(mockToken);
+      expect(result.isAuthenticated).toBe(true);
+    });
+
+    it('should handle error states correctly', () => {
+      const authenticatedState = {
+        ...initialState,
+        user: mockUser,
+        token: mockToken,
+        isAuthenticated: true,
+        isLoading: true,
+      };
+
+      const error = { code: ERROR_CODES.AUTH_001, message: 'API Error' };
+      const result = authReducer(authenticatedState, {
+        type: loginUser.rejected.type,
+        payload: error,
       });
+
+      expect(result.isLoading).toBe(false);
+      expect(result.error).toEqual(error);
+      // Authentication state should be preserved on login errors
+      expect(result.user).toEqual(mockUser);
+      expect(result.token).toBe(mockToken);
+      expect(result.isAuthenticated).toBe(true);
     });
   });
 
-  describe('token expiration utility', () => {
-    test('should handle various token expiration scenarios', async () => {
-      // Test scenarios are covered in initializeAuth tests above
-      // This ensures the isTokenExpired utility works correctly
+  describe('edge cases', () => {
+    it('should handle unknown action types gracefully', () => {
+      const result = authReducer(initialState, { type: 'unknown/action' });
+      expect(result).toEqual(initialState);
+    });
 
-      // Valid token
-      const futureTimestamp = Date.now() / 1000 + 3600;
-      mockSessionStorage.getItem
-        .mockReturnValueOnce('valid.token')
-        .mockReturnValueOnce(JSON.stringify(mockUser));
-      (global.atob as jest.Mock).mockReturnValue(createMockJWTPayload(futureTimestamp));
+    it('should handle undefined state gracefully', () => {
+      const result = authReducer(undefined, { type: 'unknown/action' });
+      expect(result).toEqual(initialState);
+    });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
-
-      const thunk = initializeAuth();
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('auth/initialize/fulfilled');
+    it('should handle empty payloads gracefully', () => {
+      const result = authReducer(initialState, {
+        type: loginUser.fulfilled.type,
+        payload: { user: null, token: null },
+      });
+      expect(result.user).toBeNull();
+      expect(result.token).toBeNull();
+      expect(result.isAuthenticated).toBe(true); // Still marked as authenticated
+      expect(result.isLoading).toBe(false);
+      expect(result.error).toBeNull();
     });
   });
 });

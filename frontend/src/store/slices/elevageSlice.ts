@@ -360,7 +360,10 @@ const elevageSlice = createSlice({
       })
       .addCase(fetchElevages.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while fetching breeding farms'
+        };
       })
 
       // Fetch élevage par ID
@@ -375,7 +378,10 @@ const elevageSlice = createSlice({
       })
       .addCase(fetchElevageById.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while fetching breeding farm'
+        };
       })
 
       // Créer élevage
@@ -390,7 +396,10 @@ const elevageSlice = createSlice({
       })
       .addCase(createElevage.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while creating breeding farm'
+        };
       })
 
       // Modifier élevage
@@ -411,7 +420,10 @@ const elevageSlice = createSlice({
       })
       .addCase(updateElevage.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while updating breeding farm'
+        };
       })
 
       // Supprimer élevage
@@ -429,7 +441,10 @@ const elevageSlice = createSlice({
       })
       .addCase(deleteElevage.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while deleting breeding farm'
+        };
       })
 
       // Utilisateurs d'élevage
@@ -444,7 +459,10 @@ const elevageSlice = createSlice({
       })
       .addCase(fetchElevageUsers.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while fetching breeding farm users'
+        };
       })
 
       // Ajouter utilisateur à l'élevage
@@ -453,7 +471,10 @@ const elevageSlice = createSlice({
         state.error = null;
       })
       .addCase(addUserToElevage.rejected, (state, action) => {
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while adding user to breeding farm'
+        };
       })
 
       // Retirer utilisateur de l'élevage
@@ -462,7 +483,10 @@ const elevageSlice = createSlice({
         state.error = null;
       })
       .addCase(removeUserFromElevage.rejected, (state, action) => {
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while removing user from breeding farm'
+        };
       });
   },
 });

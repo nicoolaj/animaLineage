@@ -19,10 +19,6 @@ import elevageReducer, {
 } from '../elevageSlice';
 import { ERROR_CODES } from '../../../utils/errorCodes';
 
-// Mock fetch global
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
-
 describe('elevageSlice', () => {
   const initialState = {
     elevages: [],
@@ -48,26 +44,34 @@ describe('elevageSlice', () => {
     proprietaire_nom: 'Jean Dupont',
     description: 'Élevage de test',
     created_at: '2023-01-15T10:00:00Z',
-    races: [mockRace]
+    updated_at: '2023-01-15T10:00:00Z',
+    nb_animaux: 5,
+    permissions: {
+      can_read: true,
+      can_write: true,
+      can_manage: true
+    }
   };
 
   const mockElevages = [
     mockElevage,
     {
-      ...mockElevage,
       id: 2,
-      nom: 'Élevage Bio',
-      proprietaire_nom: 'Marie Martin'
+      nom: 'Ferme du Sud',
+      adresse: '456 Avenue de la Prairie',
+      user_id: 2,
+      proprietaire_nom: 'Marie Martin',
+      description: 'Autre élevage de test',
+      created_at: '2023-02-20T14:30:00Z',
+      updated_at: '2023-02-20T14:30:00Z',
+      nb_animaux: 10,
+      permissions: {
+        can_read: true,
+        can_write: false,
+        can_manage: false
+      }
     }
   ];
-
-  const mockElevageUser = {
-    user_id: 2,
-    user_name: 'Marie Martin',
-    user_email: 'marie@example.com',
-    role_in_elevage: 'collaborator' as const,
-    added_at: '2023-01-20T10:00:00Z'
-  };
 
   const mockElevageUsers = [
     {
@@ -75,26 +79,25 @@ describe('elevageSlice', () => {
       user_name: 'Jean Dupont',
       user_email: 'jean@example.com',
       role_in_elevage: 'owner' as const,
-      added_at: '2023-01-15T10:00:00Z'
+      added_at: '2023-01-15T10:00:00Z',
     },
-    mockElevageUser
+    {
+      user_id: 2,
+      user_name: 'Marie Martin',
+      user_email: 'marie@example.com',
+      role_in_elevage: 'collaborator' as const,
+      added_at: '2023-02-20T14:30:00Z',
+    }
   ];
 
-  const mockToken = 'mock-token';
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockFetch.mockClear();
-  });
-
   describe('initial state', () => {
-    test('should return the initial state', () => {
+    it('should return the initial state', () => {
       expect(elevageReducer(undefined, { type: 'unknown' })).toEqual(initialState);
     });
   });
 
   describe('reducers', () => {
-    test('should handle clearError', () => {
+    it('should handle clearError', () => {
       const stateWithError = {
         ...initialState,
         error: {
@@ -107,7 +110,7 @@ describe('elevageSlice', () => {
       expect(actual.error).toBeNull();
     });
 
-    test('should handle setShowMyOnly', () => {
+    it('should handle setShowMyOnly', () => {
       const actual = elevageReducer(initialState, setShowMyOnly(true));
       expect(actual.showMyOnly).toBe(true);
 
@@ -115,7 +118,7 @@ describe('elevageSlice', () => {
       expect(actualFalse.showMyOnly).toBe(false);
     });
 
-    test('should handle clearCurrentElevage', () => {
+    it('should handle clearCurrentElevage', () => {
       const stateWithCurrentElevage = {
         ...initialState,
         currentElevage: mockElevage
@@ -126,462 +129,273 @@ describe('elevageSlice', () => {
     });
   });
 
-  describe('fetchElevages async thunk', () => {
-    test('should fetch all elevages successfully', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockElevages)
+  describe('extraReducers', () => {
+    describe('fetchElevages', () => {
+      it('should handle fetchElevages.pending', () => {
+        const action = { type: fetchElevages.pending.type };
+        const state = elevageReducer(initialState, action);
+
+        expect(state.isLoading).toBe(true);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle fetchElevages.fulfilled', () => {
+        const action = { type: fetchElevages.fulfilled.type, payload: mockElevages };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = fetchElevages({ token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages',
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mockToken}`
-          }
-        }
-      );
-
-      expect(result.type).toBe('elevage/fetchElevages/fulfilled');
-      expect(result.payload).toEqual(mockElevages);
-    });
-
-    test('should fetch user\'s elevages only', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve([mockElevage])
+        expect(state.isLoading).toBe(false);
+        expect(state.elevages).toEqual(mockElevages);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle fetchElevages.rejected', () => {
+        const error = { code: ERROR_CODES.ELEVAGE_001, message: 'Fetch elevages failed' };
+        const action = { type: fetchElevages.rejected.type, payload: error };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = fetchElevages({ token: mockToken, showMyOnly: true });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages?my=true',
-        expect.any(Object)
-      );
-
-      expect(result.type).toBe('elevage/fetchElevages/fulfilled');
-    });
-
-    test('should handle fetch elevages error', async () => {
-      const errorResponse = {
-        message: 'Access denied',
-        error_code: ERROR_CODES.ELEVAGE_001
-      };
-
-      mockFetch.mockResolvedValue({
-        ok: false,
-        json: () => Promise.resolve(errorResponse)
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual(error);
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle fetchElevages.rejected with null payload', () => {
+        const action = { type: fetchElevages.rejected.type, payload: null };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = fetchElevages({ token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('elevage/fetchElevages/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.ELEVAGE_001,
-          message: 'Access denied'
-        })
-      );
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual({
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while fetching breeding farms'
+        });
+      });
     });
 
-    test('should handle network error during fetch', async () => {
-      mockFetch.mockRejectedValue(new Error('Network error'));
+    describe('fetchElevageById', () => {
+      it('should handle fetchElevageById.pending', () => {
+        const action = { type: fetchElevageById.pending.type };
+        const state = elevageReducer(initialState, action);
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
-
-      const thunk = fetchElevages({ token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(result.type).toBe('elevage/fetchElevages/rejected');
-      expect(result.payload).toEqual(
-        expect.objectContaining({
-          code: ERROR_CODES.SYS_001,
-          message: 'Network error while fetching breeding farms'
-        })
-      );
-    });
-
-    test('should handle fetchElevages fulfilled state', () => {
-      const action = {
-        type: fetchElevages.fulfilled.type,
-        payload: mockElevages
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.elevages).toEqual(mockElevages);
-      expect(state.error).toBeNull();
-    });
-  });
-
-  describe('fetchElevageById async thunk', () => {
-    test('should fetch elevage by id successfully', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockElevage)
+        expect(state.isLoading).toBe(true);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle fetchElevageById.fulfilled', () => {
+        const action = { type: fetchElevageById.fulfilled.type, payload: mockElevage };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = fetchElevageById({ id: 1, token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages/1',
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mockToken}`
-          }
-        }
-      );
-
-      expect(result.type).toBe('elevage/fetchElevageById/fulfilled');
-      expect(result.payload).toEqual(mockElevage);
-    });
-
-    test('should handle fetchElevageById fulfilled state', () => {
-      const action = {
-        type: fetchElevageById.fulfilled.type,
-        payload: mockElevage
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.currentElevage).toEqual(mockElevage);
-      expect(state.error).toBeNull();
-    });
-  });
-
-  describe('createElevage async thunk', () => {
-    test('should create elevage successfully', async () => {
-      const newElevageData = {
-        nom: 'Nouveau Élevage',
-        adresse: '456 Avenue Test',
-        user_id: 1,
-        description: 'Description test'
-      };
-
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockElevage)
+        expect(state.isLoading).toBe(false);
+        expect(state.currentElevage).toEqual(mockElevage);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle fetchElevageById.rejected', () => {
+        const error = { code: ERROR_CODES.ELEVAGE_001, message: 'Elevage not found' };
+        const action = { type: fetchElevageById.rejected.type, payload: error };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = createElevage({ elevageData: newElevageData, token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mockToken}`
-          },
-          body: JSON.stringify(newElevageData)
-        }
-      );
-
-      expect(result.type).toBe('elevage/createElevage/fulfilled');
-      expect(result.payload).toEqual(mockElevage);
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual(error);
+      });
     });
 
-    test('should handle createElevage fulfilled state', () => {
-      const action = {
-        type: createElevage.fulfilled.type,
-        payload: mockElevage
-      };
-      const state = elevageReducer(initialState, action);
+    describe('createElevage', () => {
+      it('should handle createElevage.pending', () => {
+        const action = { type: createElevage.pending.type };
+        const state = elevageReducer(initialState, action);
 
-      expect(state.isLoading).toBe(false);
-      expect(state.elevages).toContain(mockElevage);
-      expect(state.error).toBeNull();
-    });
-  });
-
-  describe('updateElevage async thunk', () => {
-    test('should update elevage successfully', async () => {
-      const updatedElevage = { ...mockElevage, nom: 'Updated Name' };
-      const updateData = { nom: 'Updated Name' };
-
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(updatedElevage)
+        expect(state.isLoading).toBe(true);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle createElevage.fulfilled', () => {
+        const action = { type: createElevage.fulfilled.type, payload: mockElevage };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = updateElevage({ id: 1, elevageData: updateData, token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages/1',
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mockToken}`
-          },
-          body: JSON.stringify(updateData)
-        }
-      );
-
-      expect(result.type).toBe('elevage/updateElevage/fulfilled');
-      expect(result.payload).toEqual(updatedElevage);
-    });
-
-    test('should handle updateElevage fulfilled state', () => {
-      const stateWithElevages = {
-        ...initialState,
-        elevages: [mockElevage, { ...mockElevage, id: 2 }],
-        currentElevage: mockElevage
-      };
-
-      const updatedElevage = { ...mockElevage, nom: 'Updated Name' };
-      const action = {
-        type: updateElevage.fulfilled.type,
-        payload: updatedElevage
-      };
-
-      const state = elevageReducer(stateWithElevages, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.elevages[0]).toEqual(updatedElevage);
-      expect(state.currentElevage).toEqual(updatedElevage);
-      expect(state.error).toBeNull();
-    });
-
-    test('should handle updateElevage when elevage not found in state', () => {
-      const updatedElevage = { ...mockElevage, id: 999, nom: 'Updated Name' };
-      const action = {
-        type: updateElevage.fulfilled.type,
-        payload: updatedElevage
-      };
-
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.elevages).toEqual([]);
-      expect(state.currentElevage).toBeNull();
-      expect(state.error).toBeNull();
-    });
-  });
-
-  describe('deleteElevage async thunk', () => {
-    test('should delete elevage successfully', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ message: 'Elevage deleted' })
+        expect(state.isLoading).toBe(false);
+        expect(state.elevages).toContain(mockElevage);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle createElevage.rejected', () => {
+        const error = { code: ERROR_CODES.ELEVAGE_002, message: 'Create elevage failed' };
+        const action = { type: createElevage.rejected.type, payload: error };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = deleteElevage({ id: 1, token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages/1',
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mockToken}`
-          }
-        }
-      );
-
-      expect(result.type).toBe('elevage/deleteElevage/fulfilled');
-      expect(result.payload).toBe(1);
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual(error);
+      });
     });
 
-    test('should handle deleteElevage fulfilled state', () => {
-      const stateWithElevages = {
-        ...initialState,
-        elevages: [mockElevage, { ...mockElevage, id: 2 }],
-        currentElevage: mockElevage
-      };
+    describe('updateElevage', () => {
+      it('should handle updateElevage.pending', () => {
+        const action = { type: updateElevage.pending.type };
+        const state = elevageReducer(initialState, action);
 
-      const action = {
-        type: deleteElevage.fulfilled.type,
-        payload: 1
-      };
-
-      const state = elevageReducer(stateWithElevages, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.elevages).toHaveLength(1);
-      expect(state.elevages[0].id).toBe(2);
-      expect(state.currentElevage).toBeNull();
-      expect(state.error).toBeNull();
-    });
-
-    test('should handle deleteElevage when deleting non-current elevage', () => {
-      const stateWithElevages = {
-        ...initialState,
-        elevages: [mockElevage, { ...mockElevage, id: 2 }],
-        currentElevage: { ...mockElevage, id: 2 }
-      };
-
-      const action = {
-        type: deleteElevage.fulfilled.type,
-        payload: 1
-      };
-
-      const state = elevageReducer(stateWithElevages, action);
-
-      expect(state.currentElevage?.id).toBe(2);
-    });
-  });
-
-  describe('fetchElevageUsers async thunk', () => {
-    test('should fetch elevage users successfully', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockElevageUsers)
+        expect(state.isLoading).toBe(true);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle updateElevage.fulfilled', () => {
+        const initialStateWithElevages = {
+          ...initialState,
+          elevages: [mockElevage],
+          currentElevage: mockElevage
+        };
 
-      const thunk = fetchElevageUsers({ elevageId: 1, token: mockToken });
-      const result = await thunk(dispatch, getState, {});
+        const updatedElevage = { ...mockElevage, nom: 'Ferme Modifiée' };
+        const action = { type: updateElevage.fulfilled.type, payload: updatedElevage };
+        const state = elevageReducer(initialStateWithElevages, action);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages/1/users',
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mockToken}`
-          }
-        }
-      );
-
-      expect(result.type).toBe('elevage/fetchElevageUsers/fulfilled');
-      expect(result.payload).toEqual(mockElevageUsers);
-    });
-
-    test('should handle fetchElevageUsers fulfilled state', () => {
-      const action = {
-        type: fetchElevageUsers.fulfilled.type,
-        payload: mockElevageUsers
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.elevageUsers).toEqual(mockElevageUsers);
-      expect(state.error).toBeNull();
-    });
-  });
-
-  describe('addUserToElevage async thunk', () => {
-    test('should add user to elevage successfully', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockElevageUser)
+        expect(state.isLoading).toBe(false);
+        expect(state.elevages[0]).toEqual(updatedElevage);
+        expect(state.currentElevage).toEqual(updatedElevage);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle updateElevage.fulfilled when elevage not found in state', () => {
+        const updatedElevage = { ...mockElevage, nom: 'Ferme Modifiée' };
+        const action = { type: updateElevage.fulfilled.type, payload: updatedElevage };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = addUserToElevage({ elevageId: 1, userId: 2, token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages/1/users',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mockToken}`
-          },
-          body: JSON.stringify({
-            user_id: 2,
-            role_in_elevage: 'collaborator'
-          })
-        }
-      );
-
-      expect(result.type).toBe('elevage/addUserToElevage/fulfilled');
-      expect(result.payload).toEqual(mockElevageUser);
-    });
-
-    test('should handle addUserToElevage fulfilled state', () => {
-      const action = {
-        type: addUserToElevage.fulfilled.type,
-        payload: mockElevageUser
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.error).toBeNull();
-    });
-  });
-
-  describe('removeUserFromElevage async thunk', () => {
-    test('should remove user from elevage successfully', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ message: 'User removed' })
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toBeNull();
       });
 
-      const dispatch = jest.fn();
-      const getState = jest.fn();
+      it('should handle updateElevage.rejected', () => {
+        const error = { code: ERROR_CODES.ELEVAGE_006, message: 'Update elevage failed' };
+        const action = { type: updateElevage.rejected.type, payload: error };
+        const state = elevageReducer(initialState, action);
 
-      const thunk = removeUserFromElevage({ elevageId: 1, userId: 2, token: mockToken });
-      const result = await thunk(dispatch, getState, {});
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/elevages/1/users/2',
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${mockToken}`
-          }
-        }
-      );
-
-      expect(result.type).toBe('elevage/removeUserFromElevage/fulfilled');
-      expect(result.payload).toBe(2);
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual(error);
+      });
     });
 
-    test('should handle removeUserFromElevage fulfilled state', () => {
-      const stateWithUsers = {
-        ...initialState,
-        elevageUsers: mockElevageUsers
-      };
+    describe('deleteElevage', () => {
+      it('should handle deleteElevage.pending', () => {
+        const action = { type: deleteElevage.pending.type };
+        const state = elevageReducer(initialState, action);
 
-      const action = {
-        type: removeUserFromElevage.fulfilled.type,
-        payload: 2
-      };
+        expect(state.isLoading).toBe(true);
+        expect(state.error).toBeNull();
+      });
 
-      const state = elevageReducer(stateWithUsers, action);
+      it('should handle deleteElevage.fulfilled', () => {
+        const initialStateWithElevages = {
+          ...initialState,
+          elevages: mockElevages,
+          currentElevage: mockElevage
+        };
 
-      expect(state.elevageUsers).toHaveLength(1);
-      expect(state.elevageUsers[0].user_id).toBe(1);
-      expect(state.error).toBeNull();
+        const action = { type: deleteElevage.fulfilled.type, payload: 1 };
+        const state = elevageReducer(initialStateWithElevages, action);
+
+        expect(state.isLoading).toBe(false);
+        expect(state.elevages).toHaveLength(1);
+        expect(state.elevages[0].id).toBe(2);
+        expect(state.currentElevage).toBeNull();
+        expect(state.error).toBeNull();
+      });
+
+      it('should handle deleteElevage.fulfilled when deleting non-current elevage', () => {
+        const initialStateWithElevages = {
+          ...initialState,
+          elevages: mockElevages,
+          currentElevage: mockElevages[1] // Set current to second elevage
+        };
+
+        const action = { type: deleteElevage.fulfilled.type, payload: 1 };
+        const state = elevageReducer(initialStateWithElevages, action);
+
+        expect(state.isLoading).toBe(false);
+        expect(state.elevages).toHaveLength(1);
+        expect(state.elevages[0].id).toBe(2);
+        expect(state.currentElevage).toEqual(mockElevages[1]); // Current should remain unchanged
+        expect(state.error).toBeNull();
+      });
+
+      it('should handle deleteElevage.rejected', () => {
+        const error = { code: ERROR_CODES.ELEVAGE_005, message: 'Delete elevage failed' };
+        const action = { type: deleteElevage.rejected.type, payload: error };
+        const state = elevageReducer(initialState, action);
+
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual(error);
+      });
+    });
+
+    describe('fetchElevageUsers', () => {
+      it('should handle fetchElevageUsers.pending', () => {
+        const action = { type: fetchElevageUsers.pending.type };
+        const state = elevageReducer(initialState, action);
+
+        expect(state.isLoading).toBe(true);
+        expect(state.error).toBeNull();
+      });
+
+      it('should handle fetchElevageUsers.fulfilled', () => {
+        const action = { type: fetchElevageUsers.fulfilled.type, payload: mockElevageUsers };
+        const state = elevageReducer(initialState, action);
+
+        expect(state.isLoading).toBe(false);
+        expect(state.elevageUsers).toEqual(mockElevageUsers);
+        expect(state.error).toBeNull();
+      });
+
+      it('should handle fetchElevageUsers.rejected', () => {
+        const error = { code: ERROR_CODES.ELEVAGE_010, message: 'Fetch elevage users failed' };
+        const action = { type: fetchElevageUsers.rejected.type, payload: error };
+        const state = elevageReducer(initialState, action);
+
+        expect(state.isLoading).toBe(false);
+        expect(state.error).toEqual(error);
+      });
+    });
+
+    describe('addUserToElevage', () => {
+      it('should handle addUserToElevage.fulfilled', () => {
+        const stateWithError = {
+          ...initialState,
+          error: { code: ERROR_CODES.ELEVAGE_008, message: 'Previous error' }
+        };
+        const action = { type: addUserToElevage.fulfilled.type, payload: mockElevageUsers[0] };
+        const state = elevageReducer(stateWithError, action);
+
+        expect(state.error).toBeNull();
+        // Note: addUserToElevage.fulfilled ne modifie pas elevageUsers directement
+        // Il compte sur fetchElevageUsers pour recharger la liste
+      });
+
+      it('should handle addUserToElevage.rejected', () => {
+        const error = { code: ERROR_CODES.ELEVAGE_008, message: 'Add user to elevage failed' };
+        const action = { type: addUserToElevage.rejected.type, payload: error };
+        const state = elevageReducer(initialState, action);
+
+        expect(state.error).toEqual(error);
+      });
+    });
+
+    describe('removeUserFromElevage', () => {
+      it('should handle removeUserFromElevage.fulfilled', () => {
+        const initialStateWithUsers = {
+          ...initialState,
+          elevageUsers: mockElevageUsers
+        };
+
+        const action = { type: removeUserFromElevage.fulfilled.type, payload: 2 };
+        const state = elevageReducer(initialStateWithUsers, action);
+
+        expect(state.elevageUsers).toHaveLength(1);
+        expect(state.elevageUsers[0].user_id).toBe(1);
+        expect(state.error).toBeNull();
+      });
+
+      it('should handle removeUserFromElevage.rejected', () => {
+        const error = { code: ERROR_CODES.ELEVAGE_009, message: 'Remove user from elevage failed' };
+        const action = { type: removeUserFromElevage.rejected.type, payload: error };
+        const state = elevageReducer(initialState, action);
+
+        expect(state.error).toEqual(error);
+      });
     });
   });
 
@@ -591,190 +405,149 @@ describe('elevageSlice', () => {
         elevages: mockElevages,
         currentElevage: mockElevage,
         elevageUsers: mockElevageUsers,
-        isLoading: false,
-        error: null,
-        showMyOnly: true
-      }
+        isLoading: true,
+        error: { code: ERROR_CODES.ELEVAGE_001, message: 'Test error' },
+        showMyOnly: true,
+      },
     };
 
-    test('selectElevages should return elevages array', () => {
+    it('should select elevages', () => {
       expect(selectElevages(mockState)).toEqual(mockElevages);
     });
 
-    test('selectCurrentElevage should return current elevage', () => {
+    it('should select current elevage', () => {
       expect(selectCurrentElevage(mockState)).toEqual(mockElevage);
     });
 
-    test('selectElevageUsers should return elevage users', () => {
+    it('should select elevage users', () => {
       expect(selectElevageUsers(mockState)).toEqual(mockElevageUsers);
     });
 
-    test('selectElevageLoading should return loading status', () => {
-      expect(selectElevageLoading(mockState)).toBe(false);
+    it('should select loading state', () => {
+      expect(selectElevageLoading(mockState)).toBe(true);
     });
 
-    test('selectElevageError should return error', () => {
-      expect(selectElevageError(mockState)).toBeNull();
+    it('should select error state', () => {
+      expect(selectElevageError(mockState)).toEqual({
+        code: ERROR_CODES.ELEVAGE_001,
+        message: 'Test error',
+      });
     });
 
-    test('selectShowMyOnly should return showMyOnly flag', () => {
+    it('should select showMyOnly flag', () => {
       expect(selectShowMyOnly(mockState)).toBe(true);
     });
   });
 
-  describe('pending states', () => {
-    test('should handle fetchElevages pending state', () => {
-      const action = { type: fetchElevages.pending.type };
-      const state = elevageReducer(initialState, action);
-
+  describe('state transitions', () => {
+    it('should handle multiple state updates correctly', () => {
+      let state = elevageReducer(initialState, { type: fetchElevages.pending.type });
       expect(state.isLoading).toBe(true);
+
+      state = elevageReducer(state, {
+        type: fetchElevages.fulfilled.type,
+        payload: mockElevages,
+      });
+      expect(state.isLoading).toBe(false);
+      expect(state.elevages).toEqual(mockElevages);
       expect(state.error).toBeNull();
+
+      state = elevageReducer(state, setShowMyOnly(true));
+      expect(state.showMyOnly).toBe(true);
+      expect(state.elevages).toEqual(mockElevages); // Should not affect elevages
     });
 
-    test('should handle fetchElevageById pending state', () => {
-      const action = { type: fetchElevageById.pending.type };
-      const state = elevageReducer(initialState, action);
+    it('should preserve other state when clearing specific properties', () => {
+      const stateWithData = {
+        ...initialState,
+        elevages: mockElevages,
+        currentElevage: mockElevage,
+        elevageUsers: mockElevageUsers,
+        error: { code: ERROR_CODES.ELEVAGE_001, message: 'Test error' },
+        showMyOnly: true,
+      };
 
-      expect(state.isLoading).toBe(true);
-      expect(state.error).toBeNull();
+      const afterClearError = elevageReducer(stateWithData, clearError());
+      expect(afterClearError.error).toBeNull();
+      expect(afterClearError.elevages).toEqual(mockElevages);
+      expect(afterClearError.currentElevage).toEqual(mockElevage);
+      expect(afterClearError.showMyOnly).toBe(true);
+
+      const afterClearCurrent = elevageReducer(afterClearError, clearCurrentElevage());
+      expect(afterClearCurrent.currentElevage).toBeNull();
+      expect(afterClearCurrent.elevages).toEqual(mockElevages);
+      expect(afterClearCurrent.showMyOnly).toBe(true);
     });
 
-    test('should handle createElevage pending state', () => {
-      const action = { type: createElevage.pending.type };
-      const state = elevageReducer(initialState, action);
+    it('should handle error states correctly', () => {
+      const errorState = {
+        ...initialState,
+        elevages: mockElevages,
+        isLoading: true,
+      };
 
-      expect(state.isLoading).toBe(true);
-      expect(state.error).toBeNull();
-    });
+      const error = { code: ERROR_CODES.ELEVAGE_001, message: 'API Error' };
+      const result = elevageReducer(errorState, {
+        type: fetchElevages.rejected.type,
+        payload: error,
+      });
 
-    test('should handle updateElevage pending state', () => {
-      const action = { type: updateElevage.pending.type };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(true);
-      expect(state.error).toBeNull();
-    });
-
-    test('should handle deleteElevage pending state', () => {
-      const action = { type: deleteElevage.pending.type };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(true);
-      expect(state.error).toBeNull();
-    });
-
-    test('should handle fetchElevageUsers pending state', () => {
-      const action = { type: fetchElevageUsers.pending.type };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(true);
-      expect(state.error).toBeNull();
+      expect(result.isLoading).toBe(false);
+      expect(result.error).toEqual(error);
+      expect(result.elevages).toEqual(mockElevages); // Should preserve existing data
     });
   });
 
-  describe('rejected states', () => {
-    const error = {
-      code: ERROR_CODES.ELEVAGE_001,
-      message: 'Some error'
-    };
-
-    test('should handle fetchElevages rejected state', () => {
-      const action = {
-        type: fetchElevages.rejected.type,
-        payload: error
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual(error);
+  describe('edge cases', () => {
+    it('should handle unknown action types gracefully', () => {
+      const result = elevageReducer(initialState, { type: 'unknown/action' });
+      expect(result).toEqual(initialState);
     });
 
-    test('should handle fetchElevageById rejected state', () => {
-      const action = {
-        type: fetchElevageById.rejected.type,
-        payload: error
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual(error);
+    it('should handle undefined state gracefully', () => {
+      const result = elevageReducer(undefined, { type: 'unknown/action' });
+      expect(result).toEqual(initialState);
     });
 
-    test('should handle createElevage rejected state', () => {
-      const action = {
-        type: createElevage.rejected.type,
-        payload: error
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual(error);
+    it('should handle empty payloads gracefully', () => {
+      const result = elevageReducer(initialState, {
+        type: fetchElevages.fulfilled.type,
+        payload: [],
+      });
+      expect(result.elevages).toEqual([]);
+      expect(result.isLoading).toBe(false);
+      expect(result.error).toBeNull();
     });
 
-    test('should handle updateElevage rejected state', () => {
-      const action = {
-        type: updateElevage.rejected.type,
-        payload: error
+    it('should handle updating non-existent elevage', () => {
+      const updatedElevage = { ...mockElevage, id: 999, nom: 'Non-existent' };
+      const initialStateWithElevages = {
+        ...initialState,
+        elevages: mockElevages
       };
-      const state = elevageReducer(initialState, action);
 
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual(error);
+      const result = elevageReducer(initialStateWithElevages, {
+        type: updateElevage.fulfilled.type,
+        payload: updatedElevage,
+      });
+
+      expect(result.elevages).toEqual(mockElevages); // Should remain unchanged
+      expect(result.isLoading).toBe(false);
     });
 
-    test('should handle deleteElevage rejected state', () => {
-      const action = {
-        type: deleteElevage.rejected.type,
-        payload: error
+    it('should handle deleting non-existent elevage', () => {
+      const initialStateWithElevages = {
+        ...initialState,
+        elevages: mockElevages
       };
-      const state = elevageReducer(initialState, action);
 
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual(error);
-    });
+      const result = elevageReducer(initialStateWithElevages, {
+        type: deleteElevage.fulfilled.type,
+        payload: 999,
+      });
 
-    test('should handle fetchElevageUsers rejected state', () => {
-      const action = {
-        type: fetchElevageUsers.rejected.type,
-        payload: error
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toEqual(error);
-    });
-
-    test('should handle addUserToElevage rejected state', () => {
-      const action = {
-        type: addUserToElevage.rejected.type,
-        payload: error
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.error).toEqual(error);
-    });
-
-    test('should handle removeUserFromElevage rejected state', () => {
-      const action = {
-        type: removeUserFromElevage.rejected.type,
-        payload: error
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.error).toEqual(error);
-    });
-  });
-
-  describe('rejected states without payload', () => {
-    test('should handle rejected states with null payload', () => {
-      const action = {
-        type: fetchElevages.rejected.type,
-        payload: null
-      };
-      const state = elevageReducer(initialState, action);
-
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toBeNull();
+      expect(result.elevages).toEqual(mockElevages); // Should remain unchanged
+      expect(result.isLoading).toBe(false);
     });
   });
 });

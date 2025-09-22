@@ -63,7 +63,8 @@ export const fetchUsers = createAsyncThunk<
         }));
       }
 
-      return await response.json();
+      const data = await response.json();
+      return data.data || data;
     } catch (error) {
       return rejectWithValue(createCodedError({
         code: ERROR_CODES.SYS_001,
@@ -94,7 +95,8 @@ export const fetchAvailableUsers = createAsyncThunk<
         }));
       }
 
-      const users = await response.json();
+      const responseData = await response.json();
+      const users = responseData.data || responseData;
 
       // Filtrer les utilisateurs exclus si spécifié
       if (excludeUserIds && excludeUserIds.length > 0) {
@@ -132,7 +134,8 @@ export const fetchRaces = createAsyncThunk<
         }));
       }
 
-      return await response.json();
+      const data = await response.json();
+      return data.data || data;
     } catch (error) {
       return rejectWithValue(createCodedError({
         code: ERROR_CODES.SYS_001,
@@ -167,7 +170,10 @@ const userSlice = createSlice({
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while fetching users'
+        };
       })
 
       // Fetch utilisateurs disponibles
@@ -182,7 +188,10 @@ const userSlice = createSlice({
       })
       .addCase(fetchAvailableUsers.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while fetching available users'
+        };
       })
 
       // Fetch races
@@ -197,7 +206,10 @@ const userSlice = createSlice({
       })
       .addCase(fetchRaces.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while fetching races'
+        };
       });
   },
 });

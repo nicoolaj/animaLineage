@@ -286,7 +286,10 @@ const animalSlice = createSlice({
       })
       .addCase(createAnimal.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while creating animal'
+        };
       })
 
       // Modifier animal
@@ -304,7 +307,10 @@ const animalSlice = createSlice({
       })
       .addCase(updateAnimal.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while updating animal'
+        };
       })
 
       // Supprimer animal
@@ -319,7 +325,10 @@ const animalSlice = createSlice({
       })
       .addCase(deleteAnimal.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while deleting animal'
+        };
       })
 
       // Marquer décédé
@@ -337,7 +346,10 @@ const animalSlice = createSlice({
       })
       .addCase(markAnimalDead.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while marking animal as dead'
+        };
       })
 
       // Descendants
@@ -352,7 +364,10 @@ const animalSlice = createSlice({
       })
       .addCase(fetchDescendants.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || null;
+        state.error = action.payload ?? {
+          code: ERROR_CODES.SYS_010,
+          message: 'Unknown error while fetching descendants'
+        };
       });
   },
 });

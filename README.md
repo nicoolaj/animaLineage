@@ -197,6 +197,7 @@ The application will automatically create the required `users` table for all dat
 ### Guides Techniques
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Architecture détaillée du système
 - **[CONVENTIONS.md](docs/CONVENTIONS.md)** - Conventions de code et bonnes pratiques
+- **[TESTING.md](./TESTING.md)** - Guide complet des tests et patterns 🧪
 - **[DATABASE.md](backend/DATABASE.md)** - Configuration et gestion de la base de données
 - **[PHP_8.4_MIGRATION.md](backend/PHP_8.4_MIGRATION.md)** - Guide de migration vers PHP 8.4
 
@@ -209,15 +210,38 @@ L'application détecte automatiquement l'environnement :
 Voir `DATABASE.md` pour les détails de configuration.
 
 ### Tests
+
+#### Tests Frontend (Jest/React Testing Library)
 ```bash
-# Tests frontend
 cd frontend
+
+# Exécuter tous les tests
 npm test
 
-# Tests backend (PHPUnit - à configurer)
+# Tests Redux (isolation pure - 159 tests)
+npm test -- src/store/slices/__tests__/
+
+# Tests de composants
+npm test -- src/components/__tests__/
+
+# Build et vérification TypeScript
+npm run build
+```
+
+**État des tests frontend :**
+- ✅ **Redux**: 159/159 tests passent avec approche d'isolation pure
+- ✅ **Build**: Compilation TypeScript réussie
+- ⚠️ **Composants**: Problèmes MSW en cours de résolution
+
+#### Tests Backend (PHPUnit)
+```bash
 cd backend
+
+# Tests PHP (à configurer)
 composer test
 ```
+
+📖 **[Voir TESTING.md](./TESTING.md)** pour le guide complet des tests
 
 ### Maintenance
 ```bash

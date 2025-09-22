@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AnimalList from '../AnimalList';
-import { AuthContext } from '../../contexts/AuthContext';
+import { AuthProvider, useAuth } from '../../contexts/AuthContext';
 
 // Mock fetch global
 const mockFetch = jest.fn();
@@ -17,21 +17,28 @@ global.prompt = jest.fn();
 // Mock window.alert
 global.alert = jest.fn();
 
-// Mock AuthContext
-const mockAuthContext = {
-  user: { id: 1, name: 'Test User', email: 'test@test.com', role: 1, role_name: 'Admin', status: 1 },
-  token: 'mock-token',
-  isAuthenticated: true,
-  login: jest.fn(),
-  register: jest.fn(),
-  logout: jest.fn(),
-  getAuthHeaders: jest.fn(() => ({
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer mock-token'
-  })),
-  isAdmin: jest.fn(() => true),
-  canModerate: jest.fn(() => true)
-};
+// Mock useAuth hook
+jest.mock('../../contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 1, name: 'Test User', email: 'test@test.com', role: 1, role_name: 'Admin', status: 1 },
+    token: 'mock-token',
+    isAuthenticated: true,
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
+    isLoading: false,
+    getAuthHeaders: jest.fn(() => ({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer mock-token'
+    })),
+    isAdmin: jest.fn(() => true),
+    isModerator: jest.fn(() => false),
+    isReader: jest.fn(() => false),
+    canModerate: jest.fn(() => true),
+    canAdministrate: jest.fn(() => true),
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 
 // Mock data
 const mockAnimals = [
@@ -121,11 +128,7 @@ describe('AnimalList Component', () => {
   });
 
   const renderWithAuth = (component: React.ReactElement) => {
-    return render(
-      <AuthContext.Provider value={mockAuthContext}>
-        {component}
-      </AuthContext.Provider>
-    );
+    return render(component);
   };
 
   describe('Rendu du composant', () => {
@@ -225,7 +228,7 @@ describe('AnimalList Component', () => {
 
   describe('Filtrage', () => {
     test('filtre par statut vivant', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -241,7 +244,7 @@ describe('AnimalList Component', () => {
       });
 
       const statutFilter = screen.getByLabelText('Statut:');
-      await user.selectOptions(statutFilter, 'vivant');
+      await userEvent.selectOptions(statutFilter, 'vivant');
 
       await waitFor(() => {
         expect(screen.getByText('Liste des animaux (2)')).toBeInTheDocument();
@@ -253,7 +256,7 @@ describe('AnimalList Component', () => {
     });
 
     test('filtre par statut décédé', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -269,7 +272,7 @@ describe('AnimalList Component', () => {
       });
 
       const statutFilter = screen.getByLabelText('Statut:');
-      await user.selectOptions(statutFilter, 'mort');
+      await userEvent.selectOptions(statutFilter, 'mort');
 
       await waitFor(() => {
         expect(screen.getByText('Liste des animaux (1)')).toBeInTheDocument();
@@ -281,7 +284,7 @@ describe('AnimalList Component', () => {
     });
 
     test('filtre par sexe mâle', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -297,7 +300,7 @@ describe('AnimalList Component', () => {
       });
 
       const sexeFilter = screen.getByLabelText('Sexe:');
-      await user.selectOptions(sexeFilter, 'M');
+      await userEvent.selectOptions(sexeFilter, 'M');
 
       await waitFor(() => {
         expect(screen.getByText('Liste des animaux (2)')).toBeInTheDocument();
@@ -309,7 +312,7 @@ describe('AnimalList Component', () => {
     });
 
     test('filtre par sexe femelle', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -325,7 +328,7 @@ describe('AnimalList Component', () => {
       });
 
       const sexeFilter = screen.getByLabelText('Sexe:');
-      await user.selectOptions(sexeFilter, 'F');
+      await userEvent.selectOptions(sexeFilter, 'F');
 
       await waitFor(() => {
         expect(screen.getByText('Liste des animaux (1)')).toBeInTheDocument();
@@ -337,7 +340,7 @@ describe('AnimalList Component', () => {
     });
 
     test('filtre par élevage', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -353,7 +356,7 @@ describe('AnimalList Component', () => {
       });
 
       const elevageFilter = screen.getByPlaceholderText('Filtrer par élevage');
-      await user.type(elevageFilter, 'Bio');
+      await userEvent.type(elevageFilter, 'Bio');
 
       await waitFor(() => {
         expect(screen.getByText('Liste des animaux (1)')).toBeInTheDocument();
@@ -365,7 +368,7 @@ describe('AnimalList Component', () => {
     });
 
     test('filtre par race', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -381,7 +384,7 @@ describe('AnimalList Component', () => {
       });
 
       const raceFilter = screen.getByPlaceholderText('Filtrer par race');
-      await user.type(raceFilter, 'Holstein');
+      await userEvent.type(raceFilter, 'Holstein');
 
       await waitFor(() => {
         expect(screen.getByText('Liste des animaux (2)')).toBeInTheDocument();
@@ -393,7 +396,7 @@ describe('AnimalList Component', () => {
     });
 
     test('combine plusieurs filtres', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -410,10 +413,10 @@ describe('AnimalList Component', () => {
 
       // Filtrer par statut vivant ET sexe mâle
       const statutFilter = screen.getByLabelText('Statut:');
-      await user.selectOptions(statutFilter, 'vivant');
+      await userEvent.selectOptions(statutFilter, 'vivant');
 
       const sexeFilter = screen.getByLabelText('Sexe:');
-      await user.selectOptions(sexeFilter, 'M');
+      await userEvent.selectOptions(sexeFilter, 'M');
 
       await waitFor(() => {
         expect(screen.getByText('Liste des animaux (1)')).toBeInTheDocument();
@@ -448,7 +451,7 @@ describe('AnimalList Component', () => {
     });
 
     test('change l\'ordre de tri lors du clic sur l\'en-tête', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -465,7 +468,7 @@ describe('AnimalList Component', () => {
 
       // Cliquer sur l'en-tête identifiant pour inverser l'ordre
       const identifiantHeader = screen.getByText(/identifiant/i);
-      await user.click(identifiantHeader);
+      await userEvent.click(identifiantHeader);
 
       await waitFor(() => {
         const rows = screen.getAllByRole('row');
@@ -476,7 +479,7 @@ describe('AnimalList Component', () => {
     });
 
     test('trie par nom', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -492,7 +495,7 @@ describe('AnimalList Component', () => {
       });
 
       const nomHeader = screen.getByText(/nom/i);
-      await user.click(nomHeader);
+      await userEvent.click(nomHeader);
 
       await waitFor(() => {
         const rows = screen.getAllByRole('row');
@@ -505,7 +508,7 @@ describe('AnimalList Component', () => {
 
   describe('Actions sur les animaux', () => {
     test('appelle onEdit lors du clic sur modifier', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -521,13 +524,13 @@ describe('AnimalList Component', () => {
       });
 
       const editButtons = screen.getAllByTitle('Modifier');
-      await user.click(editButtons[0]);
+      await userEvent.click(editButtons[0]);
 
       expect(mockOnEdit).toHaveBeenCalledWith(mockAnimals[0]);
     });
 
     test('appelle onViewDescendants lors du clic sur voir descendants', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -543,13 +546,13 @@ describe('AnimalList Component', () => {
       });
 
       const descendantsButtons = screen.getAllByTitle('Voir descendants');
-      await user.click(descendantsButtons[0]);
+      await userEvent.click(descendantsButtons[0]);
 
       expect(mockOnViewDescendants).toHaveBeenCalledWith(1);
     });
 
     test('supprime un animal avec confirmation', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
       (global.confirm as jest.Mock).mockReturnValue(true);
 
       mockFetch
@@ -580,7 +583,7 @@ describe('AnimalList Component', () => {
       });
 
       const deleteButtons = screen.getAllByTitle('Supprimer');
-      await user.click(deleteButtons[0]);
+      await userEvent.click(deleteButtons[0]);
 
       expect(global.confirm).toHaveBeenCalledWith('Êtes-vous sûr de vouloir supprimer l\'animal FR001 ?');
 
@@ -597,7 +600,7 @@ describe('AnimalList Component', () => {
     });
 
     test('annule la suppression si l\'utilisateur refuse', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
       (global.confirm as jest.Mock).mockReturnValue(false);
 
       renderWithAuth(
@@ -614,14 +617,14 @@ describe('AnimalList Component', () => {
       });
 
       const deleteButtons = screen.getAllByTitle('Supprimer');
-      await user.click(deleteButtons[0]);
+      await userEvent.click(deleteButtons[0]);
 
       expect(global.confirm).toHaveBeenCalled();
       expect(mockOnDelete).not.toHaveBeenCalled();
     });
 
     test('marque un animal comme décédé', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
       (global.prompt as jest.Mock).mockReturnValue('2023-12-25');
       (global.confirm as jest.Mock).mockReturnValue(true);
 
@@ -653,7 +656,7 @@ describe('AnimalList Component', () => {
       });
 
       const markDeadButtons = screen.getAllByTitle('Marquer comme décédé');
-      await user.click(markDeadButtons[0]);
+      await userEvent.click(markDeadButtons[0]);
 
       expect(global.prompt).toHaveBeenCalledWith(
         'Date de décès (YYYY-MM-DD):',
@@ -696,7 +699,7 @@ describe('AnimalList Component', () => {
 
   describe('Actualisation', () => {
     test('actualise la liste lors du clic sur le bouton actualiser', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <AnimalList
@@ -712,7 +715,7 @@ describe('AnimalList Component', () => {
       });
 
       const refreshButton = screen.getByText('Actualiser');
-      await user.click(refreshButton);
+      await userEvent.click(refreshButton);
 
       // Vérifier que l'API a été appelée à nouveau
       await waitFor(() => {
@@ -737,15 +740,13 @@ describe('AnimalList Component', () => {
 
       // Changer refreshTrigger
       rerender(
-        <AuthContext.Provider value={mockAuthContext}>
-          <AnimalList
-            onEdit={mockOnEdit}
-            onDelete={mockOnDelete}
-            onViewDescendants={mockOnViewDescendants}
-            onMarkDead={mockOnMarkDead}
-            refreshTrigger={2}
-          />
-        </AuthContext.Provider>
+        <AnimalList
+          onEdit={mockOnEdit}
+          onDelete={mockOnDelete}
+          onViewDescendants={mockOnViewDescendants}
+          onMarkDead={mockOnMarkDead}
+          refreshTrigger={2}
+        />
       );
 
       // Vérifier que l'API a été appelée à nouveau
@@ -794,7 +795,7 @@ describe('AnimalList Component', () => {
     });
 
     test('gère les erreurs de suppression', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
       (global.confirm as jest.Mock).mockReturnValue(true);
 
       mockFetch
@@ -821,7 +822,7 @@ describe('AnimalList Component', () => {
       });
 
       const deleteButtons = screen.getAllByTitle('Supprimer');
-      await user.click(deleteButtons[0]);
+      await userEvent.click(deleteButtons[0]);
 
       await waitFor(() => {
         expect(global.alert).toHaveBeenCalledWith('Erreur lors de la suppression: Impossible de supprimer');
@@ -829,7 +830,7 @@ describe('AnimalList Component', () => {
     });
 
     test('gère les erreurs lors du marquage comme décédé', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
       (global.prompt as jest.Mock).mockReturnValue('2023-12-25');
       (global.confirm as jest.Mock).mockReturnValue(true);
 
@@ -857,7 +858,7 @@ describe('AnimalList Component', () => {
       });
 
       const markDeadButtons = screen.getAllByTitle('Marquer comme décédé');
-      await user.click(markDeadButtons[0]);
+      await userEvent.click(markDeadButtons[0]);
 
       await waitFor(() => {
         expect(global.alert).toHaveBeenCalledWith('Erreur lors de la mise à jour: Erreur de mise à jour');

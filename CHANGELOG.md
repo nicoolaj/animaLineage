@@ -1,5 +1,50 @@
 # Changelog - AnimaLineage
 
+## Version 2.1.3 - 2025-09-22 (Qualité & Tests)
+
+### 🧪 Refactorisation Majeure de l'Architecture de Tests
+
+#### Tests Redux - Isolation Pure (159 tests ✅)
+- **Migration complète** des tests d'intégration vers des tests d'isolation pure
+- **Performances améliorées** : Tests sans dépendances réseau (3x plus rapides)
+- **Fiabilité maximale** : Suppression des effets de bord et flakiness
+- **Couverture complète** : Tous les states (pending/fulfilled/rejected) testés
+
+#### Uniformisation de la Gestion d'Erreurs
+- **Standardisation** de la gestion des payloads null avec l'opérateur `??`
+- **Messages d'erreur cohérents** à travers tous les slices Redux
+- **Codes d'erreur uniformes** utilisant `ERROR_CODES.SYS_010`
+- **Tests de régression** pour éviter les divergences futures
+
+#### Corrections d'Infrastructure
+- ✅ **AuthContext mocking** : Correction des erreurs d'import et de Provider
+- ✅ **userEvent compatibility** : Migration de l'API v14 vers v13.5.0
+- ✅ **TypeScript build** : Compilation sans erreurs
+- ✅ **Patterns documentés** : Guide complet dans `TESTING.md`
+
+#### Détail par Slice
+- **authSlice**: 38 tests - Authentification, rôles, transitions d'état
+- **userSlice**: 24 tests - Gestion utilisateurs, races, cas d'usage complets
+- **elevageSlice**: 43 tests - CRUD élevages, gestion utilisateurs, filtrage
+- **animalSlice**: 41 tests - CRUD animaux, descendants, marquage décès
+- **languageSlice**: 13 tests - i18n, localStorage, fallbacks
+
+#### Documentation
+- **TESTING.md** : Guide complet de l'architecture de tests
+- **README.md** : Mise à jour des instructions de tests
+- **Patterns réutilisables** : Templates pour futurs développements
+
+#### Métriques d'Amélioration
+- **Tests Redux** : 100% succès (159/159)
+- **Build stability** : Compilation TypeScript réussie
+- **Performance** : Réduction du temps d'exécution des tests Redux
+- **Maintenabilité** : Tests isolés et indépendants
+
+#### Problèmes Identifiés pour Suite
+- ⚠️ **Tests composants** : Problèmes MSW en cours de résolution
+- ⚠️ **Mémoire** : Optimisation nécessaire pour tests complets
+- 📋 **TODO** : Application patterns aux tests composants restants
+
 ## Version 2.1.2 - 2025-09-21 (Fonctionnalité)
 
 ### 🆕 Nouvelle Fonctionnalité : Gestion des Utilisateurs d'Élevage

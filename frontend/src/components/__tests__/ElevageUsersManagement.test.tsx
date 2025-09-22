@@ -317,7 +317,7 @@ describe('ElevageUsersManagement Component', () => {
     });
 
     test('filtre les utilisateurs par nom et email', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
@@ -339,7 +339,7 @@ describe('ElevageUsersManagement Component', () => {
 
       const searchInput = screen.getByPlaceholderText(/rechercher un utilisateur par nom ou email/i);
 
-      await user.type(searchInput, 'new');
+      await userEvent.type(searchInput, 'new');
 
       await waitFor(() => {
         expect(screen.getByText('New User')).toBeInTheDocument();

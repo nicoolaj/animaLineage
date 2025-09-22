@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ElevageForm from '../ElevageForm';
-import { AuthContext } from '../../contexts/AuthContext';
+import { AuthProvider, useAuth } from '../../contexts/AuthContext';
 
 // Mock fetch global
 const mockFetch = jest.fn();
@@ -12,21 +12,28 @@ global.fetch = mockFetch;
 const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation();
 const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
 
-// Mock AuthContext
-const mockAuthContext = {
-  user: { id: 1, name: 'Test User', email: 'test@test.com', role: 1, role_name: 'Admin', status: 1 },
-  token: 'mock-token',
-  isAuthenticated: true,
-  login: jest.fn(),
-  register: jest.fn(),
-  logout: jest.fn(),
-  getAuthHeaders: jest.fn(() => ({
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer mock-token'
-  })),
-  isAdmin: jest.fn(() => true),
-  canModerate: jest.fn(() => true)
-};
+// Mock useAuth hook
+jest.mock('../../contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 1, name: 'Test User', email: 'test@test.com', role: 1, role_name: 'Admin', status: 1 },
+    token: 'mock-token',
+    isAuthenticated: true,
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
+    isLoading: false,
+    getAuthHeaders: jest.fn(() => ({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer mock-token'
+    })),
+    isAdmin: jest.fn(() => true),
+    isModerator: jest.fn(() => false),
+    isReader: jest.fn(() => false),
+    canModerate: jest.fn(() => true),
+    canAdministrate: jest.fn(() => true),
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 
 // Mock data
 const mockRaces = [
@@ -109,11 +116,7 @@ describe('ElevageForm Component', () => {
   });
 
   const renderWithAuth = (component: React.ReactElement) => {
-    return render(
-      <AuthContext.Provider value={mockAuthContext}>
-        {component}
-      </AuthContext.Provider>
-    );
+    return render(component);
   };
 
   describe('Rendu du composant', () => {
@@ -272,7 +275,7 @@ describe('ElevageForm Component', () => {
 
   describe('Interactions utilisateur', () => {
     test('met à jour le nom lors de la saisie', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -282,13 +285,13 @@ describe('ElevageForm Component', () => {
       );
 
       const nomInput = screen.getByLabelText(/nom de l'élevage/i);
-      await user.type(nomInput, 'Nouvel Élevage');
+      await userEvent.type(nomInput, 'Nouvel Élevage');
 
       expect(nomInput).toHaveValue('Nouvel Élevage');
     });
 
     test('met à jour l\'adresse lors de la saisie', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -298,13 +301,13 @@ describe('ElevageForm Component', () => {
       );
 
       const adresseInput = screen.getByLabelText(/adresse/i);
-      await user.type(adresseInput, '456 Avenue Test');
+      await userEvent.type(adresseInput, '456 Avenue Test');
 
       expect(adresseInput).toHaveValue('456 Avenue Test');
     });
 
     test('met à jour la description lors de la saisie', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -314,13 +317,13 @@ describe('ElevageForm Component', () => {
       );
 
       const descriptionInput = screen.getByLabelText(/description/i);
-      await user.type(descriptionInput, 'Description de test');
+      await userEvent.type(descriptionInput, 'Description de test');
 
       expect(descriptionInput).toHaveValue('Description de test');
     });
 
     test('sélectionne un propriétaire', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -334,13 +337,13 @@ describe('ElevageForm Component', () => {
       });
 
       const proprietaireSelect = screen.getByLabelText(/propriétaire/i);
-      await user.selectOptions(proprietaireSelect, '2');
+      await userEvent.selectOptions(proprietaireSelect, '2');
 
       expect(proprietaireSelect).toHaveValue('2');
     });
 
     test('coche et décoche des races', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -357,20 +360,20 @@ describe('ElevageForm Component', () => {
       const lacauneCheckbox = screen.getByRole('checkbox', { name: /lacaune/i });
 
       // Cocher Holstein
-      await user.click(holsteinCheckbox);
+      await userEvent.click(holsteinCheckbox);
       expect(holsteinCheckbox).toBeChecked();
 
       // Cocher Lacaune
-      await user.click(lacauneCheckbox);
+      await userEvent.click(lacauneCheckbox);
       expect(lacauneCheckbox).toBeChecked();
 
       // Décocher Holstein
-      await user.click(holsteinCheckbox);
+      await userEvent.click(holsteinCheckbox);
       expect(holsteinCheckbox).not.toBeChecked();
     });
 
     test('appelle onCancel lors du clic sur annuler', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -380,7 +383,7 @@ describe('ElevageForm Component', () => {
       );
 
       const cancelButton = screen.getByRole('button', { name: /annuler/i });
-      await user.click(cancelButton);
+      await userEvent.click(cancelButton);
 
       expect(mockOnCancel).toHaveBeenCalledTimes(1);
     });
@@ -388,7 +391,7 @@ describe('ElevageForm Component', () => {
 
   describe('Validation du formulaire', () => {
     test('affiche une erreur si le nom est manquant', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -398,7 +401,7 @@ describe('ElevageForm Component', () => {
       );
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText(/le nom, l'adresse et le propriétaire sont requis/i)).toBeInTheDocument();
@@ -406,7 +409,7 @@ describe('ElevageForm Component', () => {
     });
 
     test('affiche une erreur si l\'adresse est manquante', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -416,10 +419,10 @@ describe('ElevageForm Component', () => {
       );
 
       const nomInput = screen.getByLabelText(/nom de l'élevage/i);
-      await user.type(nomInput, 'Test Élevage');
+      await userEvent.type(nomInput, 'Test Élevage');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText(/le nom, l'adresse et le propriétaire sont requis/i)).toBeInTheDocument();
@@ -427,7 +430,7 @@ describe('ElevageForm Component', () => {
     });
 
     test('affiche une erreur si le propriétaire est manquant', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       renderWithAuth(
         <ElevageForm
@@ -437,13 +440,13 @@ describe('ElevageForm Component', () => {
       );
 
       const nomInput = screen.getByLabelText(/nom de l'élevage/i);
-      await user.type(nomInput, 'Test Élevage');
+      await userEvent.type(nomInput, 'Test Élevage');
 
       const adresseInput = screen.getByLabelText(/adresse/i);
-      await user.type(adresseInput, '123 Rue Test');
+      await userEvent.type(adresseInput, '123 Rue Test');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText(/le nom, l'adresse et le propriétaire sont requis/i)).toBeInTheDocument();
@@ -451,7 +454,7 @@ describe('ElevageForm Component', () => {
     });
 
     test('soumet le formulaire avec des données valides', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       // Mock pour la soumission réussie
       mockFetch.mockResolvedValueOnce({
@@ -473,23 +476,23 @@ describe('ElevageForm Component', () => {
 
       // Remplir le formulaire
       const nomInput = screen.getByLabelText(/nom de l'élevage/i);
-      await user.type(nomInput, 'Élevage Test');
+      await userEvent.type(nomInput, 'Élevage Test');
 
       const adresseInput = screen.getByLabelText(/adresse/i);
-      await user.type(adresseInput, '123 Rue Test');
+      await userEvent.type(adresseInput, '123 Rue Test');
 
       const proprietaireSelect = screen.getByLabelText(/propriétaire/i);
-      await user.selectOptions(proprietaireSelect, '2');
+      await userEvent.selectOptions(proprietaireSelect, '2');
 
       const descriptionInput = screen.getByLabelText(/description/i);
-      await user.type(descriptionInput, 'Description test');
+      await userEvent.type(descriptionInput, 'Description test');
 
       // Sélectionner une race
       const holsteinCheckbox = screen.getByRole('checkbox', { name: /holstein/i });
-      await user.click(holsteinCheckbox);
+      await userEvent.click(holsteinCheckbox);
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -511,7 +514,7 @@ describe('ElevageForm Component', () => {
     });
 
     test('soumet une modification avec PUT', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       // Setup pour le mode édition
       mockFetch
@@ -546,7 +549,7 @@ describe('ElevageForm Component', () => {
       });
 
       const submitButton = screen.getByRole('button', { name: /modifier/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -631,7 +634,7 @@ describe('ElevageForm Component', () => {
     });
 
     test('gère les erreurs de soumission', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -652,16 +655,16 @@ describe('ElevageForm Component', () => {
 
       // Remplir le formulaire
       const nomInput = screen.getByLabelText(/nom de l'élevage/i);
-      await user.type(nomInput, 'Test');
+      await userEvent.type(nomInput, 'Test');
 
       const adresseInput = screen.getByLabelText(/adresse/i);
-      await user.type(adresseInput, 'Test');
+      await userEvent.type(adresseInput, 'Test');
 
       const proprietaireSelect = screen.getByLabelText(/propriétaire/i);
-      await user.selectOptions(proprietaireSelect, '1');
+      await userEvent.selectOptions(proprietaireSelect, '1');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText('Erreur de validation')).toBeInTheDocument();
@@ -671,7 +674,7 @@ describe('ElevageForm Component', () => {
 
   describe('État de chargement', () => {
     test('désactive les boutons pendant la soumission', async () => {
-      const user = userEvent.setup();
+      // userEvent v13 doesn't need setup
 
       // Mock pour simuler une soumission lente
       let resolveSubmit: any;
@@ -695,16 +698,16 @@ describe('ElevageForm Component', () => {
 
       // Remplir le formulaire rapidement
       const nomInput = screen.getByLabelText(/nom de l'élevage/i);
-      await user.type(nomInput, 'Test');
+      await userEvent.type(nomInput, 'Test');
 
       const adresseInput = screen.getByLabelText(/adresse/i);
-      await user.type(adresseInput, 'Test');
+      await userEvent.type(adresseInput, 'Test');
 
       const proprietaireSelect = screen.getByLabelText(/propriétaire/i);
-      await user.selectOptions(proprietaireSelect, '1');
+      await userEvent.selectOptions(proprietaireSelect, '1');
 
       const submitButton = screen.getByRole('button', { name: /créer/i });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       // Vérifier que les boutons sont désactivés
       await waitFor(() => {
