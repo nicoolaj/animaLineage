@@ -106,6 +106,12 @@ jest.mock('../CompatibilityTester', () => {
   };
 });
 
+jest.mock('../LanguageSelector', () => {
+  return function LanguageSelector() {
+    return <div data-testid="language-selector">Language Selector</div>;
+  };
+});
+
 describe('MainDashboard Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
