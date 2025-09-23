@@ -164,10 +164,17 @@ Chaque modèle hérite d'une classe de base et implémente :
 - **Développement** : SQLite, ports 3001/3002
 - **Production** : MySQL/PostgreSQL, serveur web
 
+### CI/CD GitHub Actions
+- **Tests automatiques** sur push/PR (master/develop)
+- **Pipeline complet** : PHP + React + E2E + Performance
+- **Rapports de couverture** Codecov intégrés
+- **Tests nocturnes** quotidiens programmés
+
 ### Configuration
 - **Variables d'environnement** (fichiers .env)
 - **Build de production** (npm run build)
 - **Migrations automatiques** au démarrage
+- **Workflow GitHub Actions** (`.github/workflows/comprehensive-testing.yml`)
 
 ## Évolutivité
 

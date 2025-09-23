@@ -164,7 +164,7 @@ const AnimalDashboard: React.FC = () => {
     return (
         <div className="p-5 max-w-6xl mx-auto bg-gray-800 min-h-screen text-white">
             <div className="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-600">
-                <h2 className="m-0 text-white text-2xl font-semibold">🦕 Gestion des Animaux</h2>
+                <h2 className="section-title">🦕 Gestion des Animaux</h2>
                 <div className="flex gap-3 items-center">
                     <button
                         onClick={() => setCurrentView('list')}
@@ -205,11 +205,11 @@ const AnimalDashboard: React.FC = () => {
 
             {currentView === 'descendants' && (
                 <div className="bg-gray-700 rounded-lg shadow-card overflow-hidden">
-                    <div className="flex justify-between items-center p-5 bg-gray-800 border-b border-gray-600">
-                        <h2 className="m-0 text-white text-xl font-semibold">Descendants de {selectedAnimalForDescendants}</h2>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-5 bg-gray-800 border-b border-gray-600 gap-4">
+                        <h2 className="section-title">Descendants de {selectedAnimalForDescendants}</h2>
                         <button
                             onClick={() => setCurrentView('list')}
-                            className="btn-secondary text-sm py-2 px-4"
+                            className="btn-secondary text-sm py-2 px-4 self-start sm:self-auto"
                         >
                             ← Retour à la liste
                         </button>
@@ -224,17 +224,17 @@ const AnimalDashboard: React.FC = () => {
                             <table className="w-full border-collapse bg-gray-700">
                                 <thead>
                                     <tr>
-                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Identifiant</th>
-                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Nom</th>
-                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Sexe</th>
-                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Race</th>
-                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Date de naissance</th>
-                                        <th className="bg-gray-800 px-4 py-3 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-700">Statut</th>
+                                        <th className="table-header px-4 py-3 text-left">Identifiant</th>
+                                        <th className="table-header px-4 py-3 text-left">Nom</th>
+                                        <th className="table-header px-4 py-3 text-left">Sexe</th>
+                                        <th className="table-header px-4 py-3 text-left">Race</th>
+                                        <th className="table-header px-4 py-3 text-left">Date de naissance</th>
+                                        <th className="table-header px-4 py-3 text-left">Statut</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {descendants.map(descendant => (
-                                        <tr key={descendant.id} className={`border-b border-gray-600 text-white ${descendant.statut === 'mort' ? 'bg-red-900 bg-opacity-20' : ''}`}>
+                                        <tr key={descendant.id} className={`border-b border-gray-600 text-white hover:bg-gray-600 transition-colors duration-200 ${descendant.statut === 'mort' ? 'bg-red-900 bg-opacity-20' : ''}`}>
                                             <td className="px-4 py-3 font-mono font-bold">{descendant.identifiant_officiel}</td>
                                             <td className="px-4 py-3">{descendant.nom || '-'}</td>
                                             <td className="px-4 py-3">
@@ -245,7 +245,7 @@ const AnimalDashboard: React.FC = () => {
                                             <td className="px-4 py-3">{descendant.race_nom}</td>
                                             <td className="px-4 py-3">{formatDate(descendant.date_naissance)}</td>
                                             <td className="px-4 py-3">
-                                                <span className={`status-badge ${descendant.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                                                <span className={`status-badge ${descendant.statut === 'vivant' ? 'status-badge-alive' : 'status-badge-dead'}`}>
                                                     {descendant.statut === 'vivant' ? '✅ Vivant' : '💀 Décédé'}
                                                 </span>
                                             </td>
@@ -258,32 +258,6 @@ const AnimalDashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Responsive styles are now handled by Tailwind CSS classes */}
-            <style>{`
-                @media (max-width: 768px) {
-                    .animal-header {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 15px;
-                    }
-
-                    .animal-controls {
-                        width: 100%;
-                        justify-content: center;
-                    }
-
-                    .animal-controls button {
-                        flex: 1;
-                        text-align: center;
-                    }
-
-                    .descendants-header {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 15px;
-                    }
-                }
-            `}</style>
         </div>
     );
 };

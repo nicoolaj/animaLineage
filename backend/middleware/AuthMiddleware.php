@@ -78,6 +78,10 @@ class AuthMiddleware {
      * @return array|false
      */
     public function verifyToken($token) {
+        if (empty($token) || !is_string($token)) {
+            return false;
+        }
+
         try {
             $decoded = JWT::decode($token, new Key($this->jwtSecret, 'HS256'));
             return (array) $decoded->user;

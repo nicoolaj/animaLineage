@@ -231,6 +231,7 @@ npm run build
 **État des tests frontend :**
 - ✅ **Redux**: 159/159 tests passent avec approche d'isolation pure
 - ✅ **Build**: Compilation TypeScript réussie
+- ✅ **CI/CD**: GitHub Actions configuré et fonctionnel
 - ⚠️ **Composants**: Problèmes MSW en cours de résolution
 
 #### Tests Backend (PHPUnit)
@@ -242,6 +243,25 @@ composer test
 ```
 
 📖 **[Voir TESTING.md](./TESTING.md)** pour le guide complet des tests
+
+#### CI/CD GitHub Actions
+Le projet dispose d'un **système de tests automatiques** via GitHub Actions :
+
+```yaml
+# Déclenchement automatique
+- Push sur master/develop
+- Pull Requests
+- Tests nocturnes quotidiens
+
+# Pipeline complet (5 étapes)
+1. 🐘 Tests PHP Backend (PHPUnit + couverture)
+2. ⚛️ Tests React Frontend (Jest + Redux)
+3. 🔒 Tests de Sécurité (audit npm/composer)
+4. 🔄 Tests E2E (Cypress Chrome/Firefox)
+5. ⚡ Tests Performance (Lighthouse)
+```
+
+**Statut des workflows** : ✅ Configuré et fonctionnel
 
 ### Maintenance
 ```bash

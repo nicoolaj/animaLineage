@@ -46,3 +46,14 @@ function cleanupTestEnvironment() {
 
 // Hook de nettoyage automatique
 register_shutdown_function('cleanupTestEnvironment');
+
+// Mock getallheaders() pour les tests si elle n'existe pas
+if (!function_exists('getallheaders')) {
+    function getallheaders() {
+        $headers = [];
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            $headers['Authorization'] = $_SERVER['HTTP_AUTHORIZATION'];
+        }
+        return $headers;
+    }
+}

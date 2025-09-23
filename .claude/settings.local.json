@@ -20,7 +20,8 @@
       "Bash(./vendor/bin/phpunit tests/Unit/)",
       "Bash(./vendor/bin/phpunit)",
       "Bash(./vendor/bin/phpunit --coverage-text)",
-      "Bash(./vendor/bin/phpunit:*)"
+      "Bash(./vendor/bin/phpunit:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

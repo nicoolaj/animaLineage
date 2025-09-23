@@ -44,9 +44,9 @@ class AnimalController {
                     // Admin : peut voir n'importe quel élevage
                     $stmt = $this->animal->getByElevageId($elevage_id);
                 } else {
-                    // Utilisateur : vérifier que l'élevage lui appartient
-                    $elevage_data = $this->elevage->getById($elevage_id);
-                    if (!$elevage_data || $elevage_data['user_id'] != $user_id) {
+                    // Utilisateur : vérifier qu'il peut accéder à cet élevage (propriétaire ou collaborateur)
+                    $this->elevage->id = $elevage_id;
+                    if (!$this->elevage->canEdit($user_id, $user_role)) {
                         http_response_code(403);
                         echo json_encode(['message' => 'Accès non autorisé à cet élevage']);
                         return;
@@ -100,8 +100,8 @@ class AnimalController {
             // Vérifier les droits d'accès
             if ($user_role != 1) { // Si pas admin
                 if ($animal['elevage_id']) {
-                    $elevage_data = $this->elevage->getById($animal['elevage_id']);
-                    if (!$elevage_data || $elevage_data['user_id'] != $user_id) {
+                    $this->elevage->id = $animal['elevage_id'];
+                    if (!$this->elevage->canEdit($user_id, $user_role)) {
                         http_response_code(403);
                         echo json_encode(['message' => 'Accès non autorisé']);
                         return;
@@ -160,7 +160,9 @@ class AnimalController {
                     return;
                 }
 
-                if ($user_role != 1 && $elevage_data['user_id'] != $user_id) {
+                // Vérifier les permissions pour cet élevage (admin, propriétaire ou collaborateur)
+                $this->elevage->id = $elevage_data['id'];
+                if ($user_role != 1 && !$this->elevage->canEdit($user_id, $user_role)) {
                     http_response_code(403);
                     echo json_encode(['message' => 'Accès non autorisé à cet élevage']);
                     return;
@@ -404,8 +406,8 @@ class AnimalController {
             // Vérifier les droits d'accès
             if ($user_role != 1) {
                 if ($animal_data['elevage_id']) {
-                    $elevage_data = $this->elevage->getById($animal_data['elevage_id']);
-                    if (!$elevage_data || $elevage_data['user_id'] != $user_id) {
+                    $this->elevage->id = $animal_data['elevage_id'];
+                    if (!$this->elevage->canEdit($user_id, $user_role)) {
                         http_response_code(403);
                         echo json_encode(['message' => 'Accès non autorisé']);
                         return;
@@ -443,8 +445,8 @@ class AnimalController {
             // Vérifier les droits d'accès
             if ($user_role != 1) {
                 if ($animal_data['elevage_id']) {
-                    $elevage_data = $this->elevage->getById($animal_data['elevage_id']);
-                    if (!$elevage_data || $elevage_data['user_id'] != $user_id) {
+                    $this->elevage->id = $animal_data['elevage_id'];
+                    if (!$this->elevage->canEdit($user_id, $user_role)) {
                         http_response_code(403);
                         echo json_encode(['message' => 'Accès non autorisé']);
                         return;

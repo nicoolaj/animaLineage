@@ -216,15 +216,6 @@ class AuthMiddlewareIntegrationTest extends TestCase
         // Simulation simple - dans un vrai test d'intégration,
         // on utiliserait des outils comme Guzzle ou des mocks plus sophistiqués
         $_SERVER['HTTP_AUTHORIZATION'] = $header;
-
-        // Mock getallheaders() pour nos tests
-        if (!function_exists('getallheaders')) {
-            function getallheaders() {
-                return isset($_SERVER['HTTP_AUTHORIZATION'])
-                    ? ['Authorization' => $_SERVER['HTTP_AUTHORIZATION']]
-                    : [];
-            }
-        }
     }
 
     /**

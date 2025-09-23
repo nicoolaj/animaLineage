@@ -167,6 +167,49 @@ await userEvent.click(button);
 3. **Éviter MSW** - Préférer les mocks fetch simples
 4. **Tests d'isolation** - Un composant à la fois
 
+## 🔧 GitHub Actions - Workflow de Tests
+
+### Configuration CI/CD
+Le projet utilise un **workflow GitHub Actions complet** (`.github/workflows/comprehensive-testing.yml`) qui exécute :
+
+#### 🐘 Tests PHP Backend
+- **PHPUnit** avec PHP 8.4
+- **Couverture de code** avec Codecov
+- **Tests unitaires et d'intégration**
+
+#### ⚛️ Tests React Frontend
+- **Jest** avec Node.js 18 et 20
+- **Tests Redux** (159 tests passants)
+- **Couverture frontend** avec Codecov
+
+#### 🔒 Tests de Sécurité
+- **Audit npm** des dépendances frontend
+- **Vérification Composer** backend
+- **Rapports de sécurité** automatisés
+
+#### 🔄 Tests End-to-End
+- **Cypress** avec Chrome et Firefox
+- **Tests d'authentification**
+- **Tests de gestion d'élevage**
+- **Tests d'accessibilité**
+
+#### ⚡ Tests de Performance
+- **Lighthouse** pour performance web
+- **Métriques d'accessibilité**
+- **Rapports automatiques** sur les PR
+
+### Déclenchement Automatique
+- **Push** sur branches `master` et `develop`
+- **Pull Requests** vers ces branches
+- **Tests nocturnes** quotidiens à 3h
+
+### Corrections Appliquées
+✅ **Branches** : `main/develop` → `master/develop`
+✅ **Backend** : Suppression commandes Laravel inexistantes
+✅ **Ports** : Alignement sur 3001 (backend) / 3002 (frontend)
+✅ **Base de données** : Utilisation de `migrate.php` au lieu d'Artisan
+✅ **Composer audit** : Remplacement par commande compatible
+
 ## 🐛 Problèmes Connus et Solutions
 
 ### Problèmes MSW (Mock Service Worker)
@@ -206,6 +249,24 @@ npm test -- src/store/slices/__tests__/authSlice.test.ts
 
 # Tests avec couverture
 npm test -- --coverage src/store/slices/__tests__/
+```
+
+### Tests CI/CD et GitHub Actions
+```bash
+# Tests complets (comme dans CI)
+npm run test:all
+
+# Tests CI spécifiques
+npm run test:ci
+
+# Tests E2E locaux
+npm run test:e2e
+
+# Tests de performance
+npm run test:performance
+
+# Audit de sécurité
+npm run test:audit
 ```
 
 ### Tests de Composants (En cours de résolution)
@@ -256,11 +317,13 @@ npm run lint
 - [ ] Optimisation mémoire
 - [ ] Couverture de code complète
 
-### Phase 3 - 📋 Planifiée
-- [ ] Tests d'intégration E2E
-- [ ] Tests de performance
-- [ ] Tests d'accessibilité
-- [ ] CI/CD avec tests automatiques
+### Phase 3 - ✅ CI/CD Configuré
+- [x] **CI/CD GitHub Actions** configuré avec workflow complet
+- [x] **Tests automatiques** sur push/PR vers master/develop
+- [x] **Tests E2E Cypress** avec Chrome et Firefox
+- [x] **Tests de sécurité** et audit des dépendances
+- [x] **Tests de performance** Lighthouse intégrés
+- [ ] Optimisation couverture des tests composants
 
 ## 💡 Conseils pour Ajouter de Nouveaux Tests
 

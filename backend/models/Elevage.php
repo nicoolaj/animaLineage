@@ -146,9 +146,25 @@ class Elevage {
             return true;
         }
 
-        // Les propriétaires peuvent modifier leurs élevages
+        // Vérifier si l'utilisateur est propriétaire de l'élevage
         $elevage = $this->getById($this->id);
-        return $elevage && $elevage['user_id'] == $user_id;
+        if ($elevage && $elevage['user_id'] == $user_id) {
+            return true;
+        }
+
+        // Vérifier si l'utilisateur est collaborateur de l'élevage
+        try {
+            $query = "SELECT id FROM elevage_users WHERE elevage_id = :elevage_id AND user_id = :user_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':elevage_id', $this->id);
+            $stmt->bindParam(':user_id', $user_id);
+            $stmt->execute();
+
+            return $stmt->fetch() !== false;
+        } catch (Exception $e) {
+            // Si la table elevage_users n'existe pas, ignorer cette vérification
+            return false;
+        }
     }
 
     // Associer des races à l'élevage

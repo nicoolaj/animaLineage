@@ -38,14 +38,23 @@ class ElevageController {
 
     // ========== ÉLEVAGES ==========
 
-    // Lister tous les élevages
+    // Lister tous les élevages (admin) ou les élevages de l'utilisateur (autres)
     public function getAllElevages() {
         if (!$this->authMiddleware->requireAuth()) {
             return;
         }
 
+        $currentUser = $this->authMiddleware->getCurrentUser();
+
         try {
-            $stmt = $this->elevage->getAll();
+            // Admin : voir tous les élevages
+            if ($currentUser['role'] == 1) {
+                $stmt = $this->elevage->getAll();
+            } else {
+                // Autres utilisateurs : voir seulement leurs élevages (propriétaire + collaborateur)
+                $stmt = $this->getElevagesForUser($currentUser['id']);
+            }
+
             $elevages = array();
 
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -76,6 +85,27 @@ class ElevageController {
             http_response_code(500);
             echo json_encode(array("message" => "Erreur lors de la récupération des élevages.", "error" => $e->getMessage()));
         }
+    }
+
+    // Obtenir les élevages pour un utilisateur (propriétaire + collaborateur)
+    private function getElevagesForUser($user_id) {
+        $query = "SELECT DISTINCT e.*, u.name as proprietaire_nom
+                  FROM elevages e
+                  LEFT JOIN users u ON e.user_id = u.id
+                  WHERE e.user_id = :user_id
+                  UNION
+                  SELECT DISTINCT e.*, u.name as proprietaire_nom
+                  FROM elevages e
+                  LEFT JOIN users u ON e.user_id = u.id
+                  INNER JOIN elevage_users eu ON e.id = eu.elevage_id
+                  WHERE eu.user_id = :user_id2
+                  ORDER BY nom ASC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':user_id2', $user_id);
+        $stmt->execute();
+        return $stmt;
     }
 
     // Lister les élevages de l'utilisateur connecté
