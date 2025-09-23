@@ -142,7 +142,7 @@ const TransferRequestManager: React.FC = () => {
                     <h3 className="text-gray-300 text-lg font-medium mb-4 pb-2 border-b-2 border-gray-600">📥 Demandes en attente ({pendingRequests.length})</h3>
                     <div className="flex flex-col gap-4">
                         {pendingRequests.map(request => (
-                            <div key={request.id} className="bg-gray-800 border border-gray-600 border-l-4 border-l-yellow-500 rounded-lg p-6 shadow-md">
+                            <div key={request.id} className="bg-gray-700 border border-gray-600 border-l-4 border-l-yellow-500 rounded-lg p-6 shadow-md">
                                 <div className="mb-4">
                                     <div className="text-lg mb-3 flex items-center gap-4">
                                         <strong className="text-white">{request.identifiant_officiel}</strong>
@@ -207,7 +207,7 @@ const TransferRequestManager: React.FC = () => {
                     <h3 className="text-gray-300 text-lg font-medium mb-4 pb-2 border-b-2 border-gray-600">📋 Demandes traitées ({processedRequests.length})</h3>
                     <div className="flex flex-col gap-4">
                         {processedRequests.map(request => (
-                            <div key={request.id} className={`bg-gray-800 border border-gray-600 rounded-lg p-6 shadow-md ${
+                            <div key={request.id} className={`bg-gray-700 border border-gray-600 rounded-lg p-6 shadow-md ${
                                 request.status === 'approved' ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-red-500'
                             }`}>
                                 <div>

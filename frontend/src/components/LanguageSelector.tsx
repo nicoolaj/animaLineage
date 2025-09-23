@@ -7,51 +7,19 @@ const LanguageSelector: React.FC = () => {
   const languages = getAvailableLanguages();
 
   return (
-    <div className="language-selector">
+    <div className="inline-block">
       <select
         value={currentLanguage}
         onChange={(e) => changeLanguage(e.target.value as 'fr' | 'en')}
-        className="language-select"
+        className="form-select text-sm cursor-pointer"
         title="Language"
       >
         {languages.map((lang) => (
-          <option key={lang.code} value={lang.code}>
+          <option key={lang.code} value={lang.code} className="bg-gray-700 text-white">
             {lang.code === 'fr' ? '🇫🇷' : '🇬🇧'} {lang.name}
           </option>
         ))}
       </select>
-
-      <style>{`
-        .language-selector {
-          display: inline-block;
-        }
-
-        .language-select {
-          background: #374151;
-          color: white;
-          border: 1px solid #4b5563;
-          border-radius: 6px;
-          padding: 8px 12px;
-          font-size: 14px;
-          cursor: pointer;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-
-        .language-select:hover {
-          border-color: #3b82f6;
-        }
-
-        .language-select:focus {
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        }
-
-        .language-select option {
-          background: #374151;
-          color: white;
-        }
-      `}</style>
     </div>
   );
 };

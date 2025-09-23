@@ -166,11 +166,11 @@ const AnimalList: React.FC<AnimalListProps> = ({
     };
 
     if (loading) {
-        return <div className="text-center py-10 text-gray-400 bg-gray-800 min-h-screen flex items-center justify-center">Chargement des animaux...</div>;
+        return <div className="text-center py-10 text-gray-400 bg-gray-700 min-h-screen flex items-center justify-center">Chargement des animaux...</div>;
     }
 
     return (
-        <div className="p-5 bg-gray-800 min-h-screen text-white">
+        <div className="p-5 bg-gray-700 min-h-screen text-white">
             <div className="flex justify-between items-center mb-5">
                 <h2 className="text-xl font-semibold text-white">Liste des animaux 🦕 ({filteredAndSortedAnimaux.length})</h2>
                 <button onClick={loadAnimaux} className="btn-primary text-sm py-2 px-4">
@@ -238,29 +238,29 @@ const AnimalList: React.FC<AnimalListProps> = ({
                     <table className="w-full border-collapse bg-gray-700 rounded-lg shadow-card">
                         <thead>
                             <tr>
-                                <th onClick={() => handleSort('identifiant_officiel')} className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
+                                <th onClick={() => handleSort('identifiant_officiel')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Identifiant{getSortIcon('identifiant_officiel')}
                                 </th>
-                                <th onClick={() => handleSort('nom')} className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
+                                <th onClick={() => handleSort('nom')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Nom{getSortIcon('nom')}
                                 </th>
-                                <th onClick={() => handleSort('sexe')} className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
+                                <th onClick={() => handleSort('sexe')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Sexe{getSortIcon('sexe')}
                                 </th>
-                                <th onClick={() => handleSort('race_nom')} className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
+                                <th onClick={() => handleSort('race_nom')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Race{getSortIcon('race_nom')}
                                 </th>
-                                <th className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-default">Parents</th>
-                                <th onClick={() => handleSort('date_naissance')} className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
+                                <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-default">Parents</th>
+                                <th onClick={() => handleSort('date_naissance')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Naissance{getSortIcon('date_naissance')}
                                 </th>
-                                <th onClick={() => handleSort('elevage_nom')} className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
+                                <th onClick={() => handleSort('elevage_nom')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Élevage{getSortIcon('elevage_nom')}
                                 </th>
-                                <th onClick={() => handleSort('statut')} className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
+                                <th onClick={() => handleSort('statut')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Statut{getSortIcon('statut')}
                                 </th>
-                                <th className="bg-gray-800 px-3 py-2.5 text-left text-gray-300 font-bold cursor-default">Actions</th>
+                                <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-default">Actions</th>
                             </tr>
                         </thead>
                         <tbody>

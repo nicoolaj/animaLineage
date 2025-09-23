@@ -162,7 +162,7 @@ const AnimalDashboard: React.FC = () => {
     };
 
     return (
-        <div className="p-5 max-w-6xl mx-auto bg-gray-800 min-h-screen text-white">
+        <div className="p-5 max-w-6xl mx-auto bg-gray-700 min-h-screen text-white">
             <div className="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-600">
                 <h2 className="section-title">🦕 Gestion des Animaux</h2>
                 <div className="flex gap-3 items-center">
@@ -205,7 +205,7 @@ const AnimalDashboard: React.FC = () => {
 
             {currentView === 'descendants' && (
                 <div className="bg-gray-700 rounded-lg shadow-card overflow-hidden">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-5 bg-gray-800 border-b border-gray-600 gap-4">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-5 bg-gray-700 border-b border-gray-600 gap-4">
                         <h2 className="section-title">Descendants de {selectedAnimalForDescendants}</h2>
                         <button
                             onClick={() => setCurrentView('list')}

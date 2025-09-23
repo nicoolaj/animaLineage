@@ -12,6 +12,7 @@ import RaceForm from './RaceForm';
 import AnimalDashboard from './AnimalDashboard';
 import TransferRequestManager from './TransferRequestManager';
 import CompatibilityTester from './CompatibilityTester';
+import LanguageSelector from './LanguageSelector';
 
 type TabType = 'elevages' | 'animals' | 'users' | 'types-races' | 'transfer-requests' | 'compatibility-tester' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form';
 
@@ -252,9 +253,12 @@ const MainDashboard: React.FC = () => {
             <span>Bienvenue, {user?.name}!</span>
             <span className="user-role">({user?.role_name})</span>
           </div>
-          <button onClick={handleLogout} className="logout-button">
-            Déconnexion
-          </button>
+          <div className="header-controls">
+            <LanguageSelector />
+            <button onClick={handleLogout} className="logout-button">
+              Déconnexion
+            </button>
+          </div>
         </div>
       </header>
 

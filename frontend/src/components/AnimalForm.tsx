@@ -301,7 +301,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             onChange={handleChange}
                             required
                             placeholder="Ex: FR123456789 ou 001234"
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
                         />
                         {checkingAnimal && (
                             <div className="mt-2 px-3 py-2 border border-primary-300 bg-primary-50 text-primary-700 rounded-md text-sm">
@@ -336,7 +336,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             value={formData.nom || ''}
                             onChange={handleChange}
                             placeholder="Ex: Bella, Rex, Mouton123..."
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
                         />
                     </div>
                 </div>
@@ -353,7 +353,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             value={formData.sexe}
                             onChange={handleChange}
                             required
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="M">♂️ Mâle</option>
                             <option value="F">♀️ Femelle</option>
@@ -371,7 +371,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             value={formData.race_id}
                             onChange={handleChange}
                             required
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Choisir une race --</option>
                             {races.map(race => (
@@ -394,7 +394,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             name="pere_id"
                             value={formData.pere_id || ''}
                             onChange={handleChange}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Père non renseigné --</option>
                             {parentsMales.map(parent => (
@@ -415,7 +415,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             name="mere_id"
                             value={formData.mere_id || ''}
                             onChange={handleChange}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Mère non renseignée --</option>
                             {parentsFemelles.map(parent => (
@@ -439,7 +439,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             name="date_naissance"
                             value={formData.date_naissance || ''}
                             onChange={handleChange}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                     </div>
 
@@ -454,7 +454,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             name="date_bouclage"
                             value={formData.date_bouclage || ''}
                             onChange={handleChange}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                     </div>
                 </div>
@@ -471,7 +471,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             name="date_deces"
                             value={formData.date_deces || ''}
                             onChange={handleChange}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                         <div className="text-xs text-yellow-400 mt-1.5 px-2 py-2 bg-yellow-900 bg-opacity-20 rounded-md border-l-3 border-yellow-400">
                             ⚠️ Renseigner cette date retire automatiquement l'animal de son élevage
@@ -490,7 +490,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             onChange={handleChange}
                             disabled={!!formData.date_deces}
                             required={!formData.date_deces}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed"
+                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed"
                         >
                             <option value="">
                                 {formData.date_deces ? '-- Animal décédé (hors élevage) --' : '-- Choisir un élevage --'}
@@ -516,7 +516,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                         onChange={handleChange}
                         rows={3}
                         placeholder="Ex: Santé fragile, très docile, problème de patte droite..."
-                        className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-vertical placeholder-gray-400"
+                        className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-vertical placeholder-gray-400"
                     />
                 </div>
 

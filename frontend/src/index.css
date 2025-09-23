@@ -86,4 +86,361 @@
   .section-title {
     @apply m-0 text-white text-2xl font-semibold;
   }
+
+  /* Styles pour les modales et conteneurs de gestion */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  }
+
+  .modal-container {
+    @apply bg-gray-700 rounded-xl p-6 max-w-2xl mx-auto text-white shadow-2xl;
+  }
+
+  .management-container {
+    @apply bg-gray-700 rounded-xl p-6 max-w-4xl mx-auto my-5 text-white shadow-2xl;
+  }
+
+  .management-header {
+    @apply flex justify-between items-center mb-5 pb-4 border-b-2 border-gray-600;
+  }
+
+  .admin-badge {
+    @apply bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold;
+  }
+
+  .close-btn {
+    @apply bg-red-600 hover:bg-red-700 text-white border-none rounded-full w-9 h-9 cursor-pointer transition-colors duration-200 flex items-center justify-center;
+  }
+
+  .user-list {
+    @apply space-y-3 mb-5;
+  }
+
+  .user-item {
+    @apply bg-gray-700 border border-gray-600 rounded-lg p-4 flex justify-between items-center;
+  }
+
+  .user-info-detail {
+    @apply flex flex-col gap-1;
+  }
+
+  .user-name {
+    @apply font-semibold text-white;
+  }
+
+  .user-email {
+    @apply text-sm text-gray-400;
+  }
+
+  .role-badge {
+    @apply px-2 py-1 rounded text-xs font-bold;
+  }
+
+  .role-badge.owner {
+    @apply bg-blue-600 text-white;
+  }
+
+  .role-badge.collaborator {
+    @apply bg-green-600 text-white;
+  }
+
+  .user-actions {
+    @apply flex gap-2;
+  }
+
+  .action-btn {
+    @apply px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200 border-none rounded;
+  }
+
+  .remove-btn {
+    @apply bg-red-600 hover:bg-red-700 text-white;
+  }
+
+  .add-user-section {
+    @apply bg-gray-700 border border-gray-600 rounded-lg p-4 mb-4;
+  }
+
+  .search-input {
+    @apply w-full mb-4 px-3 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+
+  .available-users-list {
+    @apply max-h-64 overflow-y-auto space-y-2 mb-4;
+  }
+
+  .available-user-item {
+    @apply flex justify-between items-center p-3 bg-gray-700 rounded border border-gray-600;
+  }
+
+  .add-btn {
+    @apply bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 text-sm cursor-pointer transition-colors duration-200 border-none rounded;
+  }
+
+  .cancel-btn {
+    @apply bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 text-sm cursor-pointer transition-colors duration-200 border-none rounded;
+  }
+
+  .no-permission-notice {
+    @apply bg-yellow-600 text-yellow-100 p-4 rounded-lg text-center font-medium;
+  }
+
+  .form-actions {
+    @apply flex justify-end gap-3;
+  }
+
+  .header-controls {
+    @apply flex items-center gap-4;
+  }
+
+  /* Classes pour ElevageUsersManagement */
+  .current-users-section h4,
+  .add-user-form h4 {
+    @apply text-gray-300 font-medium mb-3;
+  }
+
+  .users-list {
+    @apply space-y-3 mb-5;
+  }
+
+  .user-info {
+    @apply flex flex-col gap-1;
+  }
+
+  .user-role {
+    @apply px-2 py-1 rounded text-xs font-bold;
+  }
+
+  .user-role.owner {
+    @apply bg-blue-600 text-white;
+  }
+
+  .user-role.collaborator {
+    @apply bg-green-600 text-white;
+  }
+
+  .added-date {
+    @apply text-xs text-gray-500 italic;
+  }
+
+  .remove-btn {
+    @apply px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200 border-none rounded bg-red-600 hover:bg-red-700 text-white;
+  }
+
+  .add-users-section {
+    @apply mt-6;
+  }
+
+  .add-user-btn {
+    @apply btn-primary;
+  }
+
+  .add-user-form {
+    @apply bg-gray-700 border border-gray-600 rounded-lg p-4 mb-4;
+  }
+
+  .available-users-list {
+    @apply max-h-64 overflow-y-auto space-y-2 mb-4;
+  }
+
+  .user-role-badge {
+    @apply px-2 py-1 rounded text-xs font-bold;
+  }
+
+  .no-users,
+  .no-available-users {
+    @apply text-center text-gray-400 py-4 italic;
+  }
+
+  .loading {
+    @apply text-center text-gray-300 py-4;
+  }
+
+  .header-actions {
+    @apply flex items-center gap-3;
+  }
+
+  /* Classes pour ElevageDetail - Réutilise le style existant */
+  .elevage-detail {
+    @apply p-8 max-w-6xl mx-auto;
+  }
+
+  .detail-header {
+    @apply management-header;
+  }
+
+  .detail-header h1 {
+    @apply section-title;
+  }
+
+  .back-btn {
+    @apply btn-secondary;
+  }
+
+  .elevage-info-card {
+    @apply management-container;
+  }
+
+  .info-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300;
+  }
+
+  .info-grid strong {
+    @apply text-gray-300 font-semibold;
+  }
+
+  /* Section des races améliorée */
+  .races-section {
+    @apply col-span-full;
+  }
+
+  .races-header {
+    @apply flex justify-between items-center mb-4 pb-2 border-b border-gray-600;
+  }
+
+  .races-count {
+    @apply text-xs bg-blue-600 text-white px-2 py-1 rounded-full font-medium;
+  }
+
+  .races-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3;
+  }
+
+  .race-card {
+    @apply bg-gray-600 border border-gray-500 rounded-lg p-3 hover:bg-gray-500 transition-all duration-200 hover:shadow-md transform hover:scale-105;
+  }
+
+  .race-name {
+    @apply font-semibold text-white text-sm mb-1;
+  }
+
+  .race-type {
+    @apply text-xs text-blue-300 bg-blue-900/30 px-2 py-1 rounded-full inline-block;
+  }
+
+  .no-races {
+    @apply flex items-center gap-2 text-gray-400 italic bg-gray-600/30 rounded-lg p-3 border border-dashed border-gray-500;
+  }
+
+  .no-races-icon {
+    @apply text-base;
+  }
+
+  .animals-section {
+    @apply space-y-4;
+  }
+
+  .animals-header {
+    @apply flex justify-between items-center mb-4;
+  }
+
+  .animals-header h2 {
+    @apply section-title;
+  }
+
+  .animals-nav {
+    @apply flex gap-3;
+  }
+
+  .animals-nav button {
+    @apply px-4 py-2 rounded transition-colors duration-200;
+  }
+
+  .animals-nav button:not(.active) {
+    @apply btn-secondary;
+  }
+
+  .animals-nav button.active {
+    @apply btn-primary;
+  }
+
+  .read-only-notice {
+    @apply no-permission-notice;
+  }
+
+  .filters {
+    @apply flex flex-wrap gap-4 mb-4 p-4 bg-gray-700 rounded-lg;
+  }
+
+  .filter-group {
+    @apply flex flex-col gap-1;
+  }
+
+  .filter-group label {
+    @apply form-label;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    @apply form-input text-sm;
+  }
+
+  .animals-table-container {
+    @apply overflow-x-auto bg-gray-700 rounded-lg;
+  }
+
+  .animals-table,
+  .descendants-table {
+    @apply w-full text-sm;
+  }
+
+  .animals-table th,
+  .descendants-table th {
+    @apply table-header p-3 text-left;
+  }
+
+  .animals-table td,
+  .descendants-table td {
+    @apply p-3 border-b border-gray-600 text-gray-300;
+  }
+
+  .animals-table tr.deceased,
+  .descendants-table tr.deceased {
+    @apply opacity-60;
+  }
+
+  .sexe-badge {
+    @apply text-lg;
+  }
+
+  .status-badge.vivant {
+    @apply status-badge-alive;
+  }
+
+  .status-badge.mort {
+    @apply status-badge-dead;
+  }
+
+  .parents {
+    @apply text-xs space-y-1;
+  }
+
+  .actions {
+    @apply flex gap-2;
+  }
+
+  .btn-descendants,
+  .btn-mark-dead {
+    @apply btn-edit;
+  }
+
+  .descendants-view {
+    @apply space-y-4;
+  }
+
+  .descendants-header {
+    @apply flex justify-between items-center;
+  }
+
+  .no-animals,
+  .no-descendants {
+    @apply text-center py-8 text-gray-400;
+  }
+
+  .read-only-text {
+    @apply text-gray-400 italic;
+  }
+
+  .form-container {
+    @apply management-container;
+  }
 }
