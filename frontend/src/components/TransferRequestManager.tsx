@@ -94,13 +94,13 @@ const TransferRequestManager: React.FC = () => {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'pending':
-                return <span className="status-badge pending">⏳ En attente</span>;
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-600 text-white">⏳ En attente</span>;
             case 'approved':
-                return <span className="status-badge approved">✅ Approuvée</span>;
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">✅ Approuvée</span>;
             case 'rejected':
-                return <span className="status-badge rejected">❌ Rejetée</span>;
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-600 text-white">❌ Rejetée</span>;
             default:
-                return <span className="status-badge">{status}</span>;
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-600 text-white">{status}</span>;
         }
     };
 
@@ -115,14 +115,14 @@ const TransferRequestManager: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="transfer-requests-loading">Chargement des demandes de transfert...</div>;
+        return <div className="text-center p-8 text-gray-300">Chargement des demandes de transfert...</div>;
     }
 
     if (error) {
         return (
-            <div className="transfer-requests-error">
+            <div className="text-center p-8 text-gray-300">
                 <p>Erreur: {error}</p>
-                <button onClick={loadTransferRequests}>Réessayer</button>
+                <button className="btn-primary mt-4" onClick={loadTransferRequests}>Réessayer</button>
             </div>
         );
     }
@@ -131,65 +131,66 @@ const TransferRequestManager: React.FC = () => {
     const processedRequests = requests.filter(r => r.status !== 'pending');
 
     return (
-        <div className="transfer-requests-container">
-            <div className="transfer-requests-header">
-                <h2>🔄 Gestion des demandes de transfert</h2>
-                <p>Gérez les demandes de transfert d'animaux entre élevages.</p>
+        <div className="p-8 max-w-6xl mx-auto">
+            <div className="mb-8">
+                <h2 className="text-white text-2xl font-semibold mb-2">🔄 Gestion des demandes de transfert</h2>
+                <p className="text-gray-300">Gérez les demandes de transfert d'animaux entre élevages.</p>
             </div>
 
             {pendingRequests.length > 0 && (
-                <div className="transfer-requests-section">
-                    <h3>📥 Demandes en attente ({pendingRequests.length})</h3>
-                    <div className="transfer-requests-list">
+                <div className="mb-8">
+                    <h3 className="text-gray-300 text-lg font-medium mb-4 pb-2 border-b-2 border-gray-600">📥 Demandes en attente ({pendingRequests.length})</h3>
+                    <div className="flex flex-col gap-4">
                         {pendingRequests.map(request => (
-                            <div key={request.id} className="transfer-request-card pending">
-                                <div className="transfer-request-info">
-                                    <div className="animal-info">
-                                        <strong>{request.identifiant_officiel}</strong>
-                                        {request.animal_nom && ` (${request.animal_nom})`}
+                            <div key={request.id} className="bg-gray-800 border border-gray-600 border-l-4 border-l-yellow-500 rounded-lg p-6 shadow-md">
+                                <div className="mb-4">
+                                    <div className="text-lg mb-3 flex items-center gap-4">
+                                        <strong className="text-white">{request.identifiant_officiel}</strong>
+                                        {request.animal_nom && <span className="text-gray-300">({request.animal_nom})</span>}
                                     </div>
-                                    <div className="transfer-details">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-3 text-sm text-gray-400">
                                         <div>
-                                            <strong>De:</strong> {request.from_elevage_nom || 'Aucun élevage'}
+                                            <strong className="text-gray-300">De:</strong> {request.from_elevage_nom || 'Aucun élevage'}
                                         </div>
                                         <div>
-                                            <strong>Vers:</strong> {request.to_elevage_nom}
+                                            <strong className="text-gray-300">Vers:</strong> {request.to_elevage_nom}
                                         </div>
                                         <div>
-                                            <strong>Demandé par:</strong> {request.requested_by_name}
+                                            <strong className="text-gray-300">Demandé par:</strong> {request.requested_by_name}
                                         </div>
                                         <div>
-                                            <strong>Date:</strong> {formatDate(request.created_at)}
+                                            <strong className="text-gray-300">Date:</strong> {formatDate(request.created_at)}
                                         </div>
                                     </div>
                                     {request.message && (
-                                        <div className="request-message">
+                                        <div className="bg-gray-700 p-3 rounded text-sm text-gray-300 mt-3">
                                             <strong>Message:</strong> {request.message}
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="transfer-request-actions">
-                                    <div className="response-input">
+                                <div className="flex flex-col gap-4">
+                                    <div>
                                         <textarea
+                                            className="form-textarea"
                                             placeholder="Message de réponse (optionnel)"
                                             value={processing === request.id ? responseMessage : ''}
                                             onChange={(e) => setResponseMessage(e.target.value)}
                                             rows={2}
                                         />
                                     </div>
-                                    <div className="action-buttons">
+                                    <div className="flex flex-col sm:flex-row gap-4">
                                         <button
                                             onClick={() => handleProcessRequest(request.id, 'approved')}
                                             disabled={processing === request.id}
-                                            className="btn-approve"
+                                            className="bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 px-6 rounded-md transition-colors duration-200"
                                         >
                                             ✅ Approuver
                                         </button>
                                         <button
                                             onClick={() => handleProcessRequest(request.id, 'rejected')}
                                             disabled={processing === request.id}
-                                            className="btn-reject"
+                                            className="bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 px-6 rounded-md transition-colors duration-200"
                                         >
                                             ❌ Rejeter
                                         </button>
@@ -202,36 +203,38 @@ const TransferRequestManager: React.FC = () => {
             )}
 
             {processedRequests.length > 0 && (
-                <div className="transfer-requests-section">
-                    <h3>📋 Demandes traitées ({processedRequests.length})</h3>
-                    <div className="transfer-requests-list">
+                <div className="mb-8">
+                    <h3 className="text-gray-300 text-lg font-medium mb-4 pb-2 border-b-2 border-gray-600">📋 Demandes traitées ({processedRequests.length})</h3>
+                    <div className="flex flex-col gap-4">
                         {processedRequests.map(request => (
-                            <div key={request.id} className={`transfer-request-card ${request.status}`}>
-                                <div className="transfer-request-info">
-                                    <div className="animal-info">
-                                        <strong>{request.identifiant_officiel}</strong>
-                                        {request.animal_nom && ` (${request.animal_nom})`}
+                            <div key={request.id} className={`bg-gray-800 border border-gray-600 rounded-lg p-6 shadow-md ${
+                                request.status === 'approved' ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-red-500'
+                            }`}>
+                                <div>
+                                    <div className="text-lg mb-3 flex items-center gap-4">
+                                        <strong className="text-white">{request.identifiant_officiel}</strong>
+                                        {request.animal_nom && <span className="text-gray-300">({request.animal_nom})</span>}
                                         {getStatusBadge(request.status)}
                                     </div>
-                                    <div className="transfer-details">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 mb-3 text-sm text-gray-400">
                                         <div>
-                                            <strong>De:</strong> {request.from_elevage_nom || 'Aucun élevage'}
+                                            <strong className="text-gray-300">De:</strong> {request.from_elevage_nom || 'Aucun élevage'}
                                         </div>
                                         <div>
-                                            <strong>Vers:</strong> {request.to_elevage_nom}
+                                            <strong className="text-gray-300">Vers:</strong> {request.to_elevage_nom}
                                         </div>
                                         <div>
-                                            <strong>Demandé par:</strong> {request.requested_by_name}
+                                            <strong className="text-gray-300">Demandé par:</strong> {request.requested_by_name}
                                         </div>
                                         <div>
-                                            <strong>Traité par:</strong> {request.processed_by_name || 'Système'}
+                                            <strong className="text-gray-300">Traité par:</strong> {request.processed_by_name || 'Système'}
                                         </div>
                                         <div>
-                                            <strong>Date de traitement:</strong> {formatDate(request.updated_at)}
+                                            <strong className="text-gray-300">Date de traitement:</strong> {formatDate(request.updated_at)}
                                         </div>
                                     </div>
                                     {request.response_message && (
-                                        <div className="response-message">
+                                        <div className="bg-gray-700 p-3 rounded text-sm text-gray-300 mt-3">
                                             <strong>Réponse:</strong> {request.response_message}
                                         </div>
                                     )}
@@ -243,200 +246,11 @@ const TransferRequestManager: React.FC = () => {
             )}
 
             {requests.length === 0 && (
-                <div className="no-requests">
+                <div className="text-center p-8 text-gray-300">
                     <p>Aucune demande de transfert trouvée.</p>
                 </div>
             )}
 
-            <style>{`
-                .transfer-requests-container {
-                    padding: 2rem;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                }
-
-                .transfer-requests-header {
-                    margin-bottom: 2rem;
-                }
-
-                .transfer-requests-header h2 {
-                    color: #333;
-                    margin-bottom: 0.5rem;
-                }
-
-                .transfer-requests-section {
-                    margin-bottom: 2rem;
-                }
-
-                .transfer-requests-section h3 {
-                    color: #495057;
-                    margin-bottom: 1rem;
-                    padding-bottom: 0.5rem;
-                    border-bottom: 2px solid #e9ecef;
-                }
-
-                .transfer-requests-list {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1rem;
-                }
-
-                .transfer-request-card {
-                    background: white;
-                    border: 1px solid #dee2e6;
-                    border-radius: 8px;
-                    padding: 1.5rem;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                }
-
-                .transfer-request-card.pending {
-                    border-left: 4px solid #ffc107;
-                }
-
-                .transfer-request-card.approved {
-                    border-left: 4px solid #28a745;
-                }
-
-                .transfer-request-card.rejected {
-                    border-left: 4px solid #dc3545;
-                }
-
-                .transfer-request-info {
-                    margin-bottom: 1rem;
-                }
-
-                .animal-info {
-                    font-size: 1.1rem;
-                    margin-bottom: 0.75rem;
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                }
-
-                .transfer-details {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 0.5rem;
-                    margin-bottom: 0.75rem;
-                    font-size: 0.9rem;
-                    color: #6c757d;
-                }
-
-                .request-message,
-                .response-message {
-                    background: #f8f9fa;
-                    padding: 0.75rem;
-                    border-radius: 4px;
-                    margin-top: 0.75rem;
-                    font-size: 0.9rem;
-                }
-
-                .transfer-request-actions {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1rem;
-                }
-
-                .response-input textarea {
-                    width: 100%;
-                    padding: 0.75rem;
-                    border: 1px solid #ced4da;
-                    border-radius: 4px;
-                    resize: vertical;
-                    font-family: inherit;
-                }
-
-                .action-buttons {
-                    display: flex;
-                    gap: 1rem;
-                }
-
-                .action-buttons button {
-                    padding: 0.75rem 1.5rem;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: 500;
-                    transition: background-color 0.2s;
-                }
-
-                .btn-approve {
-                    background: #28a745;
-                    color: white;
-                }
-
-                .btn-approve:hover:not(:disabled) {
-                    background: #218838;
-                }
-
-                .btn-reject {
-                    background: #dc3545;
-                    color: white;
-                }
-
-                .btn-reject:hover:not(:disabled) {
-                    background: #c82333;
-                }
-
-                .action-buttons button:disabled {
-                    opacity: 0.6;
-                    cursor: not-allowed;
-                }
-
-                .status-badge {
-                    padding: 0.25rem 0.75rem;
-                    border-radius: 12px;
-                    font-size: 0.8rem;
-                    font-weight: 500;
-                }
-
-                .status-badge.pending {
-                    background: #fff3cd;
-                    color: #856404;
-                }
-
-                .status-badge.approved {
-                    background: #d4edda;
-                    color: #155724;
-                }
-
-                .status-badge.rejected {
-                    background: #f8d7da;
-                    color: #721c24;
-                }
-
-                .transfer-requests-loading,
-                .transfer-requests-error,
-                .no-requests {
-                    text-align: center;
-                    padding: 2rem;
-                    color: #6c757d;
-                }
-
-                .transfer-requests-error button {
-                    margin-top: 1rem;
-                    padding: 0.5rem 1rem;
-                    background: #007bff;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-
-                @media (max-width: 768px) {
-                    .transfer-requests-container {
-                        padding: 1rem;
-                    }
-
-                    .transfer-details {
-                        grid-template-columns: 1fr;
-                    }
-
-                    .action-buttons {
-                        flex-direction: column;
-                    }
-                }
-            `}</style>
         </div>
     );
 };

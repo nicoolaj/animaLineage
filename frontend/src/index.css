@@ -40,7 +40,7 @@
   }
 
   .form-textarea {
-    @apply w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical placeholder-gray-400;
+    @apply w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y placeholder-gray-400;
   }
 
   .form-label {
