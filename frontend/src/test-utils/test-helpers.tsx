@@ -1,5 +1,7 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { store } from '../store/store';
 import { AuthProvider } from '../contexts/AuthContext';
 
 // Mock fetch globally for tests
@@ -46,9 +48,11 @@ jest.mock('../contexts/AuthContext', () => ({
 // Custom render function that includes providers
 const AllProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </Provider>
   );
 };
 

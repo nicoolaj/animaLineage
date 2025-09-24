@@ -65,7 +65,7 @@
     "test:ci": "CI=true react-scripts test --coverage --watch=false",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test:e2e": "start-server-and-test start http://localhost:3000 cypress:run",
+    "test:e2e": "start-server-and-test start http://localhost:3002 cypress:run",
     "test:lighthouse": "node scripts/performance-test.js",
     "test:performance": "npm run test:lighthouse",
     "test:security": "npm run test:e2e -- --spec 'cypress/e2e/security.cy.ts'",

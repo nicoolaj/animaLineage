@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../hooks/useTranslation';
 import AdminPanel, { AdminPanelRef } from './AdminPanel';
 import PendingUsers, { PendingUsersRef } from './PendingUsers';
 import ElevageList from './ElevageList';
@@ -25,6 +26,7 @@ interface TabData {
 
 const MainDashboard: React.FC = () => {
   const { user, logout, canAdministrate } = useAuth();
+  const { ui, messages } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('elevages');
   const [elevageFormMode, setElevageFormMode] = useState<{ mode: 'create' | 'edit'; id?: string }>({ mode: 'create' });
   const [selectedElevageId, setSelectedElevageId] = useState<number | null>(null);
@@ -102,18 +104,18 @@ const MainDashboard: React.FC = () => {
   const tabs: TabData[] = [
     {
       id: 'elevages',
-      label: 'Élevages',
+      label: ui.elevages,
       icon: '🚜'
     },
     {
       id: 'animals',
-      label: 'Animaux',
+      label: ui.animals,
       icon: '🐄',
       requiredRole: 2 // Admin et modérateurs
     },
     {
       id: 'types-races',
-      label: 'Types & Races',
+      label: ui.typesRaces,
       icon: '🏷️',
       requiredRole: 1 // Admin uniquement
     },
@@ -131,7 +133,7 @@ const MainDashboard: React.FC = () => {
     },
     {
       id: 'users',
-      label: 'Utilisateurs',
+      label: ui.users,
       icon: '👥',
       requiredRole: 1 // Admin uniquement
     }
@@ -250,13 +252,13 @@ const MainDashboard: React.FC = () => {
         />
         <div id="maindashboard-user-info-8" className="user-info">
           <div id="maindashboard-user-details-9" className="user-details">
-            <span>Bienvenue, {user?.name}!</span>
+            <span>{messages.welcomeUser}, {user?.name}!</span>
             <span className="user-role">({user?.role_name})</span>
           </div>
           <div className="header-controls">
             <LanguageSelector />
             <button onClick={handleLogout} className="logout-button">
-              Déconnexion
+              {ui.logout}
             </button>
           </div>
         </div>

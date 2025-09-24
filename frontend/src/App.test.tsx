@@ -1,12 +1,14 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from './test-utils/test-helpers';
 import App from './App';
 
 test('renders app with authentication form', () => {
   render(<App />);
-  const heading = screen.getByRole('heading', { name: /react \+ php web app/i });
-  expect(heading).toBeInTheDocument();
 
-  const loginTitle = screen.getByRole('heading', { name: /connexion/i });
-  expect(loginTitle).toBeInTheDocument();
+  // Avec les mocks d'AuthContext, l'utilisateur est connecté et voit le dashboard
+  const logo = screen.getByRole('img', { name: /animalineage/i });
+  expect(logo).toBeInTheDocument();
+
+  const welcomeMessage = screen.getByText(/welcome, test user!/i);
+  expect(welcomeMessage).toBeInTheDocument();
 });
