@@ -23,7 +23,9 @@
       "Bash(./vendor/bin/phpunit:*)",
       "Bash(cat:*)",
       "Bash(xargs sed:*)",
-      "Bash(npm run test:ci:*)"
+      "Bash(npm run test:ci:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

@@ -36,6 +36,15 @@ jobs:
           cd backend
           composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Debug backend structure
+        run: |
+          cd backend
+          ls -la
+          pwd
+          which php
+          php --version
+          composer --version
+
       - name: Run PHPUnit tests
         run: |
           cd backend
@@ -72,6 +81,15 @@ jobs:
         run: |
           cd frontend
           npm ci
+
+      - name: Debug frontend structure
+        run: |
+          cd frontend
+          ls -la
+          pwd
+          node --version
+          npm --version
+          cat package.json | head -20
 
       - name: Run Jest tests
         run: |
