@@ -367,6 +367,11 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                             animal={editingAnimal}
                             onSubmit={handleSubmitAnimal}
                             onCancel={handleCancelForm}
+                            elevageContext={elevage ? {
+                                id: elevage.id,
+                                nom: elevage.nom,
+                                races: elevage.races
+                            } : undefined}
                         />
                     </div>
                 )}

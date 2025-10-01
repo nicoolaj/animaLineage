@@ -31,14 +31,21 @@ interface AnimalFormProps {
     animal?: Animal;
     onSubmit: (animal: Animal) => void;
     onCancel: () => void;
+    elevageContext?: {
+        id: number;
+        nom: string;
+        races: Race[];
+    };
 }
 
-const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) => {
+const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, elevageContext }) => {
     const [formData, setFormData] = useState<Animal>({
         identifiant_officiel: '',
-        sexe: 'M',
+        sexe: animal?.id ? animal.sexe : '' as any, // Pas de pré-sélection pour nouveaux animaux
         race_id: 0,
-        ...animal
+        ...animal,
+        // Si on a un contexte d'élevage et qu'on crée un nouvel animal, forcer l'elevage_id
+        ...(elevageContext && !animal?.id ? { elevage_id: elevageContext.id } : {})
     });
 
     const [races, setRaces] = useState<Race[]>([]);
@@ -54,6 +61,13 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
 
     const loadRaces = useCallback(async () => {
         try {
+            // Si on a un contexte d'élevage, utiliser ses races
+            if (elevageContext?.races) {
+                setRaces(elevageContext.races);
+                return;
+            }
+
+            // Sinon, charger toutes les races comme avant
             const token = sessionStorage.getItem('token');
             if (!token) return;
 
@@ -72,7 +86,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
         } catch (error) {
             console.error('Erreur lors du chargement des races:', error);
         }
-    }, []);
+    }, [elevageContext?.races]);
 
     const loadElevages = useCallback(async () => {
         try {
@@ -355,6 +369,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                             required
                             className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
+                            <option value="">-- Sélectionner le sexe --</option>
                             <option value="M">♂️ Mâle</option>
                             <option value="F">♀️ Femelle</option>
                         </select>
@@ -481,25 +496,35 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel }) =
                     <div className="flex flex-col gap-2">
                         <label htmlFor="elevage_id" className="text-gray-100 font-medium text-sm">
                             Élevage d'appartenance {!formData.date_deces && '*'}
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Élevage où se trouve actuellement l'animal vivant</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">
+                                {elevageContext && !animal?.id ?
+                                    'Élevage automatiquement défini lors de l\'ajout depuis l\'onglet élevage' :
+                                    'Élevage où se trouve actuellement l\'animal vivant'}
+                            </span>
                         </label>
                         <select
                             id="elevage_id"
                             name="elevage_id"
                             value={formData.elevage_id || ''}
                             onChange={handleChange}
-                            disabled={!!formData.date_deces}
+                            disabled={!!formData.date_deces || (!!elevageContext && !animal?.id)}
                             required={!formData.date_deces}
                             className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed"
                         >
                             <option value="">
                                 {formData.date_deces ? '-- Animal décédé (hors élevage) --' : '-- Choisir un élevage --'}
                             </option>
-                            {elevages.map(elevage => (
-                                <option key={elevage.id} value={elevage.id}>
-                                    {elevage.nom}
+                            {elevageContext && !animal?.id ? (
+                                <option key={elevageContext.id} value={elevageContext.id}>
+                                    {elevageContext.nom} (élevage actuel)
                                 </option>
-                            ))}
+                            ) : (
+                                elevages.map(elevage => (
+                                    <option key={elevage.id} value={elevage.id}>
+                                        {elevage.nom}
+                                    </option>
+                                ))
+                            )}
                         </select>
                     </div>
                 </div>
