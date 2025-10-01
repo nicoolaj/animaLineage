@@ -52,7 +52,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     const [animaux, setAnimaux] = useState<Animal[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [currentView, setCurrentView] = useState<'list' | 'form' | 'descendants' | 'users'>('list');
+    const [currentView, setCurrentView] = useState<'list' | 'form' | 'descendants' | 'users' | 'statistics'>('list');
     const [editingAnimal, setEditingAnimal] = useState<Animal | undefined>();
     const [descendants, setDescendants] = useState<Animal[]>([]);
     const [selectedAnimalForDescendants, setSelectedAnimalForDescendants] = useState<string>('');
@@ -296,6 +296,8 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                 return animal.race_nom;
             case 'date_naissance':
                 return animal.date_naissance ? new Date(animal.date_naissance).getTime() : 0;
+            case 'age':
+                return calculateAge(animal.date_naissance, animal.date_deces) || 0;
             case 'statut':
                 return animal.statut;
             case 'parents':
@@ -348,6 +350,89 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             {label} {getSortIcon(key)}
         </th>
     );
+
+    // Fonctions de calcul des âges et statistiques
+    const calculateAge = (dateNaissance?: string, dateDeces?: string): number | null => {
+        if (!dateNaissance) return null;
+
+        const birthDate = new Date(dateNaissance);
+        const endDate = dateDeces ? new Date(dateDeces) : new Date();
+
+        const ageInMs = endDate.getTime() - birthDate.getTime();
+        const ageInYears = ageInMs / (1000 * 60 * 60 * 24 * 365.25);
+
+        return Math.floor(ageInYears * 10) / 10; // Arrondi à 1 décimale
+    };
+
+    const getAgeGroup = (age: number | null): string => {
+        if (age === null) return 'Inconnu';
+        if (age < 1) return '0-1 an';
+        if (age < 2) return '1-2 ans';
+        if (age < 5) return '2-5 ans';
+        if (age < 10) return '5-10 ans';
+        return '10+ ans';
+    };
+
+    const calculateStatistics = () => {
+        const animauxAvecAge = animaux.map(animal => ({
+            ...animal,
+            age: calculateAge(animal.date_naissance, animal.date_deces)
+        }));
+
+        const vivants = animauxAvecAge.filter(a => a.statut === 'vivant');
+        const morts = animauxAvecAge.filter(a => a.statut === 'mort');
+
+        // Calcul de l'âge moyen des vivants
+        const agesVivants = vivants.map(a => a.age).filter(age => age !== null) as number[];
+        const ageMoyenVivants = agesVivants.length > 0
+            ? agesVivants.reduce((sum, age) => sum + age, 0) / agesVivants.length
+            : null;
+
+        // Calcul de la longévité moyenne (animaux décédés)
+        const longevites = morts.map(a => a.age).filter(age => age !== null) as number[];
+        const longeviteMoyenne = longevites.length > 0
+            ? longevites.reduce((sum, age) => sum + age, 0) / longevites.length
+            : null;
+
+        // Longévité par sexe
+        const mortsMales = morts.filter(a => a.sexe === 'M');
+        const mortsFemelles = morts.filter(a => a.sexe === 'F');
+
+        const longevitesMales = mortsMales.map(a => a.age).filter(age => age !== null) as number[];
+        const longevitesFemelles = mortsFemelles.map(a => a.age).filter(age => age !== null) as number[];
+
+        const longeviteMoyenneMales = longevitesMales.length > 0
+            ? longevitesMales.reduce((sum, age) => sum + age, 0) / longevitesMales.length
+            : null;
+
+        const longeviteMoyenneFemelles = longevitesFemelles.length > 0
+            ? longevitesFemelles.reduce((sum, age) => sum + age, 0) / longevitesFemelles.length
+            : null;
+
+        // Données pour la pyramide des âges
+        const pyramideData = {
+            males: {} as Record<string, number>,
+            femelles: {} as Record<string, number>
+        };
+
+        animauxAvecAge.forEach(animal => {
+            const ageGroup = getAgeGroup(animal.age);
+            const sexe = animal.sexe === 'M' ? 'males' : 'femelles';
+            pyramideData[sexe][ageGroup] = (pyramideData[sexe][ageGroup] || 0) + 1;
+        });
+
+        return {
+            total: animaux.length,
+            vivants: vivants.length,
+            morts: morts.length,
+            ageMoyenVivants: ageMoyenVivants ? Math.round(ageMoyenVivants * 10) / 10 : null,
+            longeviteMoyenne: longeviteMoyenne ? Math.round(longeviteMoyenne * 10) / 10 : null,
+            longeviteMoyenneMales: longeviteMoyenneMales ? Math.round(longeviteMoyenneMales * 10) / 10 : null,
+            longeviteMoyenneFemelles: longeviteMoyenneFemelles ? Math.round(longeviteMoyenneFemelles * 10) / 10 : null,
+            pyramideData,
+            animauxAvecAge
+        };
+    };
 
     const filteredAnimaux = sortAnimaux(animaux.filter(animal => {
         if (filter.statut && animal.statut !== filter.statut) return false;
@@ -422,6 +507,13 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                             className={currentView === 'list' ? 'active' : ''}
                         >
                             📋 Liste
+                        </button>
+                        <button
+                            id="elevage-statistics-view-btn"
+                            onClick={() => setCurrentView('statistics')}
+                            className={currentView === 'statistics' ? 'active' : ''}
+                        >
+                            📊 Statistiques
                         </button>
                         {canEditElevage() && (
                             <>
@@ -527,6 +619,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                             {renderSortableHeader('Race', 'race_nom')}
                                             {renderSortableHeader('Parents', 'parents')}
                                             {renderSortableHeader('Naissance', 'date_naissance')}
+                                            {renderSortableHeader('Âge', 'age')}
                                             {renderSortableHeader('Statut', 'statut')}
                                             <th style={{ cursor: 'default' }}>Actions</th>
                                         </tr>
@@ -552,6 +645,12 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                     {!animal.pere_identifiant && !animal.mere_identifiant && '-'}
                                                 </td>
                                                 <td>{formatDate(animal.date_naissance)}</td>
+                                                <td>
+                                                    {(() => {
+                                                        const age = calculateAge(animal.date_naissance, animal.date_deces);
+                                                        return age !== null ? `${age} ans` : '-';
+                                                    })()}
+                                                </td>
                                                 <td>
                                                     <span className={`status-badge ${animal.statut}`}>
                                                         {animal.statut === 'vivant' ? '✅' : '💀'}
@@ -654,6 +753,133 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                 </table>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {currentView === 'statistics' && (
+                    <div id="elevage-statistics-view" className="statistics-view">
+                        <div id="elevage-statistics-header" className="statistics-header">
+                            <h3 id="elevage-statistics-title">📊 Statistiques du troupeau</h3>
+                            <button id="elevage-statistics-back-btn" onClick={() => setCurrentView('list')} className="back-btn">
+                                ← Retour à la liste
+                            </button>
+                        </div>
+
+                        {(() => {
+                            const stats = calculateStatistics();
+                            const ageGroups = ['0-1 an', '1-2 ans', '2-5 ans', '5-10 ans', '10+ ans'];
+
+                            return (
+                                <div className="statistics-content">
+                                    {/* Résumé général */}
+                                    <div className="stats-summary">
+                                        <div className="stats-cards">
+                                            <div className="stat-card">
+                                                <div className="stat-number">{stats.total}</div>
+                                                <div className="stat-label">Total animaux</div>
+                                            </div>
+                                            <div className="stat-card">
+                                                <div className="stat-number">{stats.vivants}</div>
+                                                <div className="stat-label">Vivants</div>
+                                            </div>
+                                            <div className="stat-card">
+                                                <div className="stat-number">{stats.morts}</div>
+                                                <div className="stat-label">Décédés</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Âge moyen et longévité */}
+                                    <div className="longevity-stats">
+                                        <h4>📈 Longévité et âges</h4>
+                                        <div className="longevity-cards">
+                                            <div className="longevity-card">
+                                                <div className="longevity-value">
+                                                    {stats.ageMoyenVivants !== null ? `${stats.ageMoyenVivants} ans` : 'N/A'}
+                                                </div>
+                                                <div className="longevity-label">Âge moyen (vivants)</div>
+                                            </div>
+                                            <div className="longevity-card">
+                                                <div className="longevity-value">
+                                                    {stats.longeviteMoyenne !== null ? `${stats.longeviteMoyenne} ans` : 'N/A'}
+                                                </div>
+                                                <div className="longevity-label">Longévité moyenne</div>
+                                            </div>
+                                            <div className="longevity-card">
+                                                <div className="longevity-value">
+                                                    {stats.longeviteMoyenneMales !== null ? `${stats.longeviteMoyenneMales} ans` : 'N/A'}
+                                                </div>
+                                                <div className="longevity-label">Longévité ♂️ mâles</div>
+                                            </div>
+                                            <div className="longevity-card">
+                                                <div className="longevity-value">
+                                                    {stats.longeviteMoyenneFemelles !== null ? `${stats.longeviteMoyenneFemelles} ans` : 'N/A'}
+                                                </div>
+                                                <div className="longevity-label">Longévité ♀️ femelles</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Pyramide des âges */}
+                                    <div className="age-pyramid">
+                                        <h4>🔺 Pyramide des âges</h4>
+                                        <div className="pyramid-container">
+                                            {ageGroups.map(ageGroup => {
+                                                const malesCount = stats.pyramideData.males[ageGroup] || 0;
+                                                const femellesCount = stats.pyramideData.femelles[ageGroup] || 0;
+                                                const totalInGroup = malesCount + femellesCount;
+                                                const maxCount = Math.max(...ageGroups.map(ag =>
+                                                    (stats.pyramideData.males[ag] || 0) + (stats.pyramideData.femelles[ag] || 0)
+                                                ));
+
+                                                return (
+                                                    <div key={ageGroup} className="pyramid-row">
+                                                        <div className="pyramid-label">{ageGroup}</div>
+                                                        <div className="pyramid-bars">
+                                                            <div className="pyramid-bar-left">
+                                                                <div
+                                                                    className="pyramid-bar-fill male"
+                                                                    style={{
+                                                                        width: maxCount > 0 ? `${(malesCount / maxCount) * 100}%` : '0%'
+                                                                    }}
+                                                                    title={`♂️ ${malesCount} mâles`}
+                                                                >
+                                                                    {malesCount > 0 && <span className="bar-count">♂️ {malesCount}</span>}
+                                                                </div>
+                                                            </div>
+                                                            <div className="pyramid-bar-right">
+                                                                <div
+                                                                    className="pyramid-bar-fill female"
+                                                                    style={{
+                                                                        width: maxCount > 0 ? `${(femellesCount / maxCount) * 100}%` : '0%'
+                                                                    }}
+                                                                    title={`♀️ ${femellesCount} femelles`}
+                                                                >
+                                                                    {femellesCount > 0 && <span className="bar-count">♀️ {femellesCount}</span>}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="pyramid-total">{totalInGroup}</div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Légende */}
+                                    <div className="pyramid-legend">
+                                        <div className="legend-item">
+                                            <div className="legend-color male"></div>
+                                            <span>♂️ Mâles</span>
+                                        </div>
+                                        <div className="legend-item">
+                                            <div className="legend-color female"></div>
+                                            <span>♀️ Femelles</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 )}
 

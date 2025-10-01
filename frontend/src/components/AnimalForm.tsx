@@ -41,7 +41,7 @@ interface AnimalFormProps {
 const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, elevageContext }) => {
     const [formData, setFormData] = useState<Animal>({
         identifiant_officiel: '',
-        sexe: animal?.id ? animal.sexe : '' as any, // Pas de pré-sélection pour nouveaux animaux
+        sexe: 'M',
         race_id: 0,
         ...animal,
         // Si on a un contexte d'élevage et qu'on crée un nouvel animal, forcer l'elevage_id
@@ -61,13 +61,6 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
 
     const loadRaces = useCallback(async () => {
         try {
-            // Si on a un contexte d'élevage, utiliser ses races
-            if (elevageContext?.races) {
-                setRaces(elevageContext.races);
-                return;
-            }
-
-            // Sinon, charger toutes les races comme avant
             const token = sessionStorage.getItem('token');
             if (!token) return;
 
@@ -86,7 +79,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
         } catch (error) {
             console.error('Erreur lors du chargement des races:', error);
         }
-    }, [elevageContext?.races]);
+    }, []);
 
     const loadElevages = useCallback(async () => {
         try {
@@ -135,8 +128,6 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                 setParentsFemelles([]);
                 return;
             }
-
-            console.log(`Filtrage des parents pour le type d'animal: ${selectedRace.type_animal_nom}`);
 
             // Charger tous les animaux accessibles pour la généalogie
             const response = await fetch('http://localhost:3001/api/animaux', {
@@ -369,7 +360,6 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             required
                             className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
-                            <option value="">-- Sélectionner le sexe --</option>
                             <option value="M">♂️ Mâle</option>
                             <option value="F">♀️ Femelle</option>
                         </select>
@@ -389,7 +379,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Choisir une race --</option>
-                            {races.map(race => (
+                            {(elevageContext?.races || races).map(race => (
                                 <option key={race.id} value={race.id}>
                                     {race.nom} ({race.type_animal_nom})
                                 </option>
