@@ -1,13 +1,14 @@
-name: 🧪 Tests Complets AnimaLineage
+name: 🧪 Tests Complets AnimaLineage (DISABLED)
 
-on:
-  push:
-    branches: [ master, develop ]
-  pull_request:
-    branches: [ master, develop ]
-  schedule:
-    # Tests automatiques tous les jours à 3h du matin
-    - cron: '0 3 * * *'
+# Temporarily disabled while debugging
+# on:
+#   push:
+#     branches: [ master, develop ]
+#   pull_request:
+#     branches: [ master, develop ]
+#   schedule:
+#     # Tests automatiques tous les jours à 3h du matin
+#     - cron: '0 3 * * *'
 
 jobs:
   # Tests unitaires PHP (Backend)

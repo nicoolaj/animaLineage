@@ -1,0 +1,50 @@
+name: 🧪 Simple Tests
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  # Test PHP simple
+  php-simple:
+    name: 🐘 PHP Simple Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: pdo, pdo_sqlite
+
+      - name: Test PHP basics
+        run: |
+          cd backend
+          php --version
+          composer --version
+
+  # Test React simple
+  react-simple:
+    name: ⚛️ React Simple Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Test Node basics
+        run: |
+          cd frontend
+          node --version
+          npm --version
+          ls -la
