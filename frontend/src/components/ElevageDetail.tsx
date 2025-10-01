@@ -62,6 +62,13 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         sexe: '',
         race: ''
     });
+    const [sortConfig, setSortConfig] = useState<{
+        key: string | null;
+        direction: 'asc' | 'desc' | null;
+    }>({
+        key: null,
+        direction: null
+    });
 
     const { getAuthHeaders, user, isAdmin, isModerator, isReader } = useAuth();
     const API_BASE_URL = 'http://localhost:3001/api';
@@ -261,12 +268,93 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         }
     };
 
-    const filteredAnimaux = animaux.filter(animal => {
+    const handleSort = (key: string) => {
+        let direction: 'asc' | 'desc' | null = 'asc';
+
+        if (sortConfig.key === key) {
+            if (sortConfig.direction === 'asc') {
+                direction = 'desc';
+            } else if (sortConfig.direction === 'desc') {
+                direction = null; // Reset tri
+            } else {
+                direction = 'asc';
+            }
+        }
+
+        setSortConfig({ key: direction ? key : null, direction });
+    };
+
+    const getSortValue = (animal: Animal, key: string): any => {
+        switch (key) {
+            case 'identifiant_officiel':
+                return animal.identifiant_officiel;
+            case 'nom':
+                return animal.nom || '';
+            case 'sexe':
+                return animal.sexe;
+            case 'race_nom':
+                return animal.race_nom;
+            case 'date_naissance':
+                return animal.date_naissance ? new Date(animal.date_naissance).getTime() : 0;
+            case 'statut':
+                return animal.statut;
+            case 'parents':
+                // Tri par père puis mère
+                return (animal.pere_identifiant || '') + (animal.mere_identifiant || '');
+            default:
+                return '';
+        }
+    };
+
+    const sortAnimaux = (animaux: Animal[]) => {
+        if (!sortConfig.key || !sortConfig.direction) {
+            return animaux;
+        }
+
+        return [...animaux].sort((a, b) => {
+            const aValue = getSortValue(a, sortConfig.key!);
+            const bValue = getSortValue(b, sortConfig.key!);
+
+            if (aValue < bValue) {
+                return sortConfig.direction === 'asc' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return sortConfig.direction === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
+    };
+
+    const getSortIcon = (columnKey: string) => {
+        if (sortConfig.key !== columnKey) {
+            return '↕️'; // Icône neutre
+        }
+
+        if (sortConfig.direction === 'asc') {
+            return '↑'; // Tri croissant
+        } else if (sortConfig.direction === 'desc') {
+            return '↓'; // Tri décroissant
+        }
+
+        return '↕️'; // Neutre
+    };
+
+    const renderSortableHeader = (label: string, key: string) => (
+        <th
+            onClick={() => handleSort(key)}
+            style={{ cursor: 'pointer', userSelect: 'none' }}
+            title={`Cliquer pour trier par ${label.toLowerCase()}`}
+        >
+            {label} {getSortIcon(key)}
+        </th>
+    );
+
+    const filteredAnimaux = sortAnimaux(animaux.filter(animal => {
         if (filter.statut && animal.statut !== filter.statut) return false;
         if (filter.sexe && animal.sexe !== filter.sexe) return false;
         if (filter.race && !animal.race_nom.toLowerCase().includes(filter.race.toLowerCase())) return false;
         return true;
-    });
+    }));
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return '-';
@@ -433,14 +521,14 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                 <table id="elevage-animals-table" className="animals-table">
                                     <thead>
                                         <tr>
-                                            <th>Identifiant</th>
-                                            <th>Nom</th>
-                                            <th>Sexe</th>
-                                            <th>Race</th>
-                                            <th>Parents</th>
-                                            <th>Naissance</th>
-                                            <th>Statut</th>
-                                            <th>Actions</th>
+                                            {renderSortableHeader('Identifiant', 'identifiant_officiel')}
+                                            {renderSortableHeader('Nom', 'nom')}
+                                            {renderSortableHeader('Sexe', 'sexe')}
+                                            {renderSortableHeader('Race', 'race_nom')}
+                                            {renderSortableHeader('Parents', 'parents')}
+                                            {renderSortableHeader('Naissance', 'date_naissance')}
+                                            {renderSortableHeader('Statut', 'statut')}
+                                            <th style={{ cursor: 'default' }}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
