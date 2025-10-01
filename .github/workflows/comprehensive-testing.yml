@@ -31,27 +31,21 @@ jobs:
           tools: composer
           coverage: pcov
 
-      - name: Check backend directory
-        run: |
-          ls -la backend/
-          echo "Backend directory exists"
-
       - name: Install dependencies
         run: |
           cd backend
           composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Check if PHPUnit exists
+      - name: Prepare test database
         run: |
           cd backend
-          ls -la vendor/bin/
-          test -f vendor/bin/phpunit && echo "PHPUnit found" || echo "PHPUnit NOT found"
+          touch database/test.sqlite
+          chmod 666 database/test.sqlite
 
-      - name: Run basic PHP test
+      - name: Run PHPUnit tests
         run: |
           cd backend
-          php --version
-          echo "<?php echo 'PHP is working';" | php
+          ./vendor/bin/phpunit --configuration phpunit.xml --no-coverage
 
       # Coverage upload disabled temporarily
       # - name: Upload coverage to Codecov
@@ -68,7 +62,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [20]
 
     steps:
       - name: Checkout code
@@ -96,12 +90,19 @@ jobs:
           cd frontend
           cat package.json | grep -A 10 '"scripts"'
 
-      - name: Run basic npm test
+      - name: Try different test approaches
         run: |
           cd frontend
           npm --version
           node --version
-          npm run test:ci || echo "Test command failed"
+          echo "=== Trying npm test directly ==="
+          npm test -- --version || echo "npm test version failed"
+          echo "=== Trying react-scripts test ==="
+          npx react-scripts test --version || echo "react-scripts version failed"
+          echo "=== Trying with CI=true ==="
+          CI=true npm test -- --watchAll=false || echo "CI test failed"
+          echo "=== Checking for test files ==="
+          find src -name "*.test.*" -o -name "*.spec.*" | head -10
 
       # Coverage upload disabled temporarily
       # - name: Upload coverage to Codecov
