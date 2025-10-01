@@ -175,7 +175,21 @@ Les actions transmises par le frontend doivent être vérifiées par le backend 
 - CORS configuré
 - Middleware d'autorisation
 
-## Récentes Améliorations (2025-09-22)
+## Récentes Améliorations (2025-10-01)
+
+### Nouvelles fonctionnalités
+- ✅ **Validation des dates** : Ajout de validation et limites dans les formulaires d'animaux
+- ✅ **Statistiques d'élevage** : Nouveau module de statistiques avec pyramide des âges dans ElevageDetail
+- ✅ **Colonnes triables** : Table des animaux avec tri par colonnes dans ElevageDetail
+- ✅ **Support contexte élevage** : Intégration du contexte d'élevage dans AnimalForm
+
+### Améliorations CI/CD
+- ✅ **Workflow simplifié** : Tests focalisés sur les bases essentielles
+- ✅ **Tests backend PHP** : Ajout des tests PHP avec structure améliorée
+- ✅ **Matrice Node.js** : Support Node.js 18 dans la CI
+- ✅ **Nettoyage CI** : Suppression uploads Codecov et optimisation workflow
+
+## Améliorations Précédentes (2025-09-22)
 
 ### Interface Utilisateur
 - ✅ **Migration vers Tailwind CSS** : Refactoring complet des styles des composants animaux
