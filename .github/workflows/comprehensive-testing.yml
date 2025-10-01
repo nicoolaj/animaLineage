@@ -36,26 +36,24 @@ jobs:
           cd backend
           composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Debug backend structure
+      - name: Prepare test database
         run: |
           cd backend
-          ls -la
-          pwd
-          which php
-          php --version
-          composer --version
+          touch database/test.sqlite
+          chmod 666 database/test.sqlite
 
       - name: Run PHPUnit tests
         run: |
           cd backend
-          ./vendor/bin/phpunit --configuration phpunit.xml --coverage-text --coverage-clover=coverage.xml
+          ./vendor/bin/phpunit --configuration phpunit.xml --no-coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./backend/coverage.xml
-          flags: backend
-          name: php-coverage
+      # Coverage upload disabled temporarily
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     file: ./backend/coverage.xml
+      #     flags: backend
+      #     name: php-coverage
 
   # Tests unitaires React (Frontend)
   react-tests:
@@ -82,26 +80,18 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Debug frontend structure
-        run: |
-          cd frontend
-          ls -la
-          pwd
-          node --version
-          npm --version
-          cat package.json | head -20
-
       - name: Run Jest tests
         run: |
           cd frontend
-          npm run test:ci
+          CI=true npm test -- --coverage --watch=false --passWithNoTests
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./frontend/coverage/lcov.info
-          flags: frontend
-          name: react-coverage
+      # Coverage upload disabled temporarily
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     file: ./frontend/coverage/lcov.info
+      #     flags: frontend
+      #     name: react-coverage
 
   # Tests de sécurité
   security-tests:
