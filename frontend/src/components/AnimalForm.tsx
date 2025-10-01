@@ -444,6 +444,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             name="date_naissance"
                             value={formData.date_naissance || ''}
                             onChange={handleChange}
+                            min="1980-01-01"
+                            max={new Date().toISOString().split('T')[0]}
                             className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                     </div>
@@ -459,6 +461,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             name="date_bouclage"
                             value={formData.date_bouclage || ''}
                             onChange={handleChange}
+                            min="1980-01-01"
+                            max={new Date().toISOString().split('T')[0]}
                             className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                     </div>
@@ -476,6 +480,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             name="date_deces"
                             value={formData.date_deces || ''}
                             onChange={handleChange}
+                            min="1980-01-01"
+                            max={new Date().toISOString().split('T')[0]}
                             className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                         <div className="text-xs text-yellow-400 mt-1.5 px-2 py-2 bg-yellow-900 bg-opacity-20 rounded-md border-l-3 border-yellow-400">

@@ -358,8 +358,26 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         const birthDate = new Date(dateNaissance);
         const endDate = dateDeces ? new Date(dateDeces) : new Date();
 
+        // Vérifier que les dates sont valides
+        if (isNaN(birthDate.getTime()) || isNaN(endDate.getTime())) {
+            console.warn('Date invalide:', { dateNaissance, dateDeces });
+            return null;
+        }
+
         const ageInMs = endDate.getTime() - birthDate.getTime();
         const ageInYears = ageInMs / (1000 * 60 * 60 * 24 * 365.25);
+
+        // Un âge ne peut pas être négatif
+        if (ageInYears < 0) {
+            console.warn('Âge négatif détecté - date de naissance probablement erronée:', {
+                dateNaissance,
+                dateDeces,
+                birthDate: birthDate.toISOString(),
+                endDate: endDate.toISOString(),
+                ageInYears
+            });
+            return null;
+        }
 
         return Math.floor(ageInYears * 10) / 10; // Arrondi à 1 décimale
     };
