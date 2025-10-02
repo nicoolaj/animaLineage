@@ -32,7 +32,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
   const [error, setError] = useState<string>('');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
-  const { canAdministrate, canModerate, user, getAuthHeaders } = useAuth();
+  const { canAdministrate, canModerate, getAuthHeaders } = useAuth();
   const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchAdminUsers = useCallback(async () => {

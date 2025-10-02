@@ -163,7 +163,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
         } catch (error) {
             console.error('Erreur lors du chargement des animaux:', error);
         }
-    }, [animal?.id, formData.race_id, races.length]);
+    }, [animal?.id, formData.race_id, races]);
 
     useEffect(() => {
         loadRaces();
@@ -219,7 +219,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
         } finally {
             setCheckingAnimal(false);
         }
-    }, [checkingAnimal, animal?.id]);
+    }, [checkingAnimal]);
 
     const handleTransferRequest = async (toElevageId: number, message: string) => {
         try {

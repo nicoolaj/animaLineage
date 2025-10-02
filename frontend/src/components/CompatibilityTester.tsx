@@ -70,7 +70,7 @@ const CompatibilityTester: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeaders]);
+  }, [getAuthHeaders, t]);
 
   useEffect(() => {
     fetchAnimals();

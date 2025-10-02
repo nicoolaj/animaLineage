@@ -3,7 +3,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const LanguageSelector: React.FC = () => {
-  const { currentLanguage, changeLanguage, getAvailableLanguages, ui } = useTranslation();
+  const { currentLanguage, changeLanguage, getAvailableLanguages } = useTranslation();
   const { config } = useLanguage();
 
   const languages = getAvailableLanguages();

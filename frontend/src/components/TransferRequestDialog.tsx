@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface Elevage {
     id: number;
@@ -30,11 +30,7 @@ const TransferRequestDialog: React.FC<TransferRequestDialogProps> = ({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        loadElevages();
-    }, []);
-
-    const loadElevages = async () => {
+    const loadElevages = useCallback(async () => {
         try {
             const token = sessionStorage.getItem('token');
             if (!token) return;
@@ -56,7 +52,11 @@ const TransferRequestDialog: React.FC<TransferRequestDialogProps> = ({
         } catch (error) {
             setError('Erreur de connexion');
         }
-    };
+    }, [animal.elevage_id]);
+
+    useEffect(() => {
+        loadElevages();
+    }, [loadElevages]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

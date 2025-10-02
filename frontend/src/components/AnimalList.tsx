@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { formatDate, formatAgeDisplay, getAgeTooltip } from '../utils/dateUtils';
 
 interface Animal {
     id: number;
@@ -52,11 +53,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
     const [sortBy, setSortBy] = useState<keyof Animal>('identifiant_officiel');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-    useEffect(() => {
-        loadAnimaux();
-    }, [refreshTrigger]);
-
-    const loadAnimaux = async () => {
+    const loadAnimaux = useCallback(async () => {
         try {
             setLoading(true);
             const response = await fetch('http://localhost:3001/api/animaux', {
@@ -77,7 +74,11 @@ const AnimalList: React.FC<AnimalListProps> = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [getAuthHeaders]);
+
+    useEffect(() => {
+        loadAnimaux();
+    }, [refreshTrigger, loadAnimaux]);
 
     const handleDelete = async (animalId: number, animalIdentifiant: string) => {
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'animal ${animalIdentifiant} ?`)) {
@@ -160,10 +161,6 @@ const AnimalList: React.FC<AnimalListProps> = ({
         return sortOrder === 'asc' ? ' ↗️' : ' ↘️';
     };
 
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return '-';
-        return new Date(dateString).toLocaleDateString('fr-FR');
-    };
 
     if (loading) {
         return <div className="text-center py-10 text-gray-400 bg-gray-700 min-h-screen flex items-center justify-center">Chargement des animaux...</div>;
@@ -254,6 +251,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
                                 <th onClick={() => handleSort('date_naissance')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Naissance{getSortIcon('date_naissance')}
                                 </th>
+                                <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-default">Âge</th>
                                 <th onClick={() => handleSort('elevage_nom')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
                                     Élevage{getSortIcon('elevage_nom')}
                                 </th>
@@ -288,6 +286,9 @@ const AnimalList: React.FC<AnimalListProps> = ({
                                         {!animal.pere_identifiant && !animal.mere_identifiant && '-'}
                                     </td>
                                     <td className="px-3 py-2.5">{formatDate(animal.date_naissance)}</td>
+                                    <td className="px-3 py-2.5" title={getAgeTooltip(animal)}>
+                                        {formatAgeDisplay(animal)}
+                                    </td>
                                     <td className="px-3 py-2.5">{animal.elevage_nom || '-'}</td>
                                     <td className="px-3 py-2.5">
                                         <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${animal.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>

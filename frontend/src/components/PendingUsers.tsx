@@ -22,7 +22,7 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
   const [error, setError] = useState<string>('');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
-  const { canModerate, user, getAuthHeaders } = useAuth();
+  const { canModerate, getAuthHeaders } = useAuth();
   const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchPendingUsers = useCallback(async () => {
@@ -47,7 +47,7 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
     } finally {
       setLoading(false);
     }
-  }, [user, getAuthHeaders]);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     const loadPendingUsers = async () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AnimalForm from './AnimalForm';
 import ElevageUsersManagement from './ElevageUsersManagement';
+import { formatDate, formatAgeDisplay, getAgeTooltip } from '../utils/dateUtils';
 
 interface Race {
     id: number;
@@ -459,10 +460,6 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         return true;
     }));
 
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return '-';
-        return new Date(dateString).toLocaleDateString('fr-FR');
-    };
 
     if (loading && !elevage) {
         return <div id="elevagedetail-loading-1" className="loading">Chargement...</div>;
@@ -663,11 +660,8 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                     {!animal.pere_identifiant && !animal.mere_identifiant && '-'}
                                                 </td>
                                                 <td>{formatDate(animal.date_naissance)}</td>
-                                                <td>
-                                                    {(() => {
-                                                        const age = calculateAge(animal.date_naissance, animal.date_deces);
-                                                        return age !== null ? `${age} ans` : '-';
-                                                    })()}
+                                                <td title={getAgeTooltip(animal)}>
+                                                    {formatAgeDisplay(animal)}
                                                 </td>
                                                 <td>
                                                     <span className={`status-badge ${animal.statut}`}>
