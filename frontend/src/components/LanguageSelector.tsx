@@ -1,10 +1,17 @@
 import React from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const LanguageSelector: React.FC = () => {
   const { currentLanguage, changeLanguage, getAvailableLanguages, ui } = useTranslation();
+  const { config } = useLanguage();
 
   const languages = getAvailableLanguages();
+
+  // Ne pas afficher le sélecteur si LANG_SELECTOR=false
+  if (!config.selectorEnabled) {
+    return null;
+  }
 
   return (
     <div className="inline-block">

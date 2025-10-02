@@ -38,6 +38,7 @@ require_once 'controllers/SimpleAdminController.php';
 require_once 'controllers/ElevageController.php';
 require_once 'controllers/AnimalController.php';
 require_once 'controllers/TransferRequestController.php';
+require_once 'controllers/ConfigController.php';
 require_once 'middleware/AuthMiddleware.php';
 
 $database = new Database();
@@ -51,6 +52,7 @@ $simpleAdminController = new SimpleAdminController($user, $database);
 $elevageController = new ElevageController($database);
 $animalController = new AnimalController($db, $database);
 $transferRequestController = new TransferRequestController($db, $database);
+$configController = new ConfigController();
 $authMiddleware = new AuthMiddleware($database);
 
 $request_method = $_SERVER['REQUEST_METHOD'];
@@ -98,6 +100,34 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
         } else {
             http_response_code(404);
             echo json_encode(['message' => 'Auth endpoint not specified']);
+        }
+    } elseif (isset($path_parts[1]) && $path_parts[1] === 'config') {
+        if (isset($path_parts[2])) {
+            switch ($path_parts[2]) {
+                case 'advertising':
+                    if ($request_method === 'GET') {
+                        $configController->getAdvertisingConfig();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['message' => 'Method not allowed']);
+                    }
+                    break;
+                case 'public':
+                    if ($request_method === 'GET') {
+                        $configController->getPublicConfig();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['message' => 'Method not allowed']);
+                    }
+                    break;
+                default:
+                    http_response_code(404);
+                    echo json_encode(['message' => 'Config endpoint not found']);
+                    break;
+            }
+        } else {
+            http_response_code(404);
+            echo json_encode(['message' => 'Config endpoint not specified']);
         }
     } elseif (isset($path_parts[1]) && $path_parts[1] === 'admin') {
         if (isset($path_parts[2])) {

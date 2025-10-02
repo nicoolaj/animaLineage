@@ -18,6 +18,7 @@ import React, { useEffect } from 'react';
 import './App.css';
 import { useDispatch } from 'react-redux';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { initializeLanguage } from './store/slices/languageSlice';
 import Auth from './components/Auth';
 import MainDashboard from './components/MainDashboard';
@@ -64,9 +65,11 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 

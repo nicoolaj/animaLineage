@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Animal {
   id: number;
@@ -43,6 +44,7 @@ const CompatibilityTester: React.FC = () => {
   const [searchTerm2, setSearchTerm2] = useState('');
 
   const { getAuthHeaders } = useAuth();
+  const { t } = useLanguage();
   const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchAnimals = useCallback(async () => {
@@ -60,11 +62,11 @@ const CompatibilityTester: React.FC = () => {
         const livingAnimals = data.filter((animal: Animal) => !animal.date_deces);
         setAnimals(livingAnimals);
       } else {
-        setError('Erreur lors du chargement des animaux.');
+        setError(t('error.loading'));
       }
     } catch (error) {
       console.error('Error fetching animals:', error);
-      setError('Erreur de connexion lors du chargement.');
+      setError(t('error.connection'));
     } finally {
       setLoading(false);
     }
@@ -75,20 +77,20 @@ const CompatibilityTester: React.FC = () => {
   }, [fetchAnimals]);
 
   const filteredAnimals1 = animals.filter(animal =>
-    animal.nom.toLowerCase().includes(searchTerm1.toLowerCase()) ||
-    animal.identifiant_officiel.toLowerCase().includes(searchTerm1.toLowerCase())
+    (animal.nom?.toLowerCase() || '').includes(searchTerm1.toLowerCase()) ||
+    (animal.identifiant_officiel?.toLowerCase() || '').includes(searchTerm1.toLowerCase())
   );
 
   const filteredAnimals2 = animals.filter(animal =>
-    animal.nom.toLowerCase().includes(searchTerm2.toLowerCase()) ||
-    animal.identifiant_officiel.toLowerCase().includes(searchTerm2.toLowerCase())
+    (animal.nom?.toLowerCase() || '').includes(searchTerm2.toLowerCase()) ||
+    (animal.identifiant_officiel?.toLowerCase() || '').includes(searchTerm2.toLowerCase())
   );
 
   const calculateCompatibility = (): CompatibilityResult => {
     if (!selectedAnimal1 || !selectedAnimal2) {
       return {
         compatible: false,
-        reasons: ['Veuillez sélectionner deux animaux'],
+        reasons: [t('result.select.both')],
         geneticDiversity: { score: 0, analysis: '', recommendations: [] },
         offspring: { possibleTraits: [], riskFactors: [] }
       };
@@ -98,33 +100,36 @@ const CompatibilityTester: React.FC = () => {
     let compatible = true;
 
     // Vérification de l'espèce (même type d'animal)
-    const type1 = selectedAnimal1.type_animal_nom || 'Non défini';
-    const type2 = selectedAnimal2.type_animal_nom || 'Non défini';
+    const type1 = selectedAnimal1.type_animal_nom || t('animal.type.undefined');
+    const type2 = selectedAnimal2.type_animal_nom || t('animal.type.undefined');
 
     if (type1 !== type2) {
       compatible = false;
-      reasons.push(`❌ Espèces différentes: ${type1} ≠ ${type2}`);
-    } else if (type1 === 'Non défini') {
-      reasons.push(`⚠️ Type d'animal non défini pour les deux animaux`);
+      reasons.push(`❌ ${t('check.species.different')}: ${type1} ≠ ${type2}`);
+    } else if (type1 === t('animal.type.undefined')) {
+      reasons.push(`⚠️ ${t('check.species.undefined')}`);
     } else {
-      reasons.push(`✅ Même espèce: ${type1}`);
+      reasons.push(`✅ ${t('check.species.same')}: ${type1}`);
     }
 
     // Vérification du sexe
     if (selectedAnimal1.sexe === selectedAnimal2.sexe) {
       compatible = false;
-      reasons.push(`❌ Même sexe: ${selectedAnimal1.sexe === 'M' ? 'Mâles' : 'Femelles'}`);
+      const sexText = selectedAnimal1.sexe === 'M' ? t('check.sex.same.male') : t('check.sex.same.female');
+      reasons.push(`❌ ${sexText}`);
     } else {
-      reasons.push(`✅ Sexes complémentaires: ${selectedAnimal1.sexe === 'M' ? 'Mâle' : 'Femelle'} × ${selectedAnimal2.sexe === 'M' ? 'Mâle' : 'Femelle'}`);
+      const male = selectedAnimal1.sexe === 'M' ? t('animal.male') : selectedAnimal2.sexe === 'M' ? t('animal.male') : '';
+      const female = selectedAnimal1.sexe === 'F' ? t('animal.female') : selectedAnimal2.sexe === 'F' ? t('animal.female') : '';
+      reasons.push(`✅ ${t('check.sex.compatible')}: ${male} × ${female}`);
     }
 
     // Vérification de la consanguinité
     const isRelated = checkRelationship(selectedAnimal1, selectedAnimal2);
     if (isRelated.related) {
       compatible = false;
-      reasons.push(`❌ Consanguinité détectée: ${isRelated.relationship}`);
+      reasons.push(`❌ ${t('check.relationship.detected')}: ${isRelated.relationship}`);
     } else {
-      reasons.push('✅ Pas de consanguinité directe détectée');
+      reasons.push(`✅ ${t('check.relationship.none')}`);
     }
 
     // Analyse du brassage génétique
@@ -144,21 +149,21 @@ const CompatibilityTester: React.FC = () => {
   const checkRelationship = (animal1: Animal, animal2: Animal) => {
     // Vérifier si c'est le même animal
     if (animal1.id === animal2.id) {
-      return { related: true, relationship: 'Même individu' };
+      return { related: true, relationship: t('relationship.same') };
     }
 
     // Vérifier relation parent-enfant
     if (animal1.pere_id === animal2.id || animal1.mere_id === animal2.id) {
-      return { related: true, relationship: 'Parent-enfant' };
+      return { related: true, relationship: t('relationship.parent') };
     }
     if (animal2.pere_id === animal1.id || animal2.mere_id === animal1.id) {
-      return { related: true, relationship: 'Parent-enfant' };
+      return { related: true, relationship: t('relationship.parent') };
     }
 
     // Vérifier fratrie (mêmes parents)
     if ((animal1.pere_id && animal1.pere_id === animal2.pere_id) ||
         (animal1.mere_id && animal1.mere_id === animal2.mere_id)) {
-      return { related: true, relationship: 'Frère/Sœur' };
+      return { related: true, relationship: t('relationship.sibling') };
     }
 
     return { related: false, relationship: '' };
@@ -172,30 +177,30 @@ const CompatibilityTester: React.FC = () => {
     // Si consanguinité détectée, score automatiquement très bas
     if (isConsanguineous) {
       score = 20;
-      analysis.push('🔴 Consanguinité directe - diversité génétique très faible');
-      recommendations.push('Éviter absolument ce croisement');
-      recommendations.push('Rechercher des reproducteurs non apparentés');
+      analysis.push(`🔴 ${t('genetic.consanguinity')}`);
+      recommendations.push(t('recommendations.avoid'));
+      recommendations.push(t('recommendations.unrelated'));
     } else {
       // Analyse par race (seulement si pas de consanguinité)
       if (animal1.race_nom === animal2.race_nom) {
         score = 80; // Score réduit mais toujours bon pour même race
-        analysis.push('🟡 Même race - diversité modérée');
-        recommendations.push('Considérer un croisement avec une race différente pour diversité maximale');
+        analysis.push(`🟡 ${t('genetic.same.race')}`);
+        recommendations.push(t('recommendations.crossbreed'));
       } else {
-        analysis.push('🟢 Races différentes - excellente diversité');
-        recommendations.push('Croisement inter-races favorisant la diversité génétique optimale');
+        analysis.push(`🟢 ${t('genetic.different.race')}`);
+        recommendations.push(t('recommendations.optimal'));
       }
     }
 
     // Score final
     let scoreText = '';
-    if (score >= 90) scoreText = '🟢 Excellente diversité génétique';
-    else if (score >= 70) scoreText = '🟡 Diversité modérée';
-    else scoreText = '🔴 Diversité faible - risque génétique élevé';
+    if (score >= 90) scoreText = `🟢 ${t('genetic.excellent')}`;
+    else if (score >= 70) scoreText = `🟡 ${t('genetic.moderate')}`;
+    else scoreText = `🔴 ${t('genetic.low')}`;
 
     return {
       score,
-      analysis: `${scoreText} (Score: ${score}/100)\n\n${analysis.join('\n')}`,
+      analysis: `${scoreText} (${t('genetic.score')}: ${score}/100)\n\n${analysis.join('\n')}`,
       recommendations
     };
   };
@@ -204,12 +209,12 @@ const CompatibilityTester: React.FC = () => {
     const traits = [];
 
     if (animal1.race_nom === animal2.race_nom) {
-      traits.push(`Traits typiques de la race ${animal1.race_nom}`);
-      traits.push('Expression homogène des caractéristiques raciales');
+      traits.push(`${t('offspring.traits.typical')} ${animal1.race_nom}`);
+      traits.push(t('offspring.traits.homogeneous'));
     } else {
-      traits.push(`Mélange des traits ${animal1.race_nom} × ${animal2.race_nom}`);
-      traits.push('Possible vigueur hybride (hétérosis)');
-      traits.push('Combinaisons nouvelles de caractères');
+      traits.push(`${t('offspring.traits.mix')} ${animal1.race_nom} × ${animal2.race_nom}`);
+      traits.push(t('offspring.traits.hybrid'));
+      traits.push(t('offspring.traits.new'));
     }
 
     return traits;
@@ -219,17 +224,17 @@ const CompatibilityTester: React.FC = () => {
     const risks = [];
 
     if (isConsanguineous) {
-      risks.push('🚨 Risque majeur de malformations congénitales');
-      risks.push('🚨 Forte probabilité de maladies génétiques récessives');
-      risks.push('🚨 Réduction significative de la vitalité');
-      risks.push('🚨 Problèmes de fertilité chez la descendance');
+      risks.push(t('offspring.risks.malformations'));
+      risks.push(t('offspring.risks.genetic'));
+      risks.push(t('offspring.risks.vitality'));
+      risks.push(t('offspring.risks.fertility'));
     } else if (animal1.race_nom === animal2.race_nom) {
-      risks.push('Risque accru de maladies génétiques liées à la race');
-      risks.push('Possible réduction de la vigueur hybride');
+      risks.push(t('offspring.risks.breed'));
+      risks.push(t('offspring.risks.vigor'));
     }
 
     if (risks.length === 0) {
-      risks.push('Risques génétiques minimaux');
+      risks.push(t('offspring.risks.minimal'));
     }
 
     return risks;
@@ -249,15 +254,15 @@ const CompatibilityTester: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="loading">Chargement des animaux 🦕...</div>;
+    return <div className="loading">{t('loading.animals')}</div>;
   }
 
   return (
     <div className="p-5 max-w-7xl mx-auto bg-gray-700 min-h-screen text-white">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-white mb-2">🧬 Test de Compatibilité de Reproduction</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">{t('compatibility.title')}</h2>
         <p className="text-gray-300">
-          Analysez la compatibilité reproductive entre deux animaux 🦕 et évaluez le brassage génétique potentiel
+          {t('compatibility.description')}
         </p>
       </div>
 
@@ -270,10 +275,10 @@ const CompatibilityTester: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Sélection Animal 1 */}
         <div className="bg-gray-700 p-6 rounded-lg">
-          <h3 className="text-lg font-semibold mb-4">🦕 Animal 1</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('animal.select1')}</h3>
           <input
             type="text"
-            placeholder="Rechercher par nom ou identifiant..."
+            placeholder={t('animal.search.placeholder')}
             value={searchTerm1}
             onChange={(e) => setSearchTerm1(e.target.value)}
             className="form-input mb-4"
@@ -289,20 +294,20 @@ const CompatibilityTester: React.FC = () => {
               >
                 <div className="font-medium">{animal.identifiant_officiel}</div>
                 <div className="text-sm text-gray-300">
-                  {animal.nom || 'Sans nom'} • {animal.sexe === 'M' ? '♂️' : '♀️'} • {animal.race_nom}
+                  {animal.nom || t('animal.noname')} • {animal.sexe === 'M' ? '♂️' : '♀️'} • {animal.race_nom}
                 </div>
                 <div className="text-xs text-gray-400">
-                  {animal.elevage_nom} • {animal.type_animal_nom || 'Type non défini'}
+                  {animal.elevage_nom} • {animal.type_animal_nom || t('animal.type.undefined')}
                 </div>
               </div>
             ))}
           </div>
           {selectedAnimal1 && (
             <div className="mt-4 p-4 bg-gray-600 rounded">
-              <strong>Sélectionné:</strong> {selectedAnimal1.identifiant_officiel}
+              <strong>{t('animal.selected')}</strong> {selectedAnimal1.identifiant_officiel}
               <br />
               <span className="text-sm text-gray-300">
-                {selectedAnimal1.nom} • {selectedAnimal1.sexe === 'M' ? '♂️ Mâle' : '♀️ Femelle'} • {selectedAnimal1.race_nom} • {selectedAnimal1.type_animal_nom || 'Type non défini'}
+                {selectedAnimal1.nom} • {selectedAnimal1.sexe === 'M' ? t('animal.male') : t('animal.female')} • {selectedAnimal1.race_nom} • {selectedAnimal1.type_animal_nom || t('animal.type.undefined')}
               </span>
             </div>
           )}
@@ -310,7 +315,7 @@ const CompatibilityTester: React.FC = () => {
 
         {/* Sélection Animal 2 */}
         <div className="bg-gray-700 p-6 rounded-lg">
-          <h3 className="text-lg font-semibold mb-4">🦕 Animal 2</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('animal.select2')}</h3>
           <input
             type="text"
             placeholder="Rechercher par nom ou identifiant..."
@@ -329,20 +334,20 @@ const CompatibilityTester: React.FC = () => {
               >
                 <div className="font-medium">{animal.identifiant_officiel}</div>
                 <div className="text-sm text-gray-300">
-                  {animal.nom || 'Sans nom'} • {animal.sexe === 'M' ? '♂️' : '♀️'} • {animal.race_nom}
+                  {animal.nom || t('animal.noname')} • {animal.sexe === 'M' ? '♂️' : '♀️'} • {animal.race_nom}
                 </div>
                 <div className="text-xs text-gray-400">
-                  {animal.elevage_nom} • {animal.type_animal_nom || 'Type non défini'}
+                  {animal.elevage_nom} • {animal.type_animal_nom || t('animal.type.undefined')}
                 </div>
               </div>
             ))}
           </div>
           {selectedAnimal2 && (
             <div className="mt-4 p-4 bg-gray-600 rounded">
-              <strong>Sélectionné:</strong> {selectedAnimal2.identifiant_officiel}
+              <strong>{t('animal.selected')}</strong> {selectedAnimal2.identifiant_officiel}
               <br />
               <span className="text-sm text-gray-300">
-                {selectedAnimal2.nom} • {selectedAnimal2.sexe === 'M' ? '♂️ Mâle' : '♀️ Femelle'} • {selectedAnimal2.race_nom} • {selectedAnimal2.type_animal_nom || 'Type non défini'}
+                {selectedAnimal2.nom} • {selectedAnimal2.sexe === 'M' ? t('animal.male') : t('animal.female')} • {selectedAnimal2.race_nom} • {selectedAnimal2.type_animal_nom || t('animal.type.undefined')}
               </span>
             </div>
           )}
@@ -356,13 +361,13 @@ const CompatibilityTester: React.FC = () => {
           disabled={!selectedAnimal1 || !selectedAnimal2}
           className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          🧬 Analyser la Compatibilité
+          {t('button.analyze')}
         </button>
         <button
           onClick={resetTest}
           className="btn-secondary"
         >
-          🔄 Recommencer
+          {t('button.reset')}
         </button>
       </div>
 
@@ -372,7 +377,7 @@ const CompatibilityTester: React.FC = () => {
           {/* Status de compatibilité */}
           <div className={`p-6 rounded-lg ${result.compatible ? 'bg-green-800' : 'bg-red-800'}`}>
             <h3 className="text-xl font-bold mb-4">
-              {result.compatible ? '✅ Reproduction Compatible' : '❌ Reproduction Non Recommandée'}
+              {result.compatible ? t('result.compatible') : t('result.incompatible')}
             </h3>
             <div className="space-y-2">
               {result.reasons.map((reason, index) => (
@@ -383,12 +388,12 @@ const CompatibilityTester: React.FC = () => {
 
           {/* Analyse génétique */}
           <div className="bg-gray-700 p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-4">🧬 Analyse du Brassage Génétique</h3>
+            <h3 className="text-xl font-bold mb-4">{t('genetic.title')}</h3>
             <div className="space-y-4">
               <div className="whitespace-pre-line">{result.geneticDiversity.analysis}</div>
               {result.geneticDiversity.recommendations.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-2">💡 Recommandations:</h4>
+                  <h4 className="font-semibold mb-2">{t('recommendations.title')}</h4>
                   <ul className="list-disc list-inside space-y-1">
                     {result.geneticDiversity.recommendations.map((rec, index) => (
                       <li key={index} className="text-sm text-gray-300">{rec}</li>
@@ -401,10 +406,10 @@ const CompatibilityTester: React.FC = () => {
 
           {/* Traits possibles de la descendance */}
           <div className="bg-gray-700 p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-4">🧬 Descendance Potentielle</h3>
+            <h3 className="text-xl font-bold mb-4">{t('offspring.title')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold mb-2 text-green-400">Traits Attendus:</h4>
+                <h4 className="font-semibold mb-2 text-green-400">{t('offspring.traits')}</h4>
                 <ul className="list-disc list-inside space-y-1">
                   {result.offspring.possibleTraits.map((trait, index) => (
                     <li key={index} className="text-sm text-gray-300">{trait}</li>
@@ -412,7 +417,7 @@ const CompatibilityTester: React.FC = () => {
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold mb-2 text-orange-400">Facteurs de Risque:</h4>
+                <h4 className="font-semibold mb-2 text-orange-400">{t('offspring.risks')}</h4>
                 <ul className="list-disc list-inside space-y-1">
                   {result.offspring.riskFactors.map((risk, index) => (
                     <li key={index} className="text-sm text-gray-300">{risk}</li>
