@@ -33,6 +33,21 @@ class AnimalController {
         $this->elevage = new Elevage($db, $database);
     }
 
+    /**
+     * Corriger le statut d'un animal basé sur sa date de décès
+     */
+    private function fixAnimalStatus(&$animal) {
+        // Si l'animal a une date de décès, il doit être marqué comme mort
+        if (!empty($animal['date_deces']) && $animal['statut'] !== 'mort') {
+            $animal['statut'] = 'mort';
+        }
+        // Si l'animal n'a pas de date de décès mais est marqué mort, le corriger
+        elseif (empty($animal['date_deces']) && $animal['statut'] === 'mort') {
+            $animal['statut'] = 'vivant';
+        }
+        return $animal;
+    }
+
     // Lister tous les animaux (admin) ou par élevage (utilisateur)
     public function getAnimaux($user_id, $user_role) {
         try {
@@ -65,6 +80,7 @@ class AnimalController {
                     while ($elevage_row = $elevagesStmt->fetch(PDO::FETCH_ASSOC)) {
                         $animalStmt = $this->animal->getByElevageId($elevage_row['id']);
                         while ($animal_row = $animalStmt->fetch(PDO::FETCH_ASSOC)) {
+                            $this->fixAnimalStatus($animal_row);
                             $animaux[] = $animal_row;
                         }
                     }
@@ -75,6 +91,7 @@ class AnimalController {
 
             $animaux = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $this->fixAnimalStatus($row);
                 $animaux[] = $row;
             }
 
@@ -113,6 +130,7 @@ class AnimalController {
                 }
             }
 
+            $this->fixAnimalStatus($animal);
             echo json_encode($animal);
 
         } catch (Exception $e) {
@@ -420,6 +438,7 @@ class AnimalController {
 
             $descendants = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $this->fixAnimalStatus($row);
                 $descendants[] = $row;
             }
 

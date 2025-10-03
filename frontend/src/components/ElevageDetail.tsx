@@ -106,6 +106,17 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         }
     }, [elevageId, getAuthHeaders]);
 
+    // Fonction pour corriger le statut basé sur la date de décès (sécurité côté frontend)
+    const fixAnimalStatus = (animal: Animal): Animal => {
+        if (animal.date_deces && animal.statut !== 'mort') {
+            return { ...animal, statut: 'mort' };
+        }
+        if (!animal.date_deces && animal.statut === 'mort') {
+            return { ...animal, statut: 'vivant' };
+        }
+        return animal;
+    };
+
     const loadAnimaux = useCallback(async () => {
         try {
             setLoading(true);
@@ -115,7 +126,9 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
             if (response.ok) {
                 const data = await response.json();
-                setAnimaux(data);
+                // Corriger le statut de chaque animal
+                const animauxCorrigés = data.map(fixAnimalStatus);
+                setAnimaux(animauxCorrigés);
                 setError('');
             } else {
                 const errorData = await response.json();
