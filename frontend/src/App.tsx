@@ -20,23 +20,37 @@ import { useDispatch } from 'react-redux';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { initializeLanguage } from './store/slices/languageSlice';
+import { useApiHealthWithRedux } from './hooks/useApiHealthWithRedux';
 import Auth from './components/Auth';
 import MainDashboard from './components/MainDashboard';
 import PendingAccountDashboard from './components/PendingAccountDashboard';
+import MaintenanceMessage from './components/MaintenanceMessage';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
   const dispatch = useDispatch();
+  const apiHealth = useApiHealthWithRedux();
 
   useEffect(() => {
     dispatch(initializeLanguage());
   }, [dispatch]);
 
-  if (isLoading) {
+  // Afficher le message de maintenance si l'API n'est pas disponible
+  if (!apiHealth.isHealthy && apiHealth.error) {
+    return (
+      <MaintenanceMessage
+        error={apiHealth.error}
+        onRetry={apiHealth.recheckHealth}
+        isRetrying={apiHealth.isChecking}
+      />
+    );
+  }
+
+  if (isLoading || apiHealth.isChecking) {
     return (
       <div className="App">
         <div className="loading-container">
-          <p>Chargement...</p>
+          <p>{apiHealth.isChecking ? 'Vérification du service...' : 'Chargement...'}</p>
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AnimalForm from './AnimalForm';
 import AnimalList from './AnimalList';
+import { API_BASE_URL } from '../config/api';
 
 interface Animal {
     id: number;
@@ -64,8 +65,8 @@ const AnimalDashboard: React.FC = () => {
             }
 
             const url = editingAnimal
-                ? `http://localhost:3001/api/animaux/${editingAnimal.id}`
-                : 'http://localhost:3001/api/animaux';
+                ? `${API_BASE_URL}api/animaux/${editingAnimal.id}`
+                : `${API_BASE_URL}api/animaux`;
 
             const method = editingAnimal ? 'PUT' : 'POST';
 
@@ -120,7 +121,7 @@ const AnimalDashboard: React.FC = () => {
                 throw new Error('Token d\'authentification manquant');
             }
 
-            const response = await fetch(`http://localhost:3001/api/animaux/${animalId}/descendants`, {
+            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/descendants`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -135,7 +136,7 @@ const AnimalDashboard: React.FC = () => {
             setDescendants(data);
 
             // Récupérer l'identifiant de l'animal parent pour l'affichage
-            const animalResponse = await fetch(`http://localhost:3001/api/animaux/${animalId}`, {
+            const animalResponse = await fetch(`${API_BASE_URL}api/animaux/${animalId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

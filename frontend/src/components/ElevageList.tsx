@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface Race {
   id: number;
@@ -32,7 +33,6 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
   const [showMyOnly, setShowMyOnly] = useState(false);
 
   const { getAuthHeaders, user, isAdmin, canModerate } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchElevages = useCallback(async () => {
     try {
@@ -40,8 +40,8 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
       setError('');
 
       const url = showMyOnly
-        ? `${API_BASE_URL}/elevages?my=true`
-        : `${API_BASE_URL}/elevages`;
+        ? `${API_BASE_URL}api/elevages?my=true`
+        : `${API_BASE_URL}api/elevages`;
 
       const response = await fetch(url, {
         headers: getAuthHeaders(),

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { extractErrorCode, createCodedError } from '../../utils/errorHandler';
 import { CodedError, ERROR_CODES } from '../../utils/errorCodes';
+import { API_BASE_URL } from '../../config/api';
 
 interface Animal {
   id: number;
@@ -55,8 +56,8 @@ export const fetchAnimals = createAsyncThunk<
   async ({ elevageId, token }, { rejectWithValue }) => {
     try {
       const url = elevageId
-        ? `http://localhost:3001/api/animaux?elevage_id=${elevageId}`
-        : 'http://localhost:3001/api/animaux';
+        ? `${API_BASE_URL}api/animaux?elevage_id=${elevageId}`
+        : `${API_BASE_URL}api/animaux`;
 
       const response = await fetch(url, {
         headers: getAuthHeaders(token),
@@ -89,7 +90,7 @@ export const createAnimal = createAsyncThunk<
   'animal/createAnimal',
   async ({ animalData, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:3001/api/animaux', {
+      const response = await fetch(`${API_BASE_URL}api/animaux`, {
         method: 'POST',
         headers: getAuthHeaders(token),
         body: JSON.stringify(animalData),
@@ -122,7 +123,7 @@ export const updateAnimal = createAsyncThunk<
   'animal/updateAnimal',
   async ({ id, animalData, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/animaux/${id}`, {
+      const response = await fetch(`${API_BASE_URL}api/animaux/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(token),
         body: JSON.stringify(animalData),
@@ -155,7 +156,7 @@ export const deleteAnimal = createAsyncThunk<
   'animal/deleteAnimal',
   async ({ id, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/animaux/${id}`, {
+      const response = await fetch(`${API_BASE_URL}api/animaux/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(token),
       });
@@ -187,7 +188,7 @@ export const markAnimalDead = createAsyncThunk<
   'animal/markAnimalDead',
   async ({ id, dateDeces, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/animaux/${id}/deces`, {
+      const response = await fetch(`${API_BASE_URL}api/animaux/${id}/deces`, {
         method: 'POST',
         headers: getAuthHeaders(token),
         body: JSON.stringify({ date_deces: dateDeces }),
@@ -220,7 +221,7 @@ export const fetchDescendants = createAsyncThunk<
   'animal/fetchDescendants',
   async ({ animalId, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/animaux/${animalId}/descendants`, {
+      const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/descendants`, {
         headers: getAuthHeaders(token),
       });
 

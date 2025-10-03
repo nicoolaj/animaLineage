@@ -25,7 +25,8 @@
       "Bash(xargs sed:*)",
       "Bash(npm run test:ci:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

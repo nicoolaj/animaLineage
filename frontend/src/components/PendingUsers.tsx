@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface PendingUser {
   id: number;
@@ -23,13 +24,12 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
   const { canModerate, getAuthHeaders } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchPendingUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await fetch(`${API_BASE_URL}/simple-admin/pending-users`, {
+      const response = await fetch(`${API_BASE_URL}api/simple-admin/pending-users`, {
         headers: getAuthHeaders(),
       });
 
@@ -65,7 +65,7 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
   const handleUserAction = async (userId: number, action: 'validate' | 'reject') => {
     try {
       setActionLoading(userId);
-      const response = await fetch(`${API_BASE_URL}/simple-admin/validate-user`, {
+      const response = await fetch(`${API_BASE_URL}api/simple-admin/validate-user`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { extractErrorCode, createCodedError } from '../../utils/errorHandler';
 import { CodedError, ERROR_CODES } from '../../utils/errorCodes';
+import { API_BASE_URL } from '../../config/api';
 
 interface User {
   id: number;
@@ -46,7 +47,7 @@ export const loginUser = createAsyncThunk<
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -85,7 +86,7 @@ export const registerUser = createAsyncThunk<
   'auth/register',
   async ({ name, email, password }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),

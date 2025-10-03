@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface User {
   id: number;
@@ -37,7 +38,6 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
   const [showAddUser, setShowAddUser] = useState(false);
 
   const { getAuthHeaders, user, isAdmin, canModerate } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   // Vérifier si l'utilisateur peut gérer les utilisateurs de cet élevage
   const canManageUsers = useCallback(() => {
@@ -58,7 +58,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
   const fetchElevageUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/elevages/${elevageId}/users`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}/users`, {
         headers: getAuthHeaders(),
       });
 
@@ -81,7 +81,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
 
   const fetchAvailableUsers = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/users`, {
+      const response = await fetch(`${API_BASE_URL}api/users`, {
         headers: getAuthHeaders(),
       });
 
@@ -113,7 +113,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
   const addUserToElevage = async (userId: number) => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/elevages/${elevageId}/users`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/elevages/${elevageId}/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}/users/${userId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import TransferRequestDialog from './TransferRequestDialog';
+import { API_BASE_URL } from '../config/api';
 
 interface Race {
     id: number;
@@ -64,7 +65,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             const token = sessionStorage.getItem('token');
             if (!token) return;
 
-            const response = await fetch('http://localhost:3001/api/races', {
+            const response = await fetch(`${API_BASE_URL}api/races`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -91,8 +92,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             const isAdmin = userData.user?.role === 1;
 
             const url = isAdmin
-                ? 'http://localhost:3001/api/elevages'
-                : 'http://localhost:3001/api/elevages?my=true';
+                ? `${API_BASE_URL}api/elevages`
+                : `${API_BASE_URL}api/elevages?my=true`;
 
             const response = await fetch(url, {
                 headers: {
@@ -130,7 +131,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             }
 
             // Charger tous les animaux accessibles pour la généalogie
-            const response = await fetch('http://localhost:3001/api/animaux', {
+            const response = await fetch(`${API_BASE_URL}api/animaux`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -194,7 +195,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             const token = sessionStorage.getItem('token');
             if (!token) return;
 
-            const response = await fetch(`http://localhost:3001/api/animaux?check=1&identifiant=${encodeURIComponent(identifiant)}`, {
+            const response = await fetch(`${API_BASE_URL}api/animaux?check=1&identifiant=${encodeURIComponent(identifiant)}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -226,7 +227,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             const token = sessionStorage.getItem('token');
             if (!token || !existingAnimal) return;
 
-            const response = await fetch('http://localhost:3001/api/transfer-requests', {
+            const response = await fetch(`${API_BASE_URL}api/transfer-requests`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

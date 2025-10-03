@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { API_BASE_URL } from '../config/api';
 
 interface Animal {
   id: number;
@@ -45,14 +46,13 @@ const CompatibilityTester: React.FC = () => {
 
   const { getAuthHeaders } = useAuth();
   const { t } = useLanguage();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchAnimals = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      const response = await fetch(`${API_BASE_URL}/animaux`, {
+      const response = await fetch(`${API_BASE_URL}api/animaux`, {
         headers: getAuthHeaders(),
       });
 

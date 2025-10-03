@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface TransferRequest {
     id: number;
@@ -39,7 +40,7 @@ const TransferRequestManager: React.FC = () => {
             const token = sessionStorage.getItem('token');
             if (!token) return;
 
-            const response = await fetch('http://localhost:3001/api/transfer-requests', {
+            const response = await fetch(`${API_BASE_URL}api/transfer-requests`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -64,7 +65,7 @@ const TransferRequestManager: React.FC = () => {
             const token = sessionStorage.getItem('token');
             if (!token) return;
 
-            const response = await fetch(`http://localhost:3001/api/transfer-requests/${requestId}`, {
+            const response = await fetch(`${API_BASE_URL}api/transfer-requests/${requestId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface Race {
   id: number;
@@ -37,11 +38,10 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
   const [isEdit, setIsEdit] = useState(false);
 
   const { getAuthHeaders } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchRaces = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/races`, {
+      const response = await fetch(`${API_BASE_URL}api/races`, {
         headers: getAuthHeaders(),
       });
 
@@ -57,7 +57,7 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
 
   const fetchUsers = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/users`, {
+      const response = await fetch(`${API_BASE_URL}api/users`, {
         headers: getAuthHeaders(),
       });
 
@@ -75,7 +75,7 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
     if (!elevageId) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/elevages/${elevageId}`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}`, {
         headers: getAuthHeaders(),
       });
 
@@ -163,8 +163,8 @@ const ElevageForm: React.FC<ElevageFormProps> = ({ elevageId, onSave, onCancel }
 
     try {
       const url = isEdit
-        ? `${API_BASE_URL}/elevages/${elevageId}`
-        : `${API_BASE_URL}/elevages`;
+        ? `${API_BASE_URL}api/elevages/${elevageId}`
+        : `${API_BASE_URL}api/elevages`;
 
       const method = isEdit ? 'PUT' : 'POST';
 

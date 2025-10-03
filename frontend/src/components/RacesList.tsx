@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface TypeAnimal {
   id: number;
@@ -29,7 +30,6 @@ const RacesList: React.FC<RacesListProps> = ({ onNewRace, onEditRace }) => {
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('');
 
   const { getAuthHeaders, isAdmin } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchRaces = useCallback(async () => {
     try {
@@ -37,8 +37,8 @@ const RacesList: React.FC<RacesListProps> = ({ onNewRace, onEditRace }) => {
       setError('');
 
       const url = selectedTypeFilter
-        ? `${API_BASE_URL}/races?type_id=${selectedTypeFilter}`
-        : `${API_BASE_URL}/races`;
+        ? `${API_BASE_URL}api/races?type_id=${selectedTypeFilter}`
+        : `${API_BASE_URL}api/races`;
 
       const response = await fetch(url, {
         headers: getAuthHeaders(),
@@ -62,7 +62,7 @@ const RacesList: React.FC<RacesListProps> = ({ onNewRace, onEditRace }) => {
 
   const fetchTypesAnimaux = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/types-animaux`, {
+      const response = await fetch(`${API_BASE_URL}api/types-animaux`, {
         headers: getAuthHeaders(),
       });
 
@@ -89,7 +89,7 @@ const RacesList: React.FC<RacesListProps> = ({ onNewRace, onEditRace }) => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/races/${id}`, {
+      const response = await fetch(`${API_BASE_URL}api/races/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });

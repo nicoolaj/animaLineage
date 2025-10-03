@@ -4,6 +4,7 @@ import elevageReducer from './slices/elevageSlice';
 import animalReducer from './slices/animalSlice';
 import userReducer from './slices/userSlice';
 import languageReducer from './slices/languageSlice';
+import apiHealthReducer from './slices/apiHealthSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     animal: animalReducer,
     user: userReducer,
     language: languageReducer,
+    apiHealth: apiHealthReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

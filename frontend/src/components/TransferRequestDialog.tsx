@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 interface Elevage {
     id: number;
@@ -35,7 +36,7 @@ const TransferRequestDialog: React.FC<TransferRequestDialogProps> = ({
             const token = sessionStorage.getItem('token');
             if (!token) return;
 
-            const response = await fetch('http://localhost:3001/api/elevages', {
+            const response = await fetch(`${API_BASE_URL}api/elevages`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

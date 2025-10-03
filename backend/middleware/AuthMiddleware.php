@@ -92,22 +92,59 @@ class AuthMiddleware {
     }
 
     /**
+     * Get Authorization header from multiple sources
+     * @return string|null
+     */
+    private function getAuthorizationHeader() {
+        // Try multiple methods to get the Authorization header
+
+        // Method 1: getallheaders()
+        if (function_exists('getallheaders')) {
+            $headers = getallheaders();
+            if (isset($headers['Authorization'])) {
+                return $headers['Authorization'];
+            }
+            // Case-insensitive check
+            foreach ($headers as $key => $value) {
+                if (strtolower($key) === 'authorization') {
+                    return $value;
+                }
+            }
+        }
+
+        // Method 2: $_SERVER variables
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            return $_SERVER['HTTP_AUTHORIZATION'];
+        }
+
+        // Method 3: Apache mod_rewrite
+        if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            return $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        }
+
+        return null;
+    }
+
+    /**
      * Check if user is authenticated and has the required role
      * @param int $requiredRole
      * @return array|false - returns user data if authorized, false otherwise
      */
     public function authorize($requiredRole = User::ROLE_READER) {
-        $headers = getallheaders();
+        $authHeader = $this->getAuthorizationHeader();
 
         // Check for JWT token in Authorization header
-        if (isset($headers['Authorization'])) {
-            $authHeader = $headers['Authorization'];
+        if ($authHeader) {
             if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
                 $token = $matches[1];
                 $userData = $this->verifyToken($token);
 
                 if ($userData && $this->hasRole($requiredRole, $userData)) {
-                    return $userData;
+                    // Vérifier le statut de l'utilisateur dans la base de données
+                    $userStatus = $this->getUserStatus($userData['id']);
+                    if ($userStatus === 1) { // validated
+                        return $userData;
+                    }
                 }
             }
         }
@@ -116,19 +153,64 @@ class AuthMiddleware {
     }
 
     /**
+     * Obtenir le statut de l'utilisateur
+     * @param int $userId
+     * @return int|false - status (0=pending, 1=validated, 2=rejected) or false if error
+     */
+    private function getUserStatus($userId) {
+        try {
+            $query = "SELECT status FROM users WHERE id = :id";
+            $stmt = $this->database->getConnection()->prepare($query);
+            $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? intval($result['status']) : false;
+        } catch (Exception $e) {
+            error_log("Error checking user status: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Middleware function that checks authorization and returns appropriate response
      * @param int $requiredRole
      * @return bool - true if authorized, false if not (sends HTTP response)
      */
     public function requireRole($requiredRole = User::ROLE_READER) {
-        $userData = $this->authorize($requiredRole);
+        $authHeader = $this->getAuthorizationHeader();
+        $reason = 'permissions';
 
-        if (!$userData) {
-            $this->sendUnauthorizedResponse();
-            return false;
+        // Check for JWT token in Authorization header
+        if ($authHeader) {
+            if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+                $token = $matches[1];
+                $userData = $this->verifyToken($token);
+
+                if (!$userData) {
+                    $reason = 'token';
+                } elseif (!$this->hasRole($requiredRole, $userData)) {
+                    $reason = 'permissions';
+                } else {
+                    // Vérifier le statut de l'utilisateur
+                    $userStatus = $this->getUserStatus($userData['id']);
+                    if ($userStatus === 1) {
+                        return true; // Autorisé
+                    } elseif ($userStatus === 0) {
+                        $reason = 'inactive';
+                    } elseif ($userStatus === 2) {
+                        $reason = 'rejected';
+                    }
+                }
+            } else {
+                $reason = 'token';
+            }
+        } else {
+            $reason = 'token';
         }
 
-        return true;
+        $this->sendUnauthorizedResponse($reason);
+        return false;
     }
 
     /**
@@ -175,11 +257,19 @@ class AuthMiddleware {
     /**
      * Send unauthorized response
      */
-    private function sendUnauthorizedResponse() {
+    private function sendUnauthorizedResponse($reason = 'permissions') {
         http_response_code(403);
+
+        $messages = [
+            'permissions' => 'You do not have sufficient permissions to access this resource.',
+            'inactive' => 'Your account is pending validation. Please wait for an administrator to validate your account.',
+            'rejected' => 'Your account has been rejected. Please contact an administrator.',
+            'token' => 'Invalid or expired authentication token.'
+        ];
+
         echo json_encode([
             'error' => 'Access denied',
-            'message' => 'You do not have sufficient permissions to access this resource.'
+            'message' => $messages[$reason] ?? $messages['permissions']
         ]);
     }
 

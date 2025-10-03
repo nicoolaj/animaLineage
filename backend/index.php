@@ -62,7 +62,21 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path_parts = explode('/', trim($path, '/'));
 
 if (isset($path_parts[0]) && $path_parts[0] === 'api') {
-    if (isset($path_parts[1]) && $path_parts[1] === 'users') {
+    // Test endpoint: /api/ping
+    if (isset($path_parts[1]) && $path_parts[1] === 'ping') {
+        if ($request_method === 'GET') {
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'pong',
+                'timestamp' => date('c'),
+                'server' => $_SERVER['SERVER_NAME'] ?? 'unknown'
+            ]);
+        } else {
+            http_response_code(405);
+            echo json_encode(['message' => 'Method not allowed']);
+        }
+    } elseif (isset($path_parts[1]) && $path_parts[1] === 'users') {
         switch ($request_method) {
             case 'GET':
                 $userController->getUsers();
@@ -89,6 +103,14 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                 case 'register':
                     if ($request_method === 'POST') {
                         $authController->register();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['message' => 'Method not allowed']);
+                    }
+                    break;
+                case 'me':
+                    if ($request_method === 'GET') {
+                        $authController->getCurrentUser();
                     } else {
                         http_response_code(405);
                         echo json_encode(['message' => 'Method not allowed']);

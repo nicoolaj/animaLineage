@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AnimalForm from './AnimalForm';
 import ElevageUsersManagement from './ElevageUsersManagement';
 import { formatDate, formatAgeDisplay, getAgeTooltip, calculateAge } from '../utils/dateUtils';
+import { API_BASE_URL } from '../config/api';
 
 interface Race {
     id: number;
@@ -72,7 +73,6 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     });
 
     const { getAuthHeaders, user, isAdmin, isModerator, isReader } = useAuth();
-    const API_BASE_URL = 'http://localhost:3001/api';
 
     // Vérifier si l'utilisateur peut éditer cet élevage
     const canEditElevage = () => {
@@ -90,7 +90,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
     const loadElevageData = useCallback(async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/elevages/${elevageId}`, {
+            const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}`, {
                 headers: getAuthHeaders()
             });
 
@@ -109,7 +109,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     const loadAnimaux = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await fetch(`${API_BASE_URL}/animaux?elevage_id=${elevageId}`, {
+            const response = await fetch(`${API_BASE_URL}api/animaux?elevage_id=${elevageId}`, {
                 headers: getAuthHeaders()
             });
 
@@ -155,8 +155,8 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             };
 
             const url = editingAnimal
-                ? `${API_BASE_URL}/animaux/${editingAnimal.id}`
-                : `${API_BASE_URL}/animaux`;
+                ? `${API_BASE_URL}api/animaux/${editingAnimal.id}`
+                : `${API_BASE_URL}api/animaux`;
 
             const method = editingAnimal ? 'PUT' : 'POST';
 
@@ -195,7 +195,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     const handleDeleteAnimal = async (animalId: number, animalIdentifiant: string) => {
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'animal ${animalIdentifiant} ?`)) {
             try {
-                const response = await fetch(`${API_BASE_URL}/animaux/${animalId}`, {
+                const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}`, {
                     method: 'DELETE',
                     headers: getAuthHeaders()
                 });
@@ -217,7 +217,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
         if (dateDeces && window.confirm(`Marquer ${animalIdentifiant} comme décédé le ${dateDeces} ?`)) {
             try {
-                const response = await fetch(`${API_BASE_URL}/animaux/${animalId}/deces`, {
+                const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/deces`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -241,7 +241,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     const handleViewDescendants = async (animalId: number) => {
         try {
             setLoading(true);
-            const response = await fetch(`${API_BASE_URL}/animaux/${animalId}/descendants`, {
+            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/descendants`, {
                 headers: getAuthHeaders()
             });
 

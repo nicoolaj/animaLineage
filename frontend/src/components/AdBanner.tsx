@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 interface AdConfig {
   enabled: boolean;
@@ -22,7 +23,7 @@ const AdBanner: React.FC<AdBannerProps> = ({ className = '' }) => {
 
   const fetchAdConfig = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/config/advertising');
+      const response = await fetch(`${API_BASE_URL}api/config/advertising`);
 
       if (!response.ok) {
         throw new Error('Erreur lors de la récupération de la configuration publicitaire');

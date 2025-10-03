@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface AdminUser {
   id: number;
@@ -33,13 +34,12 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
   const { canAdministrate, canModerate, getAuthHeaders } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchAdminUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await fetch(`${API_BASE_URL}/simple-admin/users`, {
+      const response = await fetch(`${API_BASE_URL}api/simple-admin/users`, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -60,7 +60,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
 
   const fetchRoles = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/simple-admin/roles`, {
+      const response = await fetch(`${API_BASE_URL}api/simple-admin/roles`, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -87,7 +87,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
     if (!selectedUser || !canAdministrate()) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/simple-admin/update-role`, {
+      const response = await fetch(`${API_BASE_URL}api/simple-admin/update-role`, {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),
@@ -135,7 +135,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
 
     try {
       setActionLoading(userId);
-      const response = await fetch(`${API_BASE_URL}/simple-admin/delete-user`, {
+      const response = await fetch(`${API_BASE_URL}api/simple-admin/delete-user`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
         body: JSON.stringify({

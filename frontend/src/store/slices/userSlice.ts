@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { extractErrorCode, createCodedError } from '../../utils/errorHandler';
 import { CodedError, ERROR_CODES } from '../../utils/errorCodes';
+import { API_BASE_URL } from '../../config/api';
 
 interface User {
   id: number;
@@ -50,7 +51,7 @@ export const fetchUsers = createAsyncThunk<
   'user/fetchUsers',
   async ({ token }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:3001/api/users', {
+      const response = await fetch(`${API_BASE_URL}api/users`, {
         headers: getAuthHeaders(token),
       });
 
@@ -82,7 +83,7 @@ export const fetchAvailableUsers = createAsyncThunk<
   'user/fetchAvailableUsers',
   async ({ token, excludeUserIds }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:3001/api/users', {
+      const response = await fetch(`${API_BASE_URL}api/users`, {
         headers: getAuthHeaders(token),
       });
 
@@ -121,7 +122,7 @@ export const fetchRaces = createAsyncThunk<
   'user/fetchRaces',
   async ({ token }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:3001/api/races', {
+      const response = await fetch(`${API_BASE_URL}api/races`, {
         headers: getAuthHeaders(token),
       });
 

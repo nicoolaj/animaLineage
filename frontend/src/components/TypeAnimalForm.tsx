@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface TypeAnimalFormProps {
   typeId?: string;
@@ -18,13 +19,12 @@ const TypeAnimalForm: React.FC<TypeAnimalFormProps> = ({ typeId, onSave, onCance
   const [isEdit, setIsEdit] = useState(false);
 
   const { getAuthHeaders } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchType = useCallback(async () => {
     if (!typeId) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/types-animaux/${typeId}`, {
+      const response = await fetch(`${API_BASE_URL}api/types-animaux/${typeId}`, {
         headers: getAuthHeaders(),
       });
 
@@ -71,8 +71,8 @@ const TypeAnimalForm: React.FC<TypeAnimalFormProps> = ({ typeId, onSave, onCance
 
     try {
       const url = isEdit
-        ? `${API_BASE_URL}/types-animaux/${typeId}`
-        : `${API_BASE_URL}/types-animaux`;
+        ? `${API_BASE_URL}api/types-animaux/${typeId}`
+        : `${API_BASE_URL}api/types-animaux`;
 
       const method = isEdit ? 'PUT' : 'POST';
 

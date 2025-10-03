@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface TypeAnimal {
   id: number;
@@ -19,14 +20,13 @@ const TypesAnimauxList: React.FC<TypesAnimauxListProps> = ({ onNewType, onEditTy
   const [error, setError] = useState<string>('');
 
   const { getAuthHeaders, isAdmin } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchTypes = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      const response = await fetch(`${API_BASE_URL}/types-animaux`, {
+      const response = await fetch(`${API_BASE_URL}api/types-animaux`, {
         headers: getAuthHeaders(),
       });
 
@@ -56,7 +56,7 @@ const TypesAnimauxList: React.FC<TypesAnimauxListProps> = ({ onNewType, onEditTy
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/types-animaux/${id}`, {
+      const response = await fetch(`${API_BASE_URL}api/types-animaux/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });

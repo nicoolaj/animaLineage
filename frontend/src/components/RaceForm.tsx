@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface TypeAnimal {
   id: number;
@@ -26,11 +27,10 @@ const RaceForm: React.FC<RaceFormProps> = ({ raceId, onSave, onCancel }) => {
   const [isEdit, setIsEdit] = useState(false);
 
   const { getAuthHeaders } = useAuth();
-  const API_BASE_URL = 'http://localhost:3001/api';
 
   const fetchTypesAnimaux = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/types-animaux`, {
+      const response = await fetch(`${API_BASE_URL}api/types-animaux`, {
         headers: getAuthHeaders(),
       });
 
@@ -47,7 +47,7 @@ const RaceForm: React.FC<RaceFormProps> = ({ raceId, onSave, onCancel }) => {
     if (!raceId) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/races/${raceId}`, {
+      const response = await fetch(`${API_BASE_URL}api/races/${raceId}`, {
         headers: getAuthHeaders(),
       });
 
@@ -96,8 +96,8 @@ const RaceForm: React.FC<RaceFormProps> = ({ raceId, onSave, onCancel }) => {
 
     try {
       const url = isEdit
-        ? `${API_BASE_URL}/races/${raceId}`
-        : `${API_BASE_URL}/races`;
+        ? `${API_BASE_URL}api/races/${raceId}`
+        : `${API_BASE_URL}api/races`;
 
       const method = isEdit ? 'PUT' : 'POST';
 

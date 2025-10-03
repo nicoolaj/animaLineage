@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDate, formatAgeDisplay, getAgeTooltip } from '../utils/dateUtils';
+import { API_BASE_URL } from '../config/api';
 
 interface Animal {
     id: number;
@@ -56,7 +57,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
     const loadAnimaux = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3001/api/animaux', {
+            const response = await fetch(`${API_BASE_URL}api/animaux`, {
                 headers: getAuthHeaders()
             });
 
@@ -83,7 +84,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
     const handleDelete = async (animalId: number, animalIdentifiant: string) => {
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'animal ${animalIdentifiant} ?`)) {
             try {
-                const response = await fetch(`http://localhost:3001/api/animaux/${animalId}`, {
+                const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}`, {
                     method: 'DELETE',
                     headers: getAuthHeaders()
                 });
@@ -106,7 +107,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
 
         if (dateDeces && window.confirm(`Marquer ${animalIdentifiant} comme décédé le ${dateDeces} ?`)) {
             try {
-                const response = await fetch(`http://localhost:3001/api/animaux/${animalId}/deces`, {
+                const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/deces`, {
                     method: 'POST',
                     headers: {
                         ...getAuthHeaders(),

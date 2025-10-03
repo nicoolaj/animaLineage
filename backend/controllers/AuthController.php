@@ -169,5 +169,39 @@ class AuthController
             echo json_encode(array("message" => "Name, email and password are required."));
         }
     }
+
+    public function getCurrentUser() {
+        $authMiddleware = new AuthMiddleware($this->database);
+        $userData = $authMiddleware->authorize(User::ROLE_READER);
+
+        if (!$userData) {
+            http_response_code(401);
+            echo json_encode(['message' => 'Non authentifié']);
+            return;
+        }
+
+        // Récupérer les données complètes de l'utilisateur depuis la base de données
+        $this->user->id = $userData['id'];
+        $fullUserData = $this->user->readOne();
+
+        if ($fullUserData) {
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'user' => [
+                    'id' => $fullUserData['id'],
+                    'name' => $fullUserData['name'],
+                    'email' => $fullUserData['email'],
+                    'role' => $fullUserData['role'],
+                    'role_name' => User::getRoleName($fullUserData['role']),
+                    'status' => $fullUserData['status'] ?? 0,
+                    'created_at' => $fullUserData['created_at']
+                ]
+            ]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['message' => 'Utilisateur non trouvé']);
+        }
+    }
 }
 ?>

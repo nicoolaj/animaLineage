@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { extractErrorCode, createCodedError } from '../../utils/errorHandler';
 import { CodedError, ERROR_CODES } from '../../utils/errorCodes';
+import { API_BASE_URL } from '../../config/api';
 
 interface Race {
   id: number;
@@ -62,8 +63,8 @@ export const fetchElevages = createAsyncThunk<
   async ({ token, showMyOnly = false }, { rejectWithValue }) => {
     try {
       const url = showMyOnly
-        ? 'http://localhost:3001/api/elevages?my=true'
-        : 'http://localhost:3001/api/elevages';
+        ? `${API_BASE_URL}api/elevages?my=true`
+        : `${API_BASE_URL}api/elevages`;
 
       const response = await fetch(url, {
         headers: getAuthHeaders(token),
@@ -96,7 +97,7 @@ export const fetchElevageById = createAsyncThunk<
   'elevage/fetchElevageById',
   async ({ id, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/elevages/${id}`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${id}`, {
         headers: getAuthHeaders(token),
       });
 
@@ -127,7 +128,7 @@ export const createElevage = createAsyncThunk<
   'elevage/createElevage',
   async ({ elevageData, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:3001/api/elevages', {
+      const response = await fetch(`${API_BASE_URL}api/elevages`, {
         method: 'POST',
         headers: getAuthHeaders(token),
         body: JSON.stringify(elevageData),
@@ -160,7 +161,7 @@ export const updateElevage = createAsyncThunk<
   'elevage/updateElevage',
   async ({ id, elevageData, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/elevages/${id}`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(token),
         body: JSON.stringify(elevageData),
@@ -193,7 +194,7 @@ export const deleteElevage = createAsyncThunk<
   'elevage/deleteElevage',
   async ({ id, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/elevages/${id}`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(token),
       });
@@ -225,7 +226,7 @@ export const fetchElevageUsers = createAsyncThunk<
   'elevage/fetchElevageUsers',
   async ({ elevageId, token }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/elevages/${elevageId}/users`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}/users`, {
         headers: getAuthHeaders(token),
       });
 
@@ -264,7 +265,7 @@ export const addUserToElevage = createAsyncThunk<
     token
   }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/elevages/${elevageId}/users`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}/users`, {
         method: 'POST',
         headers: getAuthHeaders(token),
         body: JSON.stringify({
@@ -308,7 +309,7 @@ export const removeUserFromElevage = createAsyncThunk<
     token
   }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/elevages/${elevageId}/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}/users/${userId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(token),
       });
