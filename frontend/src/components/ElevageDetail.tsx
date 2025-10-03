@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AnimalForm from './AnimalForm';
 import ElevageUsersManagement from './ElevageUsersManagement';
-import { formatDate, formatAgeDisplay, getAgeTooltip } from '../utils/dateUtils';
+import { formatDate, formatAgeDisplay, getAgeTooltip, calculateAge } from '../utils/dateUtils';
 
 interface Race {
     id: number;
@@ -298,7 +298,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             case 'date_naissance':
                 return animal.date_naissance ? new Date(animal.date_naissance).getTime() : 0;
             case 'age':
-                return calculateAge(animal.date_naissance, animal.date_deces) || 0;
+                return calculateAgeForSort(animal.date_naissance, animal.date_deces) || 0;
             case 'statut':
                 return animal.statut;
             case 'parents':
@@ -352,35 +352,25 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         </th>
     );
 
-    // Fonctions de calcul des âges et statistiques
-    const calculateAge = (dateNaissance?: string, dateDeces?: string): number | null => {
+    // Fonction locale pour compatibilité avec l'ancien code (tri uniquement)
+    const calculateAgeForSort = (dateNaissance?: string, dateDeces?: string): number | null => {
         if (!dateNaissance) return null;
 
         const birthDate = new Date(dateNaissance);
         const endDate = dateDeces ? new Date(dateDeces) : new Date();
 
-        // Vérifier que les dates sont valides
         if (isNaN(birthDate.getTime()) || isNaN(endDate.getTime())) {
-            console.warn('Date invalide:', { dateNaissance, dateDeces });
             return null;
         }
 
         const ageInMs = endDate.getTime() - birthDate.getTime();
         const ageInYears = ageInMs / (1000 * 60 * 60 * 24 * 365.25);
 
-        // Un âge ne peut pas être négatif
         if (ageInYears < 0) {
-            console.warn('Âge négatif détecté - date de naissance probablement erronée:', {
-                dateNaissance,
-                dateDeces,
-                birthDate: birthDate.toISOString(),
-                endDate: endDate.toISOString(),
-                ageInYears
-            });
             return null;
         }
 
-        return Math.floor(ageInYears * 10) / 10; // Arrondi à 1 décimale
+        return Math.floor(ageInYears * 10) / 10;
     };
 
     const getAgeGroup = (age: number | null): string => {
@@ -393,10 +383,22 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     };
 
     const calculateStatistics = () => {
-        const animauxAvecAge = animaux.map(animal => ({
-            ...animal,
-            age: calculateAge(animal.date_naissance, animal.date_deces)
-        }));
+        const animauxAvecAge = animaux.map(animal => {
+            const { age } = calculateAge(animal);
+            // Convertir l'âge en nombre si c'est une chaîne
+            let ageNumber: number | null = null;
+            if (age && age !== 'Inconnu' && age !== 'Nouveau-né') {
+                // Extraire le nombre de l'âge (ex: "5.2a 3m" -> 5.2)
+                const match = age.match(/^(\d+\.?\d*)/);
+                if (match) {
+                    ageNumber = parseFloat(match[1]);
+                }
+            }
+            return {
+                ...animal,
+                age: ageNumber
+            };
+        });
 
         const vivants = animauxAvecAge.filter(a => a.statut === 'vivant');
         const morts = animauxAvecAge.filter(a => a.statut === 'mort');
@@ -428,6 +430,34 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             ? longevitesFemelles.reduce((sum, age) => sum + age, 0) / longevitesFemelles.length
             : null;
 
+        // Espérance de vie (tous animaux vivants + décédés avec âge connu)
+        const tousAgesConnus = animauxAvecAge
+            .map(a => a.age)
+            .filter(age => age !== null) as number[];
+
+        const esperanceVieMixte = tousAgesConnus.length > 0
+            ? tousAgesConnus.reduce((sum, age) => sum + age, 0) / tousAgesConnus.length
+            : null;
+
+        // Espérance de vie par sexe (tous animaux)
+        const agesMalesConnus = animauxAvecAge
+            .filter(a => a.sexe === 'M')
+            .map(a => a.age)
+            .filter(age => age !== null) as number[];
+
+        const agesFemellesConnus = animauxAvecAge
+            .filter(a => a.sexe === 'F')
+            .map(a => a.age)
+            .filter(age => age !== null) as number[];
+
+        const esperanceVieMales = agesMalesConnus.length > 0
+            ? agesMalesConnus.reduce((sum, age) => sum + age, 0) / agesMalesConnus.length
+            : null;
+
+        const esperanceVieFemelles = agesFemellesConnus.length > 0
+            ? agesFemellesConnus.reduce((sum, age) => sum + age, 0) / agesFemellesConnus.length
+            : null;
+
         // Données pour la pyramide des âges
         const pyramideData = {
             males: {} as Record<string, number>,
@@ -448,6 +478,9 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             longeviteMoyenne: longeviteMoyenne ? Math.round(longeviteMoyenne * 10) / 10 : null,
             longeviteMoyenneMales: longeviteMoyenneMales ? Math.round(longeviteMoyenneMales * 10) / 10 : null,
             longeviteMoyenneFemelles: longeviteMoyenneFemelles ? Math.round(longeviteMoyenneFemelles * 10) / 10 : null,
+            esperanceVieMixte: esperanceVieMixte ? Math.round(esperanceVieMixte * 10) / 10 : null,
+            esperanceVieMales: esperanceVieMales ? Math.round(esperanceVieMales * 10) / 10 : null,
+            esperanceVieFemelles: esperanceVieFemelles ? Math.round(esperanceVieFemelles * 10) / 10 : null,
             pyramideData,
             animauxAvecAge
         };
@@ -828,6 +861,31 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                     {stats.longeviteMoyenneFemelles !== null ? `${stats.longeviteMoyenneFemelles} ans` : 'N/A'}
                                                 </div>
                                                 <div className="longevity-label">Longévité ♀️ femelles</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Espérance de vie */}
+                                    <div className="life-expectancy-stats">
+                                        <h4>🎯 Espérance de vie</h4>
+                                        <div className="longevity-cards">
+                                            <div className="longevity-card">
+                                                <div className="longevity-value">
+                                                    {stats.esperanceVieMixte !== null ? `${stats.esperanceVieMixte} ans` : 'N/A'}
+                                                </div>
+                                                <div className="longevity-label">Espérance de vie mixte</div>
+                                            </div>
+                                            <div className="longevity-card">
+                                                <div className="longevity-value">
+                                                    {stats.esperanceVieMales !== null ? `${stats.esperanceVieMales} ans` : 'N/A'}
+                                                </div>
+                                                <div className="longevity-label">Espérance de vie ♂️ mâles</div>
+                                            </div>
+                                            <div className="longevity-card">
+                                                <div className="longevity-value">
+                                                    {stats.esperanceVieFemelles !== null ? `${stats.esperanceVieFemelles} ans` : 'N/A'}
+                                                </div>
+                                                <div className="longevity-label">Espérance de vie ♀️ femelles</div>
                                             </div>
                                         </div>
                                     </div>
