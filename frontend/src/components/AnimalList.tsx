@@ -292,8 +292,8 @@ const AnimalList: React.FC<AnimalListProps> = ({
                                     </td>
                                     <td className="px-3 py-2.5">{animal.elevage_nom || '-'}</td>
                                     <td className="px-3 py-2.5">
-                                        <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${animal.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
-                                            {animal.statut === 'vivant' ? '✅ Vivant' : `💀 Décédé ${formatDate(animal.date_deces)}`}
+                                        <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${animal.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`} title={animal.statut === 'vivant' ? 'Vivant' : `Décédé ${formatDate(animal.date_deces)}`}>
+                                            {animal.statut === 'vivant' ? '✅' : '💀'}
                                         </span>
                                     </td>
                                     <td className="px-3 py-2.5 whitespace-nowrap">

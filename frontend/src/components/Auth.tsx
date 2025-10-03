@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ApiTest from './ApiTest';
+import AdSenseScript from './AdSenseScript';
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -61,6 +62,7 @@ const Auth: React.FC = () => {
 
   return (
     <div id="auth-container" className="auth-container">
+      <AdSenseScript />
       {process.env.NODE_ENV === 'development' && <ApiTest />}
       <div id="auth-card" className="auth-card">
         <h1>React + PHP Web App</h1>
