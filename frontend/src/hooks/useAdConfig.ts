@@ -22,8 +22,10 @@ export const useAdConfig = () => {
       try {
         const response = await fetch(`${API_BASE_URL}api/config/advertising`);
         if (response.ok) {
-          const data = await response.json();
-          setAdConfig(data);
+          const result = await response.json();
+          if (result.status === 'success' && result.data) {
+            setAdConfig(result.data);
+          }
         }
       } catch (error) {
         console.error('Erreur lors du chargement de la config publicitaire:', error);
