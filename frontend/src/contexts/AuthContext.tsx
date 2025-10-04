@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { isTokenExpired } from '../utils/auth';
 import { API_BASE_URL } from '../config/api';
 
@@ -131,7 +131,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     sessionStorage.removeItem('user');
   };
 
-  const getAuthHeaders = (): { [key: string]: string } => {
+  const getAuthHeaders = useCallback((): { [key: string]: string } => {
     const headers: { [key: string]: string } = {
       'Content-Type': 'application/json'
     };
@@ -141,7 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     return headers;
-  };
+  }, [token]);
 
   // Role utility functions
   const isAdmin = () => user?.role === 1;

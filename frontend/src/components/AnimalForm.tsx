@@ -51,6 +51,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
 
     const [races, setRaces] = useState<Race[]>([]);
     const [elevages, setElevages] = useState<Elevage[]>([]);
+    const [racesLoaded, setRacesLoaded] = useState(false);
+    const [elevagesLoaded, setElevagesLoaded] = useState(false);
     const [parentsMales, setParentsMales] = useState<Animal[]>([]);
     const [parentsFemelles, setParentsFemelles] = useState<Animal[]>([]);
     const [loading, setLoading] = useState(false);
@@ -79,6 +81,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             }
         } catch (error) {
             console.error('Erreur lors du chargement des races:', error);
+        } finally {
+            setRacesLoaded(true);
         }
     }, []);
 
@@ -107,6 +111,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             }
         } catch (error) {
             console.error('Erreur lors du chargement des élevages:', error);
+        } finally {
+            setElevagesLoaded(true);
         }
     }, []);
 
@@ -166,11 +172,25 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
         }
     }, [animal?.id, formData.race_id, races]);
 
+    // Charger les données une seule fois au montage du composant
     useEffect(() => {
-        loadRaces();
-        loadElevages();
-        loadPotentialParents();
-    }, [loadRaces, loadElevages, loadPotentialParents]);
+        if (!racesLoaded) {
+            loadRaces();
+        }
+    }, [racesLoaded]);
+
+    useEffect(() => {
+        if (!elevagesLoaded) {
+            loadElevages();
+        }
+    }, [elevagesLoaded]);
+
+    // Recharger les parents potentiels quand la race change
+    useEffect(() => {
+        if (races.length > 0 && formData.race_id) {
+            loadPotentialParents();
+        }
+    }, [formData.race_id, races.length]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -220,7 +240,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
         } finally {
             setCheckingAnimal(false);
         }
-    }, [checkingAnimal]);
+    }, [animal?.identifiant_officiel]);
 
     const handleTransferRequest = async (toElevageId: number, message: string) => {
         try {

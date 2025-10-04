@@ -48,6 +48,24 @@ class AnimalController {
         return $animal;
     }
 
+    /**
+     * Vérifier si un animal existe avec cet identifiant officiel
+     */
+    private function checkAnimalByIdentifiant($identifiant) {
+        try {
+            $query = "SELECT a.id, a.nom, a.identifiant_officiel, e.nom as elevage_nom
+                      FROM animaux a
+                      LEFT JOIN elevages e ON a.elevage_id = e.id
+                      WHERE a.identifiant_officiel = :identifiant";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':identifiant', $identifiant);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
     // Lister tous les animaux (admin) ou par élevage (utilisateur)
     public function getAnimaux($user_id, $user_role) {
         try {
@@ -149,6 +167,22 @@ class AnimalController {
                 return;
             }
 
+            // Vérifier l'unicité de l'identifiant officiel
+            $existingAnimal = $this->checkAnimalByIdentifiant($data['identifiant_officiel']);
+            if ($existingAnimal) {
+                http_response_code(409);
+                echo json_encode([
+                    'message' => 'Un animal avec cet identifiant officiel existe déjà',
+                    'field' => 'identifiant_officiel',
+                    'existing_animal' => [
+                        'id' => $existingAnimal['id'],
+                        'nom' => $existingAnimal['nom'],
+                        'elevage_nom' => $existingAnimal['elevage_nom']
+                    ]
+                ]);
+                return;
+            }
+
             if (empty($data['sexe']) || !in_array($data['sexe'], ['M', 'F'])) {
                 http_response_code(400);
                 echo json_encode(['message' => 'Le sexe doit être M ou F']);
@@ -239,8 +273,17 @@ class AnimalController {
             }
 
         } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+            // Gestion spécifique des erreurs de contrainte d'unicité
+            if (strpos($e->getMessage(), 'UNIQUE constraint failed: animaux.identifiant_officiel') !== false) {
+                http_response_code(409);
+                echo json_encode([
+                    'message' => 'Un animal avec cet identifiant officiel existe déjà',
+                    'field' => 'identifiant_officiel'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+            }
         }
     }
 

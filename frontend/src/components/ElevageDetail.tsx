@@ -143,9 +143,60 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     }, [elevageId, getAuthHeaders]);
 
     useEffect(() => {
-        loadElevageData();
-        loadAnimaux();
-    }, [elevageId, refreshTrigger, loadElevageData, loadAnimaux]);
+        const loadData = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}api/elevages/${elevageId}`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setElevage(data);
+                } else {
+                    setError('Erreur lors du chargement de l\'élevage');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                setError('Erreur lors du chargement de l\'élevage');
+            }
+        };
+        loadData();
+    }, [elevageId, refreshTrigger, getAuthHeaders]);
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(`${API_BASE_URL}api/animaux?elevage_id=${elevageId}`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const animauxCorrigés = data.map((animal: Animal) => {
+                        if (animal.date_deces && animal.statut !== 'mort') {
+                            return { ...animal, statut: 'mort' };
+                        }
+                        if (!animal.date_deces && animal.statut === 'mort') {
+                            return { ...animal, statut: 'vivant' };
+                        }
+                        return animal;
+                    });
+                    setAnimaux(animauxCorrigés);
+                    setError('');
+                } else {
+                    const errorData = await response.json();
+                    setError(errorData.message || 'Erreur lors du chargement des animaux');
+                }
+            } catch (error: any) {
+                console.error('Erreur:', error);
+                setError(error.message || 'Erreur lors du chargement des animaux');
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
+    }, [elevageId, refreshTrigger, getAuthHeaders]);
 
     const handleCreateAnimal = () => {
         setEditingAnimal(undefined);
@@ -184,7 +235,15 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Erreur lors de l\'enregistrement');
+                if (response.status === 409 && errorData.field === 'identifiant_officiel') {
+                    if (errorData.existing_animal) {
+                        throw new Error(`Cet identifiant officiel existe déjà pour l'animal "${errorData.existing_animal.nom || 'Sans nom'}" dans l'élevage "${errorData.existing_animal.elevage_nom || 'Non spécifié'}"`);
+                    } else {
+                        throw new Error('Cet identifiant officiel existe déjà. Veuillez en choisir un autre.');
+                    }
+                } else {
+                    throw new Error(errorData.message || 'Erreur lors de l\'enregistrement');
+                }
             }
 
             setCurrentView('list');
