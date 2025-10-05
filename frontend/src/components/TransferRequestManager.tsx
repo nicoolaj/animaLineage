@@ -116,14 +116,14 @@ const TransferRequestManager: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="text-center p-8 text-gray-300">Chargement des demandes de transfert...</div>;
+        return <div className="text-center p-4 sm:p-8 text-gray-300">Chargement des demandes de transfert...</div>;
     }
 
     if (error) {
         return (
-            <div className="text-center p-8 text-gray-300">
-                <p>Erreur: {error}</p>
-                <button className="btn-primary mt-4" onClick={loadTransferRequests}>Réessayer</button>
+            <div className="text-center p-4 sm:p-8 text-gray-300">
+                <p className="text-sm sm:text-base">Erreur: {error}</p>
+                <button className="btn-primary mt-4 w-full sm:w-auto" onClick={loadTransferRequests}>Réessayer</button>
             </div>
         );
     }
@@ -132,68 +132,73 @@ const TransferRequestManager: React.FC = () => {
     const processedRequests = requests.filter(r => r.status !== 'pending');
 
     return (
-        <div className="p-8 max-w-6xl mx-auto">
-            <div className="mb-8">
-                <h2 className="text-white text-2xl font-semibold mb-2">🔄 Gestion des demandes de transfert</h2>
-                <p className="text-gray-300">Gérez les demandes de transfert d'animaux entre élevages.</p>
+        <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+            <div className="mb-6 sm:mb-8">
+                <h2 className="text-white text-lg sm:text-xl lg:text-2xl font-semibold mb-2">🔄 Gestion des demandes de transfert</h2>
+                <p className="text-gray-300 text-sm sm:text-base">Gérez les demandes de transfert d'animaux entre élevages.</p>
             </div>
 
             {pendingRequests.length > 0 && (
-                <div className="mb-8">
-                    <h3 className="text-gray-300 text-lg font-medium mb-4 pb-2 border-b-2 border-gray-600">📥 Demandes en attente ({pendingRequests.length})</h3>
-                    <div className="flex flex-col gap-4">
+                <div className="mb-6 sm:mb-8">
+                    <h3 className="text-gray-300 text-base sm:text-lg font-medium mb-3 sm:mb-4 pb-2 border-b-2 border-gray-600">📥 Demandes en attente ({pendingRequests.length})</h3>
+                    <div className="flex flex-col gap-4 sm:gap-6">
                         {pendingRequests.map(request => (
-                            <div key={request.id} className="bg-gray-700 border border-gray-600 border-l-4 border-l-yellow-500 rounded-lg p-6 shadow-md">
-                                <div className="mb-4">
-                                    <div className="text-lg mb-3 flex items-center gap-4">
+                            <div key={request.id} className="bg-gray-700 border border-gray-600 border-l-4 border-l-yellow-500 rounded-lg p-4 sm:p-6 shadow-md">
+                                <div className="mb-4 sm:mb-6">
+                                    <div className="text-base sm:text-lg mb-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                         <strong className="text-white">{request.identifiant_officiel}</strong>
-                                        {request.animal_nom && <span className="text-gray-300">({request.animal_nom})</span>}
+                                        {request.animal_nom && <span className="text-gray-300 text-sm sm:text-base">({request.animal_nom})</span>}
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-3 text-sm text-gray-400">
-                                        <div>
-                                            <strong className="text-gray-300">De:</strong> {request.from_elevage_nom || 'Aucun élevage'}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-3 text-xs sm:text-sm text-gray-400">
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">De:</strong>
+                                            <span className="break-words">{request.from_elevage_nom || 'Aucun élevage'}</span>
                                         </div>
-                                        <div>
-                                            <strong className="text-gray-300">Vers:</strong> {request.to_elevage_nom}
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">Vers:</strong>
+                                            <span className="break-words">{request.to_elevage_nom}</span>
                                         </div>
-                                        <div>
-                                            <strong className="text-gray-300">Demandé par:</strong> {request.requested_by_name}
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">Demandé par:</strong>
+                                            <span className="break-words">{request.requested_by_name}</span>
                                         </div>
-                                        <div>
-                                            <strong className="text-gray-300">Date:</strong> {formatDate(request.created_at)}
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">Date:</strong>
+                                            <span className="break-words">{formatDate(request.created_at)}</span>
                                         </div>
                                     </div>
                                     {request.message && (
-                                        <div className="bg-gray-700 p-3 rounded text-sm text-gray-300 mt-3">
-                                            <strong>Message:</strong> {request.message}
+                                        <div className="bg-gray-600 p-3 sm:p-4 rounded text-xs sm:text-sm text-gray-300 mt-3">
+                                            <strong className="block mb-1">Message:</strong>
+                                            <span className="break-words">{request.message}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-3 sm:gap-4">
                                     <div>
                                         <textarea
-                                            className="form-textarea"
+                                            className="form-textarea w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-800 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y placeholder-gray-400"
                                             placeholder="Message de réponse (optionnel)"
                                             value={processing === request.id ? responseMessage : ''}
                                             onChange={(e) => setResponseMessage(e.target.value)}
                                             rows={2}
                                         />
                                     </div>
-                                    <div className="flex flex-col sm:flex-row gap-4">
+                                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                                         <button
                                             onClick={() => handleProcessRequest(request.id, 'approved')}
                                             disabled={processing === request.id}
-                                            className="bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 px-6 rounded-md transition-colors duration-200"
+                                            className="bg-green-600 hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 sm:px-6 rounded-md transition-colors duration-200 text-sm sm:text-base w-full sm:w-auto"
                                         >
-                                            ✅ Approuver
+                                            {processing === request.id ? '⏳ Traitement...' : '✅ Approuver'}
                                         </button>
                                         <button
                                             onClick={() => handleProcessRequest(request.id, 'rejected')}
                                             disabled={processing === request.id}
-                                            className="bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 px-6 rounded-md transition-colors duration-200"
+                                            className="bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 sm:px-6 rounded-md transition-colors duration-200 text-sm sm:text-base w-full sm:w-auto"
                                         >
-                                            ❌ Rejeter
+                                            {processing === request.id ? '⏳ Traitement...' : '❌ Rejeter'}
                                         </button>
                                     </div>
                                 </div>
@@ -204,39 +209,47 @@ const TransferRequestManager: React.FC = () => {
             )}
 
             {processedRequests.length > 0 && (
-                <div className="mb-8">
-                    <h3 className="text-gray-300 text-lg font-medium mb-4 pb-2 border-b-2 border-gray-600">📋 Demandes traitées ({processedRequests.length})</h3>
-                    <div className="flex flex-col gap-4">
+                <div className="mb-6 sm:mb-8">
+                    <h3 className="text-gray-300 text-base sm:text-lg font-medium mb-3 sm:mb-4 pb-2 border-b-2 border-gray-600">📋 Demandes traitées ({processedRequests.length})</h3>
+                    <div className="flex flex-col gap-4 sm:gap-6">
                         {processedRequests.map(request => (
-                            <div key={request.id} className={`bg-gray-700 border border-gray-600 rounded-lg p-6 shadow-md ${
+                            <div key={request.id} className={`bg-gray-700 border border-gray-600 rounded-lg p-4 sm:p-6 shadow-md ${
                                 request.status === 'approved' ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-red-500'
                             }`}>
                                 <div>
-                                    <div className="text-lg mb-3 flex items-center gap-4">
+                                    <div className="text-base sm:text-lg mb-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                         <strong className="text-white">{request.identifiant_officiel}</strong>
-                                        {request.animal_nom && <span className="text-gray-300">({request.animal_nom})</span>}
-                                        {getStatusBadge(request.status)}
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                            {request.animal_nom && <span className="text-gray-300 text-sm sm:text-base">({request.animal_nom})</span>}
+                                            {getStatusBadge(request.status)}
+                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 mb-3 text-sm text-gray-400">
-                                        <div>
-                                            <strong className="text-gray-300">De:</strong> {request.from_elevage_nom || 'Aucun élevage'}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 mb-3 text-xs sm:text-sm text-gray-400">
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">De:</strong>
+                                            <span className="break-words">{request.from_elevage_nom || 'Aucun élevage'}</span>
                                         </div>
-                                        <div>
-                                            <strong className="text-gray-300">Vers:</strong> {request.to_elevage_nom}
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">Vers:</strong>
+                                            <span className="break-words">{request.to_elevage_nom}</span>
                                         </div>
-                                        <div>
-                                            <strong className="text-gray-300">Demandé par:</strong> {request.requested_by_name}
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">Demandé par:</strong>
+                                            <span className="break-words">{request.requested_by_name}</span>
                                         </div>
-                                        <div>
-                                            <strong className="text-gray-300">Traité par:</strong> {request.processed_by_name || 'Système'}
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">Traité par:</strong>
+                                            <span className="break-words">{request.processed_by_name || 'Système'}</span>
                                         </div>
-                                        <div>
-                                            <strong className="text-gray-300">Date de traitement:</strong> {formatDate(request.updated_at)}
+                                        <div className="bg-gray-600 p-2 sm:p-3 rounded">
+                                            <strong className="text-gray-300 block">Date de traitement:</strong>
+                                            <span className="break-words">{formatDate(request.updated_at)}</span>
                                         </div>
                                     </div>
                                     {request.response_message && (
-                                        <div className="bg-gray-700 p-3 rounded text-sm text-gray-300 mt-3">
-                                            <strong>Réponse:</strong> {request.response_message}
+                                        <div className="bg-gray-600 p-3 sm:p-4 rounded text-xs sm:text-sm text-gray-300 mt-3">
+                                            <strong className="block mb-1">Réponse:</strong>
+                                            <span className="break-words">{request.response_message}</span>
                                         </div>
                                     )}
                                 </div>
@@ -247,8 +260,8 @@ const TransferRequestManager: React.FC = () => {
             )}
 
             {requests.length === 0 && (
-                <div className="text-center p-8 text-gray-300">
-                    <p>Aucune demande de transfert trouvée.</p>
+                <div className="text-center p-6 sm:p-8 text-gray-300">
+                    <p className="text-sm sm:text-base">Aucune demande de transfert trouvée.</p>
                 </div>
             )}
 

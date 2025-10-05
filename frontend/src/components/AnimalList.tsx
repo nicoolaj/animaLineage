@@ -232,8 +232,8 @@ const AnimalList: React.FC<AnimalListProps> = ({
             {filteredAndSortedAnimaux.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">Aucun animal trouvé.</div>
             ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+                <div className="table-responsive">
+                    <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
                         <thead>
                             <tr>
                                 <th onClick={() => handleSort('identifiant_officiel')} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600">
@@ -265,15 +265,15 @@ const AnimalList: React.FC<AnimalListProps> = ({
                         <tbody>
                             {filteredAndSortedAnimaux.map(animal => (
                                 <tr key={animal.id} className={`border-b border-gray-600 text-white ${animal.statut === 'mort' ? 'bg-red-900 bg-opacity-20' : ''}`}>
-                                    <td className="px-3 py-2.5 font-mono font-bold">{animal.identifiant_officiel}</td>
-                                    <td className="px-3 py-2.5">{animal.nom || '-'}</td>
-                                    <td className="px-3 py-2.5">
+                                    <td data-label="Identifiant" className="px-3 py-2.5 font-mono font-bold">{animal.identifiant_officiel}</td>
+                                    <td data-label="Nom" className="px-3 py-2.5">{animal.nom || '-'}</td>
+                                    <td data-label="Sexe" className="px-3 py-2.5">
                                         <span className="sexe-badge">
                                             {animal.sexe === 'M' ? '♂️' : '♀️'}
                                         </span>
                                     </td>
-                                    <td className="px-3 py-2.5">{animal.race_nom}</td>
-                                    <td className="px-3 py-2.5 text-xs leading-relaxed">
+                                    <td data-label="Race" className="px-3 py-2.5">{animal.race_nom}</td>
+                                    <td data-label="Parents" className="px-3 py-2.5 text-xs leading-relaxed">
                                         {animal.pere_identifiant && (
                                             <div className="whitespace-nowrap">
                                                 ♂️ {animal.pere_identifiant} {animal.pere_nom && `(${animal.pere_nom})`}
@@ -286,50 +286,52 @@ const AnimalList: React.FC<AnimalListProps> = ({
                                         )}
                                         {!animal.pere_identifiant && !animal.mere_identifiant && '-'}
                                     </td>
-                                    <td className="px-3 py-2.5">{formatDate(animal.date_naissance)}</td>
-                                    <td className="px-3 py-2.5" title={getAgeTooltip(animal)}>
+                                    <td data-label="Naissance" className="px-3 py-2.5">{formatDate(animal.date_naissance)}</td>
+                                    <td data-label="Âge" className="px-3 py-2.5" title={getAgeTooltip(animal)}>
                                         {formatAgeDisplay(animal)}
                                     </td>
-                                    <td className="px-3 py-2.5">{animal.elevage_nom || '-'}</td>
-                                    <td className="px-3 py-2.5">
+                                    <td data-label="Élevage" className="px-3 py-2.5">{animal.elevage_nom || '-'}</td>
+                                    <td data-label="Statut" className="px-3 py-2.5">
                                         <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${animal.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`} title={animal.statut === 'vivant' ? 'Vivant' : `Décédé ${formatDate(animal.date_deces)}`}>
                                             {animal.statut === 'vivant' ? '✅' : '💀'}
                                         </span>
                                     </td>
-                                    <td className="px-3 py-2.5 whitespace-nowrap">
-                                        <button
-                                            onClick={() => onEdit(animal)}
-                                            className="bg-transparent border border-gray-500 cursor-pointer p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
-                                            title="Modifier"
-                                        >
-                                            ✏️
-                                        </button>
-
-                                        <button
-                                            onClick={() => onViewDescendants(animal.id)}
-                                            className="bg-transparent border border-gray-500 cursor-pointer p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
-                                            title="Voir descendants"
-                                        >
-                                            🌳
-                                        </button>
-
-                                        {animal.statut === 'vivant' && (
+                                    <td className="px-3 py-2.5 whitespace-nowrap no-label">
+                                        <div className="flex flex-wrap gap-1 sm:gap-0.5">
                                             <button
-                                                onClick={() => handleMarkDead(animal.id, animal.identifiant_officiel)}
-                                                className="bg-transparent border border-gray-500 cursor-pointer p-1 mx-0.5 text-base rounded hover:bg-yellow-600 transition-colors duration-150 text-white"
-                                                title="Marquer comme décédé"
+                                                onClick={() => onEdit(animal)}
+                                                className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
+                                                title="Modifier"
                                             >
-                                                💀
+                                                ✏️
                                             </button>
-                                        )}
 
-                                        <button
-                                            onClick={() => handleDelete(animal.id, animal.identifiant_officiel)}
-                                            className="bg-transparent border border-gray-500 cursor-pointer p-1 mx-0.5 text-base rounded hover:bg-red-600 transition-colors duration-150 text-white"
-                                            title="Supprimer"
-                                        >
-                                            🗑️
-                                        </button>
+                                            <button
+                                                onClick={() => onViewDescendants(animal.id)}
+                                                className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
+                                                title="Voir descendants"
+                                            >
+                                                🌳
+                                            </button>
+
+                                            {animal.statut === 'vivant' && (
+                                                <button
+                                                    onClick={() => handleMarkDead(animal.id, animal.identifiant_officiel)}
+                                                    className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-yellow-600 transition-colors duration-150 text-white"
+                                                    title="Marquer comme décédé"
+                                                >
+                                                    💀
+                                                </button>
+                                            )}
+
+                                            <button
+                                                onClick={() => handleDelete(animal.id, animal.identifiant_officiel)}
+                                                className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-red-600 transition-colors duration-150 text-white"
+                                                title="Supprimer"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

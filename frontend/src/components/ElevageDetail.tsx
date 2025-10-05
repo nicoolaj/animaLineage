@@ -571,32 +571,34 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     }
 
     return (
-        <div id="elevage-detail-container" className="elevage-detail">
+        <div id="elevage-detail-container" className="elevage-detail p-4 sm:p-8">
             {/* En-tête */}
-            <div id="elevage-detail-header" className="detail-header">
-                <button id="elevage-detail-back-btn" onClick={onBack} className="back-btn">
-                    ← Retour aux élevages
-                </button>
-                <h1 id="elevage-detail-title">{elevage?.nom}</h1>
+            <div id="elevage-detail-header" className="detail-header mb-4 sm:mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                    <button id="elevage-detail-back-btn" onClick={onBack} className="back-btn order-2 sm:order-1">
+                        ← Retour aux élevages
+                    </button>
+                    <h1 id="elevage-detail-title" className="text-lg sm:text-2xl font-bold text-white order-1 sm:order-2">{elevage?.nom}</h1>
+                </div>
             </div>
 
             {/* Informations de l'élevage */}
-            <div id="elevage-info-card" className="elevage-info-card">
-                <div id="elevage-info-grid" className="info-grid">
-                    <div><strong>Propriétaire:</strong> {elevage?.proprietaire_nom}</div>
-                    <div><strong>Adresse:</strong> {elevage?.adresse}</div>
+            <div id="elevage-info-card" className="elevage-info-card p-4 sm:p-6 mb-4 sm:mb-6">
+                <div id="elevage-info-grid" className="info-grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="text-sm sm:text-base"><strong>Propriétaire:</strong> {elevage?.proprietaire_nom}</div>
+                    <div className="text-sm sm:text-base"><strong>Adresse:</strong> {elevage?.adresse}</div>
                     {elevage?.description && (
-                        <div><strong>Description:</strong> {elevage.description}</div>
+                        <div className="col-span-1 sm:col-span-2 text-sm sm:text-base"><strong>Description:</strong> {elevage.description}</div>
                     )}
-                    <div className="races-section">
+                    <div className="races-section col-span-1 sm:col-span-2">
                         <div className="races-header">
-                            <strong>Races d'animaux 🦕</strong>
-                            <span className="races-count">
+                            <strong className="text-sm sm:text-base">Races d'animaux 🦕</strong>
+                            <span className="races-count text-xs">
                                 {elevage?.races?.length || 0} race{(elevage?.races?.length || 0) > 1 ? 's' : ''}
                             </span>
                         </div>
                         {elevage?.races && elevage.races.length > 0 ? (
-                            <div className="races-grid">
+                            <div className="races-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                                 {elevage.races.map(race => (
                                     <div key={race.id} className="race-card">
                                         <div className="race-name">{race.nom}</div>
@@ -618,43 +620,47 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
             {/* Navigation des animaux */}
             <div id="elevage-animals-section" className="animals-section">
-                <div id="elevage-animals-header" className="animals-header">
-                    <h2 id="elevage-animals-title">Animaux de l'élevage ({filteredAnimaux.length})</h2>
-                    <div id="elevage-animals-nav" className="animals-nav">
-                        <button
-                            id="elevage-list-view-btn"
-                            onClick={() => setCurrentView('list')}
-                            className={currentView === 'list' ? 'active' : ''}
-                        >
-                            📋 Liste
-                        </button>
-                        <button
-                            id="elevage-statistics-view-btn"
-                            onClick={() => setCurrentView('statistics')}
-                            className={currentView === 'statistics' ? 'active' : ''}
-                        >
-                            📊 Statistiques
-                        </button>
-                        {canEditElevage() && (
-                            <>
-                                <button
-                                    id="elevage-add-animal-btn"
-                                    onClick={handleCreateAnimal}
-                                    className={currentView === 'form' && !editingAnimal ? 'active' : ''}
-                                >
-                                    🦕 Nouvel animal
-                                </button>
-                                <button
-                                    id="elevage-manage-users-btn"
-                                    onClick={() => setCurrentView('users')}
-                                    className={currentView === 'users' ? 'active' : ''}
-                                >
-                                    👥 Gérer les utilisateurs
-                                </button>
-                            </>
-                        )}
+                <div id="elevage-animals-header" className="animals-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <h2 id="elevage-animals-title" className="text-lg sm:text-xl font-semibold text-white">
+                        Animaux de l'élevage ({filteredAnimaux.length})
+                    </h2>
+                    <div id="elevage-animals-nav" className="animals-nav w-full sm:w-auto">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                            <button
+                                id="elevage-list-view-btn"
+                                onClick={() => setCurrentView('list')}
+                                className={`${currentView === 'list' ? 'btn-primary' : 'btn-secondary'} text-sm px-3 py-2 w-full sm:w-auto`}
+                            >
+                                📋 Liste
+                            </button>
+                            <button
+                                id="elevage-statistics-view-btn"
+                                onClick={() => setCurrentView('statistics')}
+                                className={`${currentView === 'statistics' ? 'btn-primary' : 'btn-secondary'} text-sm px-3 py-2 w-full sm:w-auto`}
+                            >
+                                📊 Statistiques
+                            </button>
+                            {canEditElevage() && (
+                                <>
+                                    <button
+                                        id="elevage-add-animal-btn"
+                                        onClick={handleCreateAnimal}
+                                        className={`${currentView === 'form' && !editingAnimal ? 'btn-primary' : 'btn-secondary'} text-sm px-3 py-2 w-full sm:w-auto`}
+                                    >
+                                        🦕 Nouvel animal
+                                    </button>
+                                    <button
+                                        id="elevage-manage-users-btn"
+                                        onClick={() => setCurrentView('users')}
+                                        className={`${currentView === 'users' ? 'btn-primary' : 'btn-secondary'} text-sm px-3 py-2 w-full sm:w-auto`}
+                                    >
+                                        👥 Utilisateurs
+                                    </button>
+                                </>
+                            )}
+                        </div>
                         {isReader() && !canEditElevage() && (
-                            <div id="elevagedetail-read-only-notice-4" className="read-only-notice">
+                            <div id="elevagedetail-read-only-notice-4" className="read-only-notice mt-2 text-center text-xs">
                                 👁️ Mode consultation uniquement
                             </div>
                         )}
@@ -679,12 +685,13 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                 {currentView === 'list' && (
                     <>
                         {/* Filtres */}
-                        <div id="elevage-filters" className="filters">
-                            <div id="elevage-filter-statut" className="filter-group">
-                                <label>Statut:</label>
+                        <div id="elevage-filters" className="filters flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 p-3 sm:p-4">
+                            <div id="elevage-filter-statut" className="filter-group flex-1">
+                                <label className="form-label text-xs">Statut:</label>
                                 <select
                                     value={filter.statut}
                                     onChange={(e) => setFilter({...filter, statut: e.target.value})}
+                                    className="form-select text-sm"
                                 >
                                     <option value="">Tous</option>
                                     <option value="vivant">Vivant</option>
@@ -692,11 +699,12 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                 </select>
                             </div>
 
-                            <div id="elevage-filter-sexe" className="filter-group">
-                                <label>Sexe:</label>
+                            <div id="elevage-filter-sexe" className="filter-group flex-1">
+                                <label className="form-label text-xs">Sexe:</label>
                                 <select
                                     value={filter.sexe}
                                     onChange={(e) => setFilter({...filter, sexe: e.target.value})}
+                                    className="form-select text-sm"
                                 >
                                     <option value="">Tous</option>
                                     <option value="M">Mâle</option>
@@ -704,34 +712,35 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                 </select>
                             </div>
 
-                            <div id="elevage-filter-race" className="filter-group">
-                                <label>Race:</label>
+                            <div id="elevage-filter-race" className="filter-group flex-1">
+                                <label className="form-label text-xs">Race:</label>
                                 <input
                                     type="text"
                                     placeholder="Filtrer par race"
                                     value={filter.race}
                                     onChange={(e) => setFilter({...filter, race: e.target.value})}
+                                    className="form-input text-sm"
                                 />
                             </div>
                         </div>
 
                         {/* Liste des animaux */}
                         {filteredAnimaux.length === 0 ? (
-                            <div id="elevagedetail-no-animals-5" className="no-animals">
-                                <p>Aucun animal dans cet élevage.</p>
+                            <div id="elevagedetail-no-animals-5" className="no-animals text-center py-8">
+                                <p className="text-gray-400 mb-4">Aucun animal dans cet élevage.</p>
                                 {canEditElevage() && (
                                     <button onClick={handleCreateAnimal} className="btn-primary">
                                         Ajouter le premier animal
                                     </button>
                                 )}
                                 {isReader() && !canEditElevage() && (
-                                    <p className="read-only-text">Mode consultation uniquement</p>
+                                    <p className="read-only-text text-gray-500 italic">Mode consultation uniquement</p>
                                 )}
                             </div>
                         ) : (
-                            <div id="elevage-animals-table-container" className="animals-table-container">
-                                <table id="elevage-animals-table" className="animals-table">
-                                    <thead>
+                            <div id="elevage-animals-table-container" className="table-responsive">
+                                <table id="elevage-animals-table" className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+                                    <thead className="hidden sm:table-header-group">
                                         <tr>
                                             {renderSortableHeader('Identifiant', 'identifiant_officiel')}
                                             {renderSortableHeader('Nom', 'nom')}
@@ -741,76 +750,78 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                             {renderSortableHeader('Naissance', 'date_naissance')}
                                             {renderSortableHeader('Âge', 'age')}
                                             {renderSortableHeader('Statut', 'statut')}
-                                            <th style={{ cursor: 'default' }}>Actions</th>
+                                            <th style={{ cursor: 'default' }} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="block sm:table-row-group">
                                         {filteredAnimaux.map(animal => (
-                                            <tr key={animal.id} className={animal.statut === 'mort' ? 'deceased' : ''}>
-                                                <td className="font-mono">{animal.identifiant_officiel}</td>
-                                                <td>{animal.nom || '-'}</td>
-                                                <td>
-                                                    <span className={`sexe-badge ${animal.sexe.toLowerCase()}`}>
+                                            <tr key={animal.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${animal.statut === 'mort' ? 'opacity-75' : ''}`}>
+                                                <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-mono font-bold">{animal.identifiant_officiel}</td>
+                                                <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{animal.nom || '-'}</td>
+                                                <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                                                    <span className="sexe-badge text-lg">
                                                         {animal.sexe === 'M' ? '♂️' : '♀️'}
                                                     </span>
                                                 </td>
-                                                <td>{animal.race_nom}</td>
-                                                <td className="parents">
+                                                <td data-label="Race" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{animal.race_nom}</td>
+                                                <td data-label="Parents" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-xs leading-relaxed">
                                                     {animal.pere_identifiant && (
-                                                        <div>♂️ {animal.pere_identifiant}</div>
+                                                        <div className="whitespace-nowrap">♂️ {animal.pere_identifiant}</div>
                                                     )}
                                                     {animal.mere_identifiant && (
-                                                        <div>♀️ {animal.mere_identifiant}</div>
+                                                        <div className="whitespace-nowrap">♀️ {animal.mere_identifiant}</div>
                                                     )}
                                                     {!animal.pere_identifiant && !animal.mere_identifiant && '-'}
                                                 </td>
-                                                <td>{formatDate(animal.date_naissance)}</td>
-                                                <td title={getAgeTooltip(animal)}>
+                                                <td data-label="Naissance" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{formatDate(animal.date_naissance)}</td>
+                                                <td data-label="Âge" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600" title={getAgeTooltip(animal)}>
                                                     {formatAgeDisplay(animal)}
                                                 </td>
-                                                <td>
-                                                    <span className={`status-badge ${animal.statut}`}>
+                                                <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                                                    <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${animal.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`} title={animal.statut === 'vivant' ? 'Vivant' : `Décédé ${formatDate(animal.date_deces)}`}>
                                                         {animal.statut === 'vivant' ? '✅' : '💀'}
                                                     </span>
                                                 </td>
-                                                <td className="actions">
-                                                    <button
-                                                        onClick={() => handleViewDescendants(animal.id)}
-                                                        className="btn-descendants"
-                                                        title="Voir descendants"
-                                                    >
-                                                        🌳
-                                                    </button>
+                                                <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 no-label">
+                                                    <div className="flex flex-wrap gap-1 sm:gap-0.5">
+                                                        <button
+                                                            onClick={() => handleViewDescendants(animal.id)}
+                                                            className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
+                                                            title="Voir descendants"
+                                                        >
+                                                            🌳
+                                                        </button>
 
-                                                    {canEditElevage() && (
-                                                        <>
-                                                            <button
-                                                                onClick={() => handleEditAnimal(animal)}
-                                                                className="btn-edit"
-                                                                title="Modifier"
-                                                            >
-                                                                ✏️
-                                                            </button>
-
-                                                            {animal.statut === 'vivant' && (
+                                                        {canEditElevage() && (
+                                                            <>
                                                                 <button
-                                                                    onClick={() => handleMarkDead(animal.id, animal.identifiant_officiel)}
-                                                                    className="btn-mark-dead"
-                                                                    title="Marquer comme décédé"
+                                                                    onClick={() => handleEditAnimal(animal)}
+                                                                    className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
+                                                                    title="Modifier"
                                                                 >
-                                                                    💀
+                                                                    ✏️
                                                                 </button>
-                                                            )}
 
-                                                            <button
-                                                                onClick={() => handleDeleteAnimal(animal.id, animal.identifiant_officiel)}
-                                                                className="btn-delete"
-                                                                title="Supprimer"
-                                                            >
-                                                                🗑️
-                                                            </button>
-                                                        </>
-                                                    )}
+                                                                {animal.statut === 'vivant' && (
+                                                                    <button
+                                                                        onClick={() => handleMarkDead(animal.id, animal.identifiant_officiel)}
+                                                                        className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-yellow-600 transition-colors duration-150 text-white"
+                                                                        title="Marquer comme décédé"
+                                                                    >
+                                                                        💀
+                                                                    </button>
+                                                                )}
+
+                                                                <button
+                                                                    onClick={() => handleDeleteAnimal(animal.id, animal.identifiant_officiel)}
+                                                                    className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-red-600 transition-colors duration-150 text-white"
+                                                                    title="Supprimer"
+                                                                >
+                                                                    🗑️
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -823,45 +834,47 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
                 {currentView === 'descendants' && (
                     <div id="elevage-descendants-view" className="descendants-view">
-                        <div id="elevage-descendants-header" className="descendants-header">
-                            <h3 id="elevage-descendants-title">Descendants de {selectedAnimalForDescendants}</h3>
+                        <div id="elevage-descendants-header" className="descendants-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                            <h3 id="elevage-descendants-title" className="text-lg sm:text-xl font-semibold text-white">
+                                Descendants de {selectedAnimalForDescendants}
+                            </h3>
                             <button id="elevage-descendants-back-btn" onClick={() => setCurrentView('list')} className="back-btn">
                                 ← Retour à la liste
                             </button>
                         </div>
 
                         {descendants.length === 0 ? (
-                            <div id="elevagedetail-no-descendants-6" className="no-descendants">
+                            <div id="elevagedetail-no-descendants-6" className="no-descendants text-center py-8 text-gray-400">
                                 Cet animal n'a pas de descendants connus.
                             </div>
                         ) : (
-                            <div id="elevagedetail-descendants-table-container-7" className="descendants-table-container">
-                                <table className="descendants-table">
-                                    <thead>
+                            <div id="elevagedetail-descendants-table-container-7" className="table-responsive">
+                                <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+                                    <thead className="hidden sm:table-header-group">
                                         <tr>
-                                            <th>Identifiant</th>
-                                            <th>Nom</th>
-                                            <th>Sexe</th>
-                                            <th>Race</th>
-                                            <th>Naissance</th>
-                                            <th>Statut</th>
+                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Identifiant</th>
+                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Nom</th>
+                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Sexe</th>
+                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Race</th>
+                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Naissance</th>
+                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Statut</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="block sm:table-row-group">
                                         {descendants.map(descendant => (
-                                            <tr key={descendant.id} className={descendant.statut === 'mort' ? 'deceased' : ''}>
-                                                <td className="font-mono">{descendant.identifiant_officiel}</td>
-                                                <td>{descendant.nom || '-'}</td>
-                                                <td>
-                                                    <span className={`sexe-badge ${descendant.sexe.toLowerCase()}`}>
+                                            <tr key={descendant.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${descendant.statut === 'mort' ? 'opacity-75' : ''}`}>
+                                                <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-mono font-bold">{descendant.identifiant_officiel}</td>
+                                                <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{descendant.nom || '-'}</td>
+                                                <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                                                    <span className="sexe-badge text-lg">
                                                         {descendant.sexe === 'M' ? '♂️' : '♀️'}
                                                     </span>
                                                 </td>
-                                                <td>{descendant.race_nom}</td>
-                                                <td>{formatDate(descendant.date_naissance)}</td>
-                                                <td>
-                                                    <span className={`status-badge ${descendant.statut}`}>
-                                                        {descendant.statut === 'vivant' ? '✅ Vivant' : '💀 Décédé'}
+                                                <td data-label="Race" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{descendant.race_nom}</td>
+                                                <td data-label="Naissance" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{formatDate(descendant.date_naissance)}</td>
+                                                <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                                                    <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${descendant.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                                                        {descendant.statut === 'vivant' ? '✅' : '💀'}
                                                     </span>
                                                 </td>
                                             </tr>
@@ -875,8 +888,8 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
                 {currentView === 'statistics' && (
                     <div id="elevage-statistics-view" className="statistics-view">
-                        <div id="elevage-statistics-header" className="statistics-header">
-                            <h3 id="elevage-statistics-title">📊 Statistiques du troupeau</h3>
+                        <div id="elevage-statistics-header" className="statistics-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                            <h3 id="elevage-statistics-title" className="text-lg sm:text-xl font-semibold text-white">📊 Statistiques du troupeau</h3>
                             <button id="elevage-statistics-back-btn" onClick={() => setCurrentView('list')} className="back-btn">
                                 ← Retour à la liste
                             </button>
@@ -887,85 +900,85 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                             const ageGroups = ['0-1 an', '1-2 ans', '2-5 ans', '5-10 ans', '10+ ans'];
 
                             return (
-                                <div className="statistics-content">
+                                <div className="statistics-content space-y-6">
                                     {/* Résumé général */}
                                     <div className="stats-summary">
-                                        <div className="stats-cards">
-                                            <div className="stat-card">
-                                                <div className="stat-number">{stats.total}</div>
-                                                <div className="stat-label">Total animaux</div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <div className="bg-gray-700 rounded-lg p-4 text-center">
+                                                <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">{stats.total}</div>
+                                                <div className="text-sm text-gray-300">Total animaux</div>
                                             </div>
-                                            <div className="stat-card">
-                                                <div className="stat-number">{stats.vivants}</div>
-                                                <div className="stat-label">Vivants</div>
+                                            <div className="bg-gray-700 rounded-lg p-4 text-center">
+                                                <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">{stats.vivants}</div>
+                                                <div className="text-sm text-gray-300">Vivants</div>
                                             </div>
-                                            <div className="stat-card">
-                                                <div className="stat-number">{stats.morts}</div>
-                                                <div className="stat-label">Décédés</div>
+                                            <div className="bg-gray-700 rounded-lg p-4 text-center">
+                                                <div className="text-2xl sm:text-3xl font-bold text-red-400 mb-2">{stats.morts}</div>
+                                                <div className="text-sm text-gray-300">Décédés</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Âge moyen et longévité */}
-                                    <div className="longevity-stats">
-                                        <h4>📈 Longévité et âges</h4>
-                                        <div className="longevity-cards">
-                                            <div className="longevity-card">
-                                                <div className="longevity-value">
+                                    <div className="longevity-stats bg-gray-700 rounded-lg p-4 sm:p-6">
+                                        <h4 className="text-base sm:text-lg font-semibold text-white mb-4">📈 Longévité et âges</h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="text-lg sm:text-xl font-bold text-blue-300 mb-1">
                                                     {stats.ageMoyenVivants !== null ? `${stats.ageMoyenVivants} ans` : 'N/A'}
                                                 </div>
-                                                <div className="longevity-label">Âge moyen (vivants)</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">Âge moyen (vivants)</div>
                                             </div>
-                                            <div className="longevity-card">
-                                                <div className="longevity-value">
+                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="text-lg sm:text-xl font-bold text-orange-300 mb-1">
                                                     {stats.longeviteMoyenne !== null ? `${stats.longeviteMoyenne} ans` : 'N/A'}
                                                 </div>
-                                                <div className="longevity-label">Longévité moyenne</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">Longévité moyenne</div>
                                             </div>
-                                            <div className="longevity-card">
-                                                <div className="longevity-value">
+                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
                                                     {stats.longeviteMoyenneMales !== null ? `${stats.longeviteMoyenneMales} ans` : 'N/A'}
                                                 </div>
-                                                <div className="longevity-label">Longévité ♂️ mâles</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">Longévité ♂️ mâles</div>
                                             </div>
-                                            <div className="longevity-card">
-                                                <div className="longevity-value">
+                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
                                                     {stats.longeviteMoyenneFemelles !== null ? `${stats.longeviteMoyenneFemelles} ans` : 'N/A'}
                                                 </div>
-                                                <div className="longevity-label">Longévité ♀️ femelles</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">Longévité ♀️ femelles</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Espérance de vie */}
-                                    <div className="life-expectancy-stats">
-                                        <h4>🎯 Espérance de vie</h4>
-                                        <div className="longevity-cards">
-                                            <div className="longevity-card">
-                                                <div className="longevity-value">
+                                    <div className="life-expectancy-stats bg-gray-700 rounded-lg p-4 sm:p-6">
+                                        <h4 className="text-base sm:text-lg font-semibold text-white mb-4">🎯 Espérance de vie</h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="text-lg sm:text-xl font-bold text-purple-300 mb-1">
                                                     {stats.esperanceVieMixte !== null ? `${stats.esperanceVieMixte} ans` : 'N/A'}
                                                 </div>
-                                                <div className="longevity-label">Espérance de vie mixte</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">Espérance de vie mixte</div>
                                             </div>
-                                            <div className="longevity-card">
-                                                <div className="longevity-value">
+                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
                                                     {stats.esperanceVieMales !== null ? `${stats.esperanceVieMales} ans` : 'N/A'}
                                                 </div>
-                                                <div className="longevity-label">Espérance de vie ♂️ mâles</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">Espérance de vie ♂️ mâles</div>
                                             </div>
-                                            <div className="longevity-card">
-                                                <div className="longevity-value">
+                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
                                                     {stats.esperanceVieFemelles !== null ? `${stats.esperanceVieFemelles} ans` : 'N/A'}
                                                 </div>
-                                                <div className="longevity-label">Espérance de vie ♀️ femelles</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">Espérance de vie ♀️ femelles</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Pyramide des âges */}
-                                    <div className="age-pyramid">
-                                        <h4>🔺 Pyramide des âges</h4>
-                                        <div className="pyramid-container">
+                                    <div className="age-pyramid bg-gray-700 rounded-lg p-4 sm:p-6">
+                                        <h4 className="text-base sm:text-lg font-semibold text-white mb-4">🔺 Pyramide des âges</h4>
+                                        <div className="space-y-3">
                                             {ageGroups.map(ageGroup => {
                                                 const malesCount = stats.pyramideData.males[ageGroup] || 0;
                                                 const femellesCount = stats.pyramideData.femelles[ageGroup] || 0;
@@ -975,48 +988,52 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                 ));
 
                                                 return (
-                                                    <div key={ageGroup} className="pyramid-row">
-                                                        <div className="pyramid-label">{ageGroup}</div>
-                                                        <div className="pyramid-bars">
-                                                            <div className="pyramid-bar-left">
+                                                    <div key={ageGroup} className="flex items-center gap-2 sm:gap-4">
+                                                        <div className="w-16 sm:w-20 text-xs sm:text-sm text-gray-300 text-right">{ageGroup}</div>
+                                                        <div className="flex-1 flex items-center h-8 sm:h-10">
+                                                            {/* Barres mâles (à gauche) */}
+                                                            <div className="flex-1 flex justify-end pr-1">
                                                                 <div
-                                                                    className="pyramid-bar-fill male"
+                                                                    className="bg-blue-500 h-full rounded-l flex items-center justify-center text-xs text-white font-medium"
                                                                     style={{
-                                                                        width: maxCount > 0 ? `${(malesCount / maxCount) * 100}%` : '0%'
+                                                                        width: maxCount > 0 ? `${Math.max((malesCount / maxCount) * 100, malesCount > 0 ? 15 : 0)}%` : '0%'
                                                                     }}
                                                                     title={`♂️ ${malesCount} mâles`}
                                                                 >
-                                                                    {malesCount > 0 && <span className="bar-count">♂️ {malesCount}</span>}
+                                                                    {malesCount > 0 && <span>♂️{malesCount}</span>}
                                                                 </div>
                                                             </div>
-                                                            <div className="pyramid-bar-right">
+                                                            {/* Séparateur central */}
+                                                            <div className="w-px bg-gray-500"></div>
+                                                            {/* Barres femelles (à droite) */}
+                                                            <div className="flex-1 flex justify-start pl-1">
                                                                 <div
-                                                                    className="pyramid-bar-fill female"
+                                                                    className="bg-pink-500 h-full rounded-r flex items-center justify-center text-xs text-white font-medium"
                                                                     style={{
-                                                                        width: maxCount > 0 ? `${(femellesCount / maxCount) * 100}%` : '0%'
+                                                                        width: maxCount > 0 ? `${Math.max((femellesCount / maxCount) * 100, femellesCount > 0 ? 15 : 0)}%` : '0%'
                                                                     }}
                                                                     title={`♀️ ${femellesCount} femelles`}
                                                                 >
-                                                                    {femellesCount > 0 && <span className="bar-count">♀️ {femellesCount}</span>}
+                                                                    {femellesCount > 0 && <span>♀️{femellesCount}</span>}
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="pyramid-total">{totalInGroup}</div>
+                                                        <div className="w-8 sm:w-12 text-xs sm:text-sm text-gray-300 text-center font-medium">{totalInGroup}</div>
                                                     </div>
                                                 );
                                             })}
                                         </div>
-                                    </div>
 
-                                    {/* Légende */}
-                                    <div className="pyramid-legend">
-                                        <div className="legend-item">
-                                            <div className="legend-color male"></div>
-                                            <span>♂️ Mâles</span>
-                                        </div>
-                                        <div className="legend-item">
-                                            <div className="legend-color female"></div>
-                                            <span>♀️ Femelles</span>
+                                        {/* Légende */}
+                                        <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-gray-600">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                                <span className="text-xs sm:text-sm text-gray-300">♂️ Mâles</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-4 h-4 bg-pink-500 rounded"></div>
+                                                <span className="text-xs sm:text-sm text-gray-300">♀️ Femelles</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

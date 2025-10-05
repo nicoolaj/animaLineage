@@ -161,106 +161,133 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
 
   if (!canModerate()) {
     return (
-      <div id="adminpanel-admin-panel-1" className="admin-panel">
-        <p>Accès refusé. Vous n'avez pas les permissions nécessaires.</p>
+      <div id="adminpanel-admin-panel-1" className="admin-panel bg-red-600 text-red-100 p-4 rounded-lg text-center">
+        <p className="text-sm">Accès refusé. Vous n'avez pas les permissions nécessaires.</p>
       </div>
     );
   }
 
   return (
-    <div id="adminpanel-admin-panel-2" className="admin-panel">
-      <h3>👥 Gestion des utilisateurs</h3>
+    <div id="adminpanel-admin-panel-2" className="admin-panel bg-gray-700 rounded-lg p-4 sm:p-6 border border-gray-600">
+      <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">👥 Gestion des utilisateurs</h3>
 
       {error && (
-        <div id="adminpanel-error-banner-3" className="error-banner">
-          <p>⚠️ {error}</p>
-          <button onClick={fetchAdminUsers} className="btn-small btn-secondary">
+        <div id="adminpanel-error-banner-3" className="error-banner bg-red-600 text-white p-3 sm:p-4 rounded-lg mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <p className="text-sm">⚠️ {error}</p>
+          <button onClick={fetchAdminUsers} className="btn-secondary text-sm px-3 py-2 w-full sm:w-auto">
             Réessayer
           </button>
         </div>
       )}
 
       {loading ? (
-        <p>Chargement...</p>
+        <p className="text-center text-gray-300 py-4">Chargement...</p>
       ) : (
         <div id="adminpanel-admin-users-table-4" className="admin-users-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Nom</th>
-                <th>Email</th>
-                <th>Rôle</th>
-                <th>Statut</th>
-                <th>Créé le</th>
-                {canAdministrate() && <th>Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {adminUsers.map((user) => (
-                <tr key={user.id} className={user.status === 0 ? 'pending-user' : ''}>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>
-                    <span className={`role-badge role-${user.role}`}>
-                      {user.role_name}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status-badge status-${user.status}`}>
-                      {user.status === 0 ? '⏳ En attente' :
-                       user.status === 1 ? '✅ Validé' :
-                       user.status === 2 ? '❌ Rejeté' : 'Inconnu'}
-                    </span>
-                  </td>
-                  <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                  {canAdministrate() && (
-                    <td>
-                      <div id="adminpanel-action-buttons-5" className="action-buttons">
-                        <button
-                          onClick={() => handleRoleChange(user)}
-                          className="btn-small btn-primary"
-                        >
-                          Modifier rôle
-                        </button>
-                        <button
-                          onClick={() => deleteUser(user.id, user.name)}
-                          className="btn-small btn-danger"
-                          disabled={actionLoading === user.id}
-                        >
-                          {actionLoading === user.id ? 'Suppression...' : 'Supprimer'}
-                        </button>
-                      </div>
-                    </td>
-                  )}
+          <div className="table-responsive">
+            <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+              <thead className="hidden sm:table-header-group">
+                <tr>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Nom</th>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Email</th>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Rôle</th>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Statut</th>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Créé le</th>
+                  {canAdministrate() && <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Actions</th>}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="block sm:table-row-group">
+                {adminUsers.map((user) => (
+                  <tr key={user.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${user.status === 0 ? 'ring-2 ring-yellow-500' : ''}`}>
+                    <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-semibold">
+                      {user.name}
+                    </td>
+                    <td data-label="Email" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-sm text-gray-300">
+                      {user.email}
+                    </td>
+                    <td data-label="Rôle" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                      <span className={`role-badge px-2 py-1 rounded text-xs font-bold ${
+                        user.role === 1 ? 'bg-red-600 text-white' :
+                        user.role === 2 ? 'bg-yellow-600 text-white' :
+                        'bg-blue-600 text-white'
+                      }`}>
+                        {user.role_name}
+                      </span>
+                    </td>
+                    <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                      <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${
+                        user.status === 0 ? 'bg-yellow-600 text-white' :
+                        user.status === 1 ? 'bg-green-600 text-white' :
+                        user.status === 2 ? 'bg-red-600 text-white' : 'bg-gray-600 text-white'
+                      }`}>
+                        {user.status === 0 ? '⏳ En attente' :
+                         user.status === 1 ? '✅ Validé' :
+                         user.status === 2 ? '❌ Rejeté' : 'Inconnu'}
+                      </span>
+                    </td>
+                    <td data-label="Créé le" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-sm">
+                      {new Date(user.created_at).toLocaleDateString('fr-FR')}
+                    </td>
+                    {canAdministrate() && (
+                      <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 no-label">
+                        <div id="adminpanel-action-buttons-5" className="action-buttons flex flex-col sm:flex-row gap-2 sm:gap-1">
+                          <button
+                            onClick={() => handleRoleChange(user)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs sm:text-sm rounded transition-colors duration-200 w-full sm:w-auto"
+                          >
+                            ✏️ Modifier rôle
+                          </button>
+                          <button
+                            onClick={() => deleteUser(user.id, user.name)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 text-xs sm:text-sm rounded transition-colors duration-200 disabled:opacity-60 w-full sm:w-auto"
+                            disabled={actionLoading === user.id}
+                          >
+                            {actionLoading === user.id ? '⏳ Suppression...' : '🗑️ Supprimer'}
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {selectedUser && canAdministrate() && (
-        <div id="adminpanel-role-modal-6" className="role-modal">
-          <div id="adminpanel-modal-content-7" className="modal-content">
-            <h4>Modifier le rôle de {selectedUser.name}</h4>
-            <div id="adminpanel-role-form-8" className="role-form">
-              <label>Nouveau rôle :</label>
-              <select
-                value={newRole}
-                onChange={(e) => setNewRole(Number(e.target.value))}
-              >
-                {Object.entries(roles).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <div id="adminpanel-modal-actions-9" className="modal-actions">
-                <button onClick={updateUserRole} className="btn-primary">
-                  Confirmer
-                </button>
-                <button onClick={cancelRoleChange} className="btn-secondary">
+        <div id="adminpanel-role-modal-6" className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div id="adminpanel-modal-content-7" className="modal-container bg-gray-700 rounded-xl p-4 sm:p-6 max-w-md sm:max-w-2xl w-full mx-auto text-white shadow-2xl">
+            <h4 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">
+              Modifier le rôle de {selectedUser.name}
+            </h4>
+            <div id="adminpanel-role-form-8" className="role-form space-y-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm sm:text-base font-medium text-gray-300">Nouveau rôle :</label>
+                <select
+                  value={newRole}
+                  onChange={(e) => setNewRole(Number(e.target.value))}
+                  className="form-select w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {Object.entries(roles).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div id="adminpanel-modal-actions-9" className="modal-actions flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-600">
+                <button
+                  onClick={cancelRoleChange}
+                  className="btn-secondary w-full sm:w-auto order-2 sm:order-1"
+                >
                   Annuler
+                </button>
+                <button
+                  onClick={updateUserRole}
+                  className="btn-primary w-full sm:w-auto order-1 sm:order-2"
+                >
+                  Confirmer
                 </button>
               </div>
             </div>

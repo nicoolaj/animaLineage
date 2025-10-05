@@ -19,16 +19,25 @@
 }
 
 @layer components {
+  /* Mobile-first responsive design */
+  .container-responsive {
+    @apply w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
+  }
+
   .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-md transition-colors duration-200 border border-blue-600 hover:border-blue-700;
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-3 sm:px-5 rounded-md transition-colors duration-200 border border-blue-600 hover:border-blue-700 text-sm sm:text-base;
   }
 
   .btn-secondary {
-    @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-5 rounded-md transition-colors duration-200 border border-gray-600 hover:border-gray-700;
+    @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-3 sm:px-5 rounded-md transition-colors duration-200 border border-gray-600 hover:border-gray-700 text-sm sm:text-base;
   }
 
   .btn-outline {
-    @apply border-2 border-blue-600 bg-transparent text-blue-600 hover:bg-blue-600 hover:text-white font-medium py-2.5 px-5 rounded-md transition-all duration-300;
+    @apply border-2 border-blue-600 bg-transparent text-blue-600 hover:bg-blue-600 hover:text-white font-medium py-2.5 px-3 sm:px-5 rounded-md transition-all duration-300 text-sm sm:text-base;
+  }
+
+  .btn-mobile {
+    @apply w-full sm:w-auto justify-center;
   }
 
   .form-input {
@@ -408,6 +417,49 @@
 
   .status-badge.mort {
     @apply status-badge-dead;
+  }
+
+  /* Responsive table styles */
+  .table-responsive {
+    @apply w-full overflow-x-auto;
+  }
+
+  .table-mobile {
+    @apply block sm:table w-full;
+  }
+
+  .table-mobile thead {
+    @apply hidden sm:table-header-group;
+  }
+
+  .table-mobile tbody {
+    @apply block sm:table-row-group;
+  }
+
+  .table-mobile tr {
+    @apply block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0;
+  }
+
+  .table-mobile td {
+    @apply block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600;
+  }
+
+  .table-mobile td:before {
+    content: attr(data-label) ": ";
+    @apply font-bold text-gray-300 sm:hidden;
+  }
+
+  .table-mobile td.no-label:before {
+    content: "";
+  }
+
+  /* Mobile navigation */
+  .nav-mobile {
+    @apply flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2;
+  }
+
+  .nav-mobile button {
+    @apply w-full sm:w-auto text-center;
   }
 
   .parents {

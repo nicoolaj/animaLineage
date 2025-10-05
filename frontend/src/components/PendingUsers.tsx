@@ -93,78 +93,88 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
 
   if (!canModerate()) {
     return (
-      <div id="pendingusers-pending-users-1" className="pending-users">
-        <p>Accès refusé. Vous n'avez pas les permissions nécessaires.</p>
+      <div id="pendingusers-pending-users-1" className="pending-users bg-red-600 text-red-100 p-4 rounded-lg text-center">
+        <p className="text-sm">Accès refusé. Vous n'avez pas les permissions nécessaires.</p>
       </div>
     );
   }
 
   return (
-    <div id="pendingusers-pending-users-2" className="pending-users">
-      <h2>👤 Comptes en attente de validation</h2>
-      <p>Les nouveaux comptes créés via la page d'inscription apparaissent ici.</p>
+    <div id="pendingusers-pending-users-2" className="pending-users bg-gray-700 rounded-lg p-4 sm:p-6 border border-gray-600">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">👤 Comptes en attente de validation</h2>
+        <p className="text-sm sm:text-base text-gray-300">Les nouveaux comptes créés via la page d'inscription apparaissent ici.</p>
+      </div>
 
       {error && (
-        <div id="pendingusers-error-banner-3" className="error-banner">
-          <p>⚠️ {error}</p>
-          <button onClick={fetchPendingUsers} className="btn-small btn-secondary">
+        <div id="pendingusers-error-banner-3" className="error-banner bg-red-600 text-white p-3 sm:p-4 rounded-lg mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <p className="text-sm">⚠️ {error}</p>
+          <button onClick={fetchPendingUsers} className="btn-secondary text-sm px-3 py-2 w-full sm:w-auto">
             Réessayer
           </button>
         </div>
       )}
 
       {loading ? (
-        <p>Chargement...</p>
+        <p className="text-center text-gray-300 py-4">Chargement...</p>
       ) : pendingUsers.length === 0 ? (
-        <div id="pendingusers-pending-placeholder-4" className="pending-placeholder">
-          <p>📝 Aucun compte en attente pour le moment</p>
-          <small>Les utilisateurs peuvent créer un compte via la page de connexion</small>
+        <div id="pendingusers-pending-placeholder-4" className="pending-placeholder text-center py-8 bg-gray-600 rounded-lg border border-gray-500">
+          <p className="text-base sm:text-lg text-gray-200 mb-2">📝 Aucun compte en attente pour le moment</p>
+          <small className="text-xs sm:text-sm text-gray-400">Les utilisateurs peuvent créer un compte via la page de connexion</small>
         </div>
       ) : (
         <div id="pendingusers-pending-users-table-5" className="pending-users-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Nom</th>
-                <th>Email</th>
-                <th>Demande créée le</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingUsers.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>{new Date(user.created_at).toLocaleDateString('fr-FR', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}</td>
-                  <td>
-                    <div id="pendingusers-action-buttons-6" className="action-buttons">
-                      <button
-                        onClick={() => handleUserAction(user.id, 'validate')}
-                        className="btn-small btn-success"
-                        disabled={actionLoading === user.id}
-                      >
-                        {actionLoading === user.id ? 'En cours...' : '✅ Valider'}
-                      </button>
-                      <button
-                        onClick={() => handleUserAction(user.id, 'reject')}
-                        className="btn-small btn-danger"
-                        disabled={actionLoading === user.id}
-                      >
-                        {actionLoading === user.id ? 'En cours...' : '❌ Rejeter'}
-                      </button>
-                    </div>
-                  </td>
+          <div className="table-responsive">
+            <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+              <thead className="hidden sm:table-header-group">
+                <tr>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Nom</th>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Email</th>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Demande créée le</th>
+                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="block sm:table-row-group">
+                {pendingUsers.map((user) => (
+                  <tr key={user.id} className="block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ring-2 ring-yellow-500">
+                    <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-semibold">
+                      {user.name}
+                    </td>
+                    <td data-label="Email" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-sm text-gray-300">
+                      {user.email}
+                    </td>
+                    <td data-label="Demande créée le" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-sm">
+                      {new Date(user.created_at).toLocaleDateString('fr-FR', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </td>
+                    <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 no-label">
+                      <div id="pendingusers-action-buttons-6" className="action-buttons flex flex-col sm:flex-row gap-2 sm:gap-1 mt-3 sm:mt-0">
+                        <button
+                          onClick={() => handleUserAction(user.id, 'validate')}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-xs sm:text-sm rounded transition-colors duration-200 disabled:opacity-60 w-full sm:w-auto"
+                          disabled={actionLoading === user.id}
+                        >
+                          {actionLoading === user.id ? '⏳ En cours...' : '✅ Valider'}
+                        </button>
+                        <button
+                          onClick={() => handleUserAction(user.id, 'reject')}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 text-xs sm:text-sm rounded transition-colors duration-200 disabled:opacity-60 w-full sm:w-auto"
+                          disabled={actionLoading === user.id}
+                        >
+                          {actionLoading === user.id ? '⏳ En cours...' : '❌ Rejeter'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

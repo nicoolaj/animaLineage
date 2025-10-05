@@ -307,17 +307,17 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
     };
 
     return (
-        <div className="bg-gray-700 rounded-xl p-6 text-white max-w-4xl mx-auto border border-gray-600">
-            <h3 className="section-title mb-6">{animal ? '🦕 Modifier l\'animal' : '🦕 Nouvel animal'}</h3>
+        <div className="bg-gray-700 rounded-xl p-4 sm:p-6 text-white max-w-4xl mx-auto border border-gray-600">
+            <h3 className="section-title mb-4 sm:mb-6 text-lg sm:text-2xl">{animal ? '🦕 Modifier l\'animal' : '🦕 Nouvel animal'}</h3>
 
-            {error && <div className="bg-red-600 text-white px-3 py-2.5 rounded-md mb-5">{error}</div>}
+            {error && <div className="bg-red-600 text-white px-3 py-2.5 rounded-md mb-4 sm:mb-5 text-sm">{error}</div>}
 
             <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="identifiant_officiel" className="text-gray-100 font-medium text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="identifiant_officiel" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Identifiant officiel *
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Numéro unique d'identification de l'animal (ex: numéro de boucle)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Numéro unique d'identification de l'animal (ex: numéro de boucle)</span>
                         </label>
                         <input
                             type="text"
@@ -327,21 +327,21 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             onChange={handleChange}
                             required
                             placeholder="Ex: FR123456789 ou 001234"
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
                         />
                         {checkingAnimal && (
-                            <div className="mt-2 px-3 py-2 border border-primary-300 bg-primary-50 text-primary-700 rounded-md text-sm">
+                            <div className="mt-1.5 sm:mt-2 px-2 sm:px-3 py-1.5 sm:py-2 border border-primary-300 bg-primary-50 text-primary-700 rounded-md text-xs sm:text-sm">
                                 🔍 Vérification en cours...
                             </div>
                         )}
                         {animalExistsWarning && (
-                            <div className="text-yellow-700 bg-yellow-100 border border-yellow-300 px-3 py-2.5 rounded-md mt-2 text-sm">
+                            <div className="text-yellow-700 bg-yellow-100 border border-yellow-300 px-2 sm:px-3 py-2 sm:py-2.5 rounded-md mt-1.5 sm:mt-2 text-xs sm:text-sm">
                                 {animalExistsWarning}
                                 {existingAnimal && existingAnimal.can_transfer && (
                                     <button
                                         type="button"
                                         onClick={() => setShowTransferDialog(true)}
-                                        className="inline-block mt-2.5 px-3 py-1.5 bg-blue-600 text-white border-0 rounded-md cursor-pointer text-xs hover:bg-blue-700 transition-colors duration-200"
+                                        className="inline-block mt-2 sm:mt-2.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-600 text-white border-0 rounded-md cursor-pointer text-xs hover:bg-blue-700 transition-colors duration-200 w-full sm:w-auto"
                                     >
                                         🔄 Demander un transfert
                                     </button>
@@ -350,10 +350,10 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                         )}
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="nom" className="text-gray-100 font-medium text-sm">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="nom" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Nom de l'animal 🦕
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Nom donné à l'animal 🦕 (facultatif)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Nom donné à l'animal 🦕 (facultatif)</span>
                         </label>
                         <input
                             type="text"
@@ -362,16 +362,16 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             value={formData.nom || ''}
                             onChange={handleChange}
                             placeholder="Ex: Bella, Rex, Mouton123..."
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400"
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="sexe" className="text-gray-100 font-medium text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="sexe" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Sexe de l'animal *
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Sexe biologique de l'animal</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Sexe biologique de l'animal</span>
                         </label>
                         <select
                             id="sexe"
@@ -379,17 +379,17 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             value={formData.sexe}
                             onChange={handleChange}
                             required
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="M">♂️ Mâle</option>
                             <option value="F">♀️ Femelle</option>
                         </select>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="race_id" className="text-gray-100 font-medium text-sm">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="race_id" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Race *
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Race et type d'animal (mouton, chèvre, etc.)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Race et type d'animal (mouton, chèvre, etc.)</span>
                         </label>
                         <select
                             id="race_id"
@@ -397,7 +397,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             value={formData.race_id}
                             onChange={handleChange}
                             required
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Choisir une race --</option>
                             {(elevageContext?.races || races).map(race => (
@@ -409,18 +409,18 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="pere_id" className="text-gray-100 font-medium text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="pere_id" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Père géniteur
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Animal mâle ayant engendré cet animal (généalogie)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Animal mâle ayant engendré cet animal (généalogie)</span>
                         </label>
                         <select
                             id="pere_id"
                             name="pere_id"
                             value={formData.pere_id || ''}
                             onChange={handleChange}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Père non renseigné --</option>
                             {parentsMales.map(parent => (
@@ -431,17 +431,17 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                         </select>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="mere_id" className="text-gray-100 font-medium text-sm">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="mere_id" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Mère génitrice
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Animal femelle ayant donné naissance à cet animal</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Animal femelle ayant donné naissance à cet animal</span>
                         </label>
                         <select
                             id="mere_id"
                             name="mere_id"
                             value={formData.mere_id || ''}
                             onChange={handleChange}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         >
                             <option value="">-- Mère non renseignée --</option>
                             {parentsFemelles.map(parent => (
@@ -453,11 +453,11 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="date_naissance" className="text-gray-100 font-medium text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="date_naissance" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Date de naissance
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Date de mise bas de l'animal</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Date de mise bas de l'animal</span>
                         </label>
                         <input
                             type="date"
@@ -467,14 +467,14 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             onChange={handleChange}
                             min="1980-01-01"
                             max={new Date().toISOString().split('T')[0]}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="date_bouclage" className="text-gray-100 font-medium text-sm">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="date_bouclage" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Date de bouclage
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Date de pose de la boucle d'identification officielle</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Date de pose de la boucle d'identification officielle</span>
                         </label>
                         <input
                             type="date"
@@ -484,16 +484,16 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             onChange={handleChange}
                             min="1980-01-01"
                             max={new Date().toISOString().split('T')[0]}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="date_deces" className="text-gray-100 font-medium text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="date_deces" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Date de décès
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Date de mort de l'animal (retire automatiquement de l'élevage)</span>
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Date de mort de l'animal (retire automatiquement de l'élevage)</span>
                         </label>
                         <input
                             type="date"
@@ -503,17 +503,17 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             onChange={handleChange}
                             min="1980-01-01"
                             max={new Date().toISOString().split('T')[0]}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
-                        <div className="text-xs text-yellow-400 mt-1.5 px-2 py-2 bg-yellow-900 bg-opacity-20 rounded-md border-l-3 border-yellow-400">
+                        <div className="text-xs text-yellow-400 mt-1.5 px-2 py-1.5 sm:py-2 bg-yellow-900 bg-opacity-20 rounded-md border-l-3 border-yellow-400">
                             ⚠️ Renseigner cette date retire automatiquement l'animal de son élevage
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="elevage_id" className="text-gray-100 font-medium text-sm">
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                        <label htmlFor="elevage_id" className="text-gray-100 font-medium text-xs sm:text-sm">
                             Élevage d'appartenance {!formData.date_deces && '*'}
-                            <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">
+                            <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">
                                 {elevageContext && !animal?.id ?
                                     'Élevage automatiquement défini lors de l\'ajout depuis l\'onglet élevage' :
                                     'Élevage où se trouve actuellement l\'animal vivant'}
@@ -526,7 +526,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                             onChange={handleChange}
                             disabled={!!formData.date_deces || (!!elevageContext && !animal?.id)}
                             required={!formData.date_deces}
-                            className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed"
+                            className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed"
                         >
                             <option value="">
                                 {formData.date_deces ? '-- Animal décédé (hors élevage) --' : '-- Choisir un élevage --'}
@@ -546,10 +546,10 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-2 mb-5">
-                    <label htmlFor="notes" className="text-gray-100 font-medium text-sm">
+                <div className="flex flex-col gap-1.5 sm:gap-2 mb-4 sm:mb-5">
+                    <label htmlFor="notes" className="text-gray-100 font-medium text-xs sm:text-sm">
                         Notes et observations
-                        <span className="block text-xs text-gray-400 font-normal mt-1 leading-relaxed">Informations complémentaires sur l'animal (santé, comportement, etc.)</span>
+                        <span className="block text-xs text-gray-400 font-normal mt-0.5 sm:mt-1 leading-relaxed">Informations complémentaires sur l'animal (santé, comportement, etc.)</span>
                     </label>
                     <textarea
                         id="notes"
@@ -558,23 +558,23 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                         onChange={handleChange}
                         rows={3}
                         placeholder="Ex: Santé fragile, très docile, problème de patte droite..."
-                        className="w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-vertical placeholder-gray-400"
+                        className="w-full px-3 py-2 sm:py-2.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-vertical placeholder-gray-400"
                     />
                 </div>
 
-                <div className="flex gap-4 justify-end mt-8 pt-5 border-t border-gray-600">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-gray-600">
                     <button
                         type="button"
                         onClick={onCancel}
                         disabled={loading}
-                        className="btn-secondary min-w-[120px] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="btn-secondary w-full sm:w-auto sm:min-w-[120px] disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         Annuler
                     </button>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="btn-primary min-w-[120px] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="btn-primary w-full sm:w-auto sm:min-w-[120px] disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         {loading ? 'Enregistrement...' : (animal ? 'Modifier' : 'Créer')}
                     </button>
