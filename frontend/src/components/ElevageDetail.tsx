@@ -559,6 +559,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             femelles: {} as Record<string, number>
         };
 
+
         animauxAvecAge.forEach(animal => {
             const ageGroup = getAgeGroup(animal.age);
             // Ne traiter que les animaux avec un sexe défini

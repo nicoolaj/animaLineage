@@ -295,6 +295,9 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
 
             // Si un animal vivant doit avoir un élevage
             if (!formData.date_deces && !formData.elevage_id) {
+                if (!elevageContext && elevages.length === 0) {
+                    throw new Error('Aucun élevage disponible. Vous devez d\'abord créer un élevage ou avoir les permissions pour en gérer un.');
+                }
                 throw new Error('Un animal vivant doit être associé à un élevage');
             }
 
