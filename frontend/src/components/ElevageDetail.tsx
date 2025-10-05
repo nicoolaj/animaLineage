@@ -370,7 +370,41 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             case 'date_naissance':
                 return animal.date_naissance ? new Date(animal.date_naissance).getTime() : 0;
             case 'age':
-                return calculateAgeForSort(animal.date_naissance, animal.date_deces) || 0;
+                // Utiliser la même logique que dans calculateStatistics pour une cohérence parfaite
+                const { age: ageString } = calculateAge(animal);
+                let ageNumber: number | null = null;
+                if (ageString && ageString !== 'Inconnu') {
+                    if (ageString === 'Nouveau-né') {
+                        ageNumber = 0;
+                    } else {
+                        ageNumber = 0;
+                        // Chercher les années (format: "5a", "5 ans", "5.2a")
+                        const yearsMatch = ageString.match(/(\d+\.?\d*)\s*a(?:ns?)?/);
+                        if (yearsMatch) {
+                            ageNumber += parseFloat(yearsMatch[1]);
+                        }
+                        // Chercher les mois (format: "3m", "3 mois")
+                        const monthsMatch = ageString.match(/(\d+)\s*m(?:ois)?(?!\w)/);
+                        if (monthsMatch) {
+                            ageNumber += parseFloat(monthsMatch[1]) / 12;
+                        }
+                        // Chercher les jours (format: "15j", "15 jours")
+                        const daysMatch = ageString.match(/(\d+)\s*j(?:ours?)?(?!\w)/);
+                        if (daysMatch) {
+                            ageNumber += parseFloat(daysMatch[1]) / 365;
+                        }
+                        // Si aucun format reconnu, essayer d'extraire un nombre simple
+                        if (!yearsMatch && !monthsMatch && !daysMatch) {
+                            const match = ageString.match(/^(\d+\.?\d*)/);
+                            if (match) {
+                                ageNumber = parseFloat(match[1]);
+                            } else {
+                                ageNumber = null;
+                            }
+                        }
+                    }
+                }
+                return ageNumber || 0;
             case 'statut':
                 return animal.statut;
             case 'parents':
