@@ -346,10 +346,10 @@ class AnimalController {
             $this->animal->elevage_id = $data['elevage_id'] ?? $animal_data['elevage_id'];
             $this->animal->notes = $data['notes'] ?? $animal_data['notes'];
 
-            // Gérer automatiquement le statut et l'élevage en cas de décès
+            // Gérer automatiquement le statut en cas de décès (mais conserver l'élevage)
             if (!empty($data['date_deces'])) {
                 $this->animal->statut = 'mort';
-                $this->animal->elevage_id = null;
+                // Conserver l'élevage pour les statistiques
             } else {
                 $this->animal->statut = $data['statut'] ?? $animal_data['statut'];
             }

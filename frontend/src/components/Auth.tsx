@@ -67,7 +67,15 @@ const Auth: React.FC = () => {
       <div id="auth-card" className="auth-card bg-gray-700 rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm sm:max-w-md border border-gray-600">
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3">🦕 AnimaLineage</h1>
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-200">{isLogin ? 'Connexion' : 'Créer un compte'}</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-200 mb-3 sm:mb-4">{isLogin ? 'Connexion' : 'Créer un compte'}</h2>
+          <div className="bg-gray-600 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+            <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+              <strong className="text-blue-400">🏠 Gestion d'élevages</strong> • <strong className="text-green-400">📊 Suivi des lignées</strong>
+            </p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-2">
+              Organisez vos animaux par élevages, suivez leur généalogie et calculez les statistiques de reproduction et d'espérance de vie
+            </p>
+          </div>
         </div>
 
         {error && <div id="auth-error-message" className="error-message bg-red-600 text-white px-3 py-2.5 rounded-md mb-4 sm:mb-6 text-sm">{error}</div>}

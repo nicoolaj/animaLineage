@@ -225,12 +225,11 @@ class Animal {
     public function marquerDeces($date_deces) {
         $this->date_deces = $date_deces;
         $this->statut = 'mort';
-        $this->elevage_id = null; // Retirer de l'élevage automatiquement
+        // Ne plus retirer l'animal de l'élevage pour conserver les statistiques
 
         $query = "UPDATE " . $this->table_name . "
                   SET date_deces = :date_deces,
                       statut = 'mort',
-                      elevage_id = NULL,
                       updated_at = CURRENT_TIMESTAMP
                   WHERE id = :id";
 
