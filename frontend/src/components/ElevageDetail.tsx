@@ -459,11 +459,40 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             const { age } = calculateAge(animal);
             // Convertir l'âge en nombre si c'est une chaîne
             let ageNumber: number | null = null;
-            if (age && age !== 'Inconnu' && age !== 'Nouveau-né') {
-                // Extraire le nombre de l'âge (ex: "5.2a 3m" -> 5.2)
-                const match = age.match(/^(\d+\.?\d*)/);
-                if (match) {
-                    ageNumber = parseFloat(match[1]);
+            if (age && age !== 'Inconnu') {
+                if (age === 'Nouveau-né') {
+                    ageNumber = 0;
+                } else {
+                    // Traiter différents formats d'âge avec parsing complet
+                    ageNumber = 0;
+
+                    // Chercher les années (format: "5a", "5 ans", "5.2a")
+                    const yearsMatch = age.match(/(\d+\.?\d*)\s*a(?:ns?)?/);
+                    if (yearsMatch) {
+                        ageNumber += parseFloat(yearsMatch[1]);
+                    }
+
+                    // Chercher les mois (format: "3m", "3 mois")
+                    const monthsMatch = age.match(/(\d+)\s*m(?:ois)?(?!\w)/); // (?!\w) pour éviter "mois" dans "6 mois"
+                    if (monthsMatch) {
+                        ageNumber += parseFloat(monthsMatch[1]) / 12;
+                    }
+
+                    // Chercher les jours (format: "15j", "15 jours")
+                    const daysMatch = age.match(/(\d+)\s*j(?:ours?)?(?!\w)/);
+                    if (daysMatch) {
+                        ageNumber += parseFloat(daysMatch[1]) / 365;
+                    }
+
+                    // Si aucun format reconnu, essayer d'extraire un nombre simple
+                    if (!yearsMatch && !monthsMatch && !daysMatch) {
+                        const match = age.match(/^(\d+\.?\d*)/);
+                        if (match) {
+                            ageNumber = parseFloat(match[1]);
+                        } else {
+                            ageNumber = null; // Âge non parsable
+                        }
+                    }
                 }
             }
             return {
@@ -502,32 +531,26 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             ? longevitesFemelles.reduce((sum, age) => sum + age, 0) / longevitesFemelles.length
             : null;
 
-        // Espérance de vie (tous animaux vivants + décédés avec âge connu)
-        const tousAgesConnus = animauxAvecAge
-            .map(a => a.age)
-            .filter(age => age !== null) as number[];
+        // Espérance de vie = âge moyen des animaux décédés uniquement
+        const esperanceVieMixte = longeviteMoyenne; // Réutiliser le calcul déjà correct
 
-        const esperanceVieMixte = tousAgesConnus.length > 0
-            ? tousAgesConnus.reduce((sum, age) => sum + age, 0) / tousAgesConnus.length
+        // Espérance de vie par sexe = âge moyen des décédés par sexe
+        const esperanceVieMales = longeviteMoyenneMales; // Réutiliser le calcul déjà correct
+        const esperanceVieFemelles = longeviteMoyenneFemelles; // Réutiliser le calcul déjà correct
+
+        // Âge moyen par sexe (vivants uniquement)
+        const vivantsMales = vivants.filter(a => a.sexe === 'M');
+        const vivantsFemelles = vivants.filter(a => a.sexe === 'F');
+
+        const agesVivantsMales = vivantsMales.map(a => a.age).filter(age => age !== null) as number[];
+        const agesVivantsFemelles = vivantsFemelles.map(a => a.age).filter(age => age !== null) as number[];
+
+        const ageMoyenVivantsMales = agesVivantsMales.length > 0
+            ? agesVivantsMales.reduce((sum, age) => sum + age, 0) / agesVivantsMales.length
             : null;
 
-        // Espérance de vie par sexe (tous animaux)
-        const agesMalesConnus = animauxAvecAge
-            .filter(a => a.sexe === 'M')
-            .map(a => a.age)
-            .filter(age => age !== null) as number[];
-
-        const agesFemellesConnus = animauxAvecAge
-            .filter(a => a.sexe === 'F')
-            .map(a => a.age)
-            .filter(age => age !== null) as number[];
-
-        const esperanceVieMales = agesMalesConnus.length > 0
-            ? agesMalesConnus.reduce((sum, age) => sum + age, 0) / agesMalesConnus.length
-            : null;
-
-        const esperanceVieFemelles = agesFemellesConnus.length > 0
-            ? agesFemellesConnus.reduce((sum, age) => sum + age, 0) / agesFemellesConnus.length
+        const ageMoyenVivantsFemelles = agesVivantsFemelles.length > 0
+            ? agesVivantsFemelles.reduce((sum, age) => sum + age, 0) / agesVivantsFemelles.length
             : null;
 
         // Données pour la pyramide des âges
@@ -538,15 +561,20 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
         animauxAvecAge.forEach(animal => {
             const ageGroup = getAgeGroup(animal.age);
-            const sexe = animal.sexe === 'M' ? 'males' : 'femelles';
-            pyramideData[sexe][ageGroup] = (pyramideData[sexe][ageGroup] || 0) + 1;
+            // Ne traiter que les animaux avec un sexe défini
+            if (animal.sexe === 'M' || animal.sexe === 'F') {
+                const sexe = animal.sexe === 'M' ? 'males' : 'femelles';
+                pyramideData[sexe][ageGroup] = (pyramideData[sexe][ageGroup] || 0) + 1;
+            }
         });
 
         return {
-            total: animaux.length,
+            total: animauxAvecAge.length,
             vivants: vivants.length,
             morts: morts.length,
             ageMoyenVivants: ageMoyenVivants ? Math.round(ageMoyenVivants * 10) / 10 : null,
+            ageMoyenVivantsMales: ageMoyenVivantsMales ? Math.round(ageMoyenVivantsMales * 10) / 10 : null,
+            ageMoyenVivantsFemelles: ageMoyenVivantsFemelles ? Math.round(ageMoyenVivantsFemelles * 10) / 10 : null,
             longeviteMoyenne: longeviteMoyenne ? Math.round(longeviteMoyenne * 10) / 10 : null,
             longeviteMoyenneMales: longeviteMoyenneMales ? Math.round(longeviteMoyenneMales * 10) / 10 : null,
             longeviteMoyenneFemelles: longeviteMoyenneFemelles ? Math.round(longeviteMoyenneFemelles * 10) / 10 : null,
@@ -897,7 +925,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
                         {(() => {
                             const stats = calculateStatistics();
-                            const ageGroups = ['0-1 an', '1-2 ans', '2-5 ans', '5-10 ans', '10+ ans'];
+                            const ageGroups = ['0-1 an', '1-2 ans', '2-5 ans', '5-10 ans', '10+ ans', 'Inconnu'];
 
                             return (
                                 <div className="statistics-content space-y-6">
@@ -922,37 +950,61 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                     {/* Âge moyen et longévité */}
                                     <div className="longevity-stats bg-gray-700 rounded-lg p-4 sm:p-6">
                                         <h4 className="text-base sm:text-lg font-semibold text-white mb-4">📈 Longévité et âges</h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
-                                                <div className="text-lg sm:text-xl font-bold text-blue-300 mb-1">
-                                                    {stats.ageMoyenVivants !== null ? `${stats.ageMoyenVivants} ans` : 'N/A'}
+                                        <div className="space-y-4">
+                                            {/* Âge moyen des vivants */}
+                                            <h5 className="text-sm font-semibold text-gray-300 mb-2">📊 Âge moyen des animaux vivants</h5>
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                    <div className="text-lg sm:text-xl font-bold text-blue-300 mb-1">
+                                                        {stats.ageMoyenVivants !== null ? `${stats.ageMoyenVivants} ans` : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">Âge moyen mixte</div>
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">Âge moyen (vivants)</div>
+                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                    <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
+                                                        {stats.ageMoyenVivantsMales !== null ? `${stats.ageMoyenVivantsMales} ans` : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">♂️ Mâles vivants</div>
+                                                </div>
+                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                    <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
+                                                        {stats.ageMoyenVivantsFemelles !== null ? `${stats.ageMoyenVivantsFemelles} ans` : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">♀️ Femelles vivantes</div>
+                                                </div>
                                             </div>
-                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
-                                                <div className="text-lg sm:text-xl font-bold text-orange-300 mb-1">
-                                                    {stats.longeviteMoyenne !== null ? `${stats.longeviteMoyenne} ans` : 'N/A'}
+
+                                            {/* Longévité moyenne (décédés) */}
+                                            <h5 className="text-sm font-semibold text-gray-300 mb-2 mt-6">⚰️ Longévité moyenne des animaux décédés</h5>
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                    <div className="text-lg sm:text-xl font-bold text-orange-300 mb-1">
+                                                        {stats.longeviteMoyenne !== null ? `${stats.longeviteMoyenne} ans` : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">Longévité mixte</div>
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">Longévité moyenne</div>
-                                            </div>
-                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
-                                                <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
-                                                    {stats.longeviteMoyenneMales !== null ? `${stats.longeviteMoyenneMales} ans` : 'N/A'}
+                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                    <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
+                                                        {stats.longeviteMoyenneMales !== null ? `${stats.longeviteMoyenneMales} ans` : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">♂️ Mâles décédés</div>
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">Longévité ♂️ mâles</div>
-                                            </div>
-                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
-                                                <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
-                                                    {stats.longeviteMoyenneFemelles !== null ? `${stats.longeviteMoyenneFemelles} ans` : 'N/A'}
+                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                    <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
+                                                        {stats.longeviteMoyenneFemelles !== null ? `${stats.longeviteMoyenneFemelles} ans` : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">♀️ Femelles décédées</div>
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">Longévité ♀️ femelles</div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Espérance de vie */}
+                                    {/* Espérance de vie (identique à la longévité) */}
                                     <div className="life-expectancy-stats bg-gray-700 rounded-lg p-4 sm:p-6">
                                         <h4 className="text-base sm:text-lg font-semibold text-white mb-4">🎯 Espérance de vie</h4>
+                                        <p className="text-xs text-gray-400 mb-4">
+                                            💡 L'espérance de vie est calculée sur les animaux décédés uniquement (= longévité moyenne)
+                                        </p>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                             <div className="bg-gray-600 rounded-lg p-3 text-center">
                                                 <div className="text-lg sm:text-xl font-bold text-purple-300 mb-1">
@@ -964,13 +1016,13 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                 <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
                                                     {stats.esperanceVieMales !== null ? `${stats.esperanceVieMales} ans` : 'N/A'}
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">Espérance de vie ♂️ mâles</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">♂️ Mâles</div>
                                             </div>
                                             <div className="bg-gray-600 rounded-lg p-3 text-center">
                                                 <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
                                                     {stats.esperanceVieFemelles !== null ? `${stats.esperanceVieFemelles} ans` : 'N/A'}
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">Espérance de vie ♀️ femelles</div>
+                                                <div className="text-xs sm:text-sm text-gray-400">♀️ Femelles</div>
                                             </div>
                                         </div>
                                     </div>
