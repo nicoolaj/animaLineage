@@ -450,7 +450,8 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         if (age < 1) return '0-1 an';
         if (age < 2) return '1-2 ans';
         if (age < 5) return '2-5 ans';
-        if (age < 10) return '5-10 ans';
+        if (age < 8) return '5-8 ans';
+        if (age < 10) return '8-10 ans';
         return '10+ ans';
     };
 
@@ -560,10 +561,11 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         };
 
 
+
         animauxAvecAge.forEach(animal => {
             const ageGroup = getAgeGroup(animal.age);
-            // Ne traiter que les animaux avec un sexe défini
-            if (animal.sexe === 'M' || animal.sexe === 'F') {
+            // Ne traiter que les animaux avec un sexe défini et un âge connu
+            if ((animal.sexe === 'M' || animal.sexe === 'F') && ageGroup !== 'Inconnu') {
                 const sexe = animal.sexe === 'M' ? 'males' : 'femelles';
                 pyramideData[sexe][ageGroup] = (pyramideData[sexe][ageGroup] || 0) + 1;
             }
@@ -926,7 +928,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
                         {(() => {
                             const stats = calculateStatistics();
-                            const ageGroups = ['0-1 an', '1-2 ans', '2-5 ans', '5-10 ans', '10+ ans', 'Inconnu'];
+                            const ageGroups = ['0-1 an', '1-2 ans', '2-5 ans', '5-8 ans', '8-10 ans', '10+ ans'];
 
                             return (
                                 <div className="statistics-content space-y-6">
