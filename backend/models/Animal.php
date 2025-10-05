@@ -42,11 +42,12 @@ class Animal {
 
     // Lire tous les animaux
     public function getAll() {
-        $query = "SELECT a.*, r.nom as race_nom, e.nom as elevage_nom,
+        $query = "SELECT a.*, r.nom as race_nom, e.nom as elevage_nom, ta.nom as type_animal_nom,
                          p.identifiant_officiel as pere_identifiant, p.nom as pere_nom,
                          m.identifiant_officiel as mere_identifiant, m.nom as mere_nom
                   FROM " . $this->table_name . " a
                   LEFT JOIN races r ON a.race_id = r.id
+                  LEFT JOIN types_animaux ta ON r.type_animal_id = ta.id
                   LEFT JOIN elevages e ON a.elevage_id = e.id
                   LEFT JOIN animaux p ON a.pere_id = p.id
                   LEFT JOIN animaux m ON a.mere_id = m.id
@@ -58,11 +59,12 @@ class Animal {
 
     // Lire les animaux par élevage
     public function getByElevageId($elevage_id) {
-        $query = "SELECT a.*, r.nom as race_nom,
+        $query = "SELECT a.*, r.nom as race_nom, ta.nom as type_animal_nom,
                          p.identifiant_officiel as pere_identifiant, p.nom as pere_nom,
                          m.identifiant_officiel as mere_identifiant, m.nom as mere_nom
                   FROM " . $this->table_name . " a
                   LEFT JOIN races r ON a.race_id = r.id
+                  LEFT JOIN types_animaux ta ON r.type_animal_id = ta.id
                   LEFT JOIN animaux p ON a.pere_id = p.id
                   LEFT JOIN animaux m ON a.mere_id = m.id
                   WHERE a.elevage_id = :elevage_id
@@ -75,11 +77,12 @@ class Animal {
 
     // Lire les animaux vivants par élevage
     public function getVivantsByElevageId($elevage_id) {
-        $query = "SELECT a.*, r.nom as race_nom,
+        $query = "SELECT a.*, r.nom as race_nom, ta.nom as type_animal_nom,
                          p.identifiant_officiel as pere_identifiant, p.nom as pere_nom,
                          m.identifiant_officiel as mere_identifiant, m.nom as mere_nom
                   FROM " . $this->table_name . " a
                   LEFT JOIN races r ON a.race_id = r.id
+                  LEFT JOIN types_animaux ta ON r.type_animal_id = ta.id
                   LEFT JOIN animaux p ON a.pere_id = p.id
                   LEFT JOIN animaux m ON a.mere_id = m.id
                   WHERE a.elevage_id = :elevage_id AND a.statut = 'vivant'
@@ -92,11 +95,12 @@ class Animal {
 
     // Lire un animal par ID
     public function getById($id) {
-        $query = "SELECT a.*, r.nom as race_nom, e.nom as elevage_nom,
+        $query = "SELECT a.*, r.nom as race_nom, e.nom as elevage_nom, ta.nom as type_animal_nom,
                          p.identifiant_officiel as pere_identifiant, p.nom as pere_nom,
                          m.identifiant_officiel as mere_identifiant, m.nom as mere_nom
                   FROM " . $this->table_name . " a
                   LEFT JOIN races r ON a.race_id = r.id
+                  LEFT JOIN types_animaux ta ON r.type_animal_id = ta.id
                   LEFT JOIN elevages e ON a.elevage_id = e.id
                   LEFT JOIN animaux p ON a.pere_id = p.id
                   LEFT JOIN animaux m ON a.mere_id = m.id
@@ -109,11 +113,12 @@ class Animal {
 
     // Lire un animal par identifiant officiel
     public function getByIdentifiant($identifiant_officiel) {
-        $query = "SELECT a.*, r.nom as race_nom, e.nom as elevage_nom,
+        $query = "SELECT a.*, r.nom as race_nom, e.nom as elevage_nom, ta.nom as type_animal_nom,
                          p.identifiant_officiel as pere_identifiant, p.nom as pere_nom,
                          m.identifiant_officiel as mere_identifiant, m.nom as mere_nom
                   FROM " . $this->table_name . " a
                   LEFT JOIN races r ON a.race_id = r.id
+                  LEFT JOIN types_animaux ta ON r.type_animal_id = ta.id
                   LEFT JOIN elevages e ON a.elevage_id = e.id
                   LEFT JOIN animaux p ON a.pere_id = p.id
                   LEFT JOIN animaux m ON a.mere_id = m.id
@@ -273,9 +278,10 @@ class Animal {
 
     // Obtenir les descendants d'un animal
     public function getDescendants() {
-        $query = "SELECT a.*, r.nom as race_nom
+        $query = "SELECT a.*, r.nom as race_nom, ta.nom as type_animal_nom
                   FROM " . $this->table_name . " a
                   LEFT JOIN races r ON a.race_id = r.id
+                  LEFT JOIN types_animaux ta ON r.type_animal_id = ta.id
                   WHERE a.pere_id = :animal_id OR a.mere_id = :animal_id
                   ORDER BY a.date_naissance DESC";
         $stmt = $this->conn->prepare($query);
