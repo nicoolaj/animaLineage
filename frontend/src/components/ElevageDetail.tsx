@@ -1114,14 +1114,20 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                         </div>
 
                                         {/* Légende */}
-                                        <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-gray-600">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                                                <span className="text-xs sm:text-sm text-gray-300">♂️ Mâles</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 bg-pink-500 rounded"></div>
-                                                <span className="text-xs sm:text-sm text-gray-300">♀️ Femelles</span>
+                                        <div className="mt-4 pt-4 border-t border-gray-600">
+                                            <div className="flex justify-between items-center max-w-md mx-auto">
+                                                {/* Mâles à gauche */}
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                                    <span className="text-xs sm:text-sm text-gray-300">♂️ Mâles</span>
+                                                </div>
+                                                {/* Séparateur central */}
+                                                <div className="w-px h-4 bg-gray-500"></div>
+                                                {/* Femelles à droite */}
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 bg-pink-500 rounded"></div>
+                                                    <span className="text-xs sm:text-sm text-gray-300">♀️ Femelles</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
