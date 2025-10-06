@@ -168,32 +168,34 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
   }
 
   return (
-    <div id="adminpanel-admin-panel-2" className="admin-panel bg-gray-700 rounded-lg p-4 sm:p-6 border border-gray-600">
-      <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">👥 Gestion des utilisateurs</h3>
+    <div id="adminpanel-admin-panel-2" className="admin-panel">
+      <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+        📋 Utilisateurs validés
+      </h4>
 
       {error && (
-        <div id="adminpanel-error-banner-3" className="error-banner bg-red-600 text-white p-3 sm:p-4 rounded-lg mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div id="adminpanel-error-banner-3" className="error-banner bg-red-100 border border-red-400 text-red-700 p-3 rounded mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <p className="text-sm">⚠️ {error}</p>
-          <button onClick={fetchAdminUsers} className="btn-secondary text-sm px-3 py-2 w-full sm:w-auto">
+          <button onClick={fetchAdminUsers} className="text-sm px-3 py-2 bg-red-200 text-red-800 rounded hover:bg-red-300 w-full sm:w-auto">
             Réessayer
           </button>
         </div>
       )}
 
       {loading ? (
-        <p className="text-center text-gray-300 py-4">Chargement...</p>
+        <p className="text-center text-gray-500 py-4">Chargement...</p>
       ) : (
         <div id="adminpanel-admin-users-table-4" className="admin-users-table">
           <div className="table-responsive">
-            <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+            <table className="table-mobile w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden">
               <thead className="hidden sm:table-header-group">
                 <tr>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Nom</th>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Email</th>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Rôle</th>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Statut</th>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Créé le</th>
-                  {canAdministrate() && <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Actions</th>}
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-medium text-sm">Nom</th>
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-medium text-sm">Email</th>
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-medium text-sm">Rôle</th>
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-medium text-sm">Statut</th>
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-medium text-sm">Créé le</th>
+                  {canAdministrate() && <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-medium text-sm">Actions</th>}
                 </tr>
               </thead>
               <tbody className="block sm:table-row-group">

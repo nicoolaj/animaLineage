@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface Backup {
   filename: string;
@@ -24,7 +25,7 @@ const BackupManager: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/backup', {
+      const response = await fetch(`${API_BASE_URL}api/backup`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -53,7 +54,7 @@ const BackupManager: React.FC = () => {
     setSuccess('');
 
     try {
-      const response = await fetch('/api/backup', {
+      const response = await fetch(`${API_BASE_URL}api/backup`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -95,24 +96,20 @@ const BackupManager: React.FC = () => {
   };
 
   return (
-    <div className="backup-manager mt-8">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-gray-800 flex items-center">
-            💾 Gestion des sauvegardes
-          </h3>
-          <button
-            onClick={createBackup}
-            disabled={creating}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              creating
-                ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
-          >
-            {creating ? '⏳ Création...' : '📁 Créer une sauvegarde'}
-          </button>
-        </div>
+    <div className="backup-manager">
+      <div className="backup-actions mb-6">
+        <button
+          onClick={createBackup}
+          disabled={creating}
+          className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors ${
+            creating
+              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          {creating ? '⏳ Création...' : '📁 Créer une sauvegarde'}
+        </button>
+      </div>
 
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -126,11 +123,11 @@ const BackupManager: React.FC = () => {
           </div>
         )}
 
-        <div className="mb-4">
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <button
             onClick={fetchBackups}
             disabled={loading}
-            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50"
+            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 w-full sm:w-auto"
           >
             {loading ? '⏳ Actualisation...' : '🔄 Actualiser'}
           </button>
@@ -146,30 +143,44 @@ const BackupManager: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+            <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nom du fichier
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Taille
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date de création
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {backups.map((backup, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                      {backup.filename}
+                  <tr key={index} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-3 sm:px-4 py-4 text-sm text-gray-900">
+                      <div className="font-mono text-xs sm:text-sm break-all">
+                        {backup.filename}
+                      </div>
+                      <div className="sm:hidden mt-1 flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          backup.extension === 'db'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {backup.type}
+                        </span>
+                        <span className="text-xs text-gray-500 md:hidden">
+                          {formatDateTime(backup.created_at)}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="hidden sm:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         backup.extension === 'db'
                           ? 'bg-green-100 text-green-800'
@@ -178,10 +189,10 @@ const BackupManager: React.FC = () => {
                         {backup.type}
                       </span>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-3 sm:px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                       {backup.size}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDateTime(backup.created_at)}
                     </td>
                   </tr>
@@ -191,14 +202,13 @@ const BackupManager: React.FC = () => {
           </div>
         )}
 
-        <div className="mt-4 text-sm text-gray-600">
+        <div className="mt-4 text-sm text-gray-600 bg-gray-50 p-3 rounded">
           <p>
-            ℹ️ Les sauvegardes sont stockées dans le répertoire ../sqlsave/ par rapport à la racine du site.
+            ℹ️ Les sauvegardes sont stockées dans le répertoire ../../sqlsave/ par rapport à la racine du site.
             Les fichiers SQLite sont copiés directement (.db), tandis que les bases MySQL/PostgreSQL
             sont exportées au format SQL (.sql).
           </p>
         </div>
-      </div>
     </div>
   );
 };

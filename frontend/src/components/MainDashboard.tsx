@@ -228,20 +228,51 @@ const MainDashboard: React.FC = () => {
 
       case 'users':
         return (
-          <div id="maindashboard-users-management-4" className="users-management">
-            <div id="maindashboard-users-section-5" className="users-section">
-              <h3>⚙️ Paramétrages du système</h3>
-              <p>Configuration et administration des paramètres globaux.</p>
+          <div id="maindashboard-users-management-4" className="parametrages-container">
+            {/* En-tête */}
+            <div className="parametrages-header mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                ⚙️ Paramétrages du système
+              </h2>
+              <p className="text-gray-600 mt-2">Configuration et administration des paramètres globaux.</p>
               {canAdministrate() && (
-                <div id="maindashboard-admin-notice-6" className="admin-notice">
-                  <p>👑 Accès administrateur - Configuration système complète</p>
+                <div className="admin-notice mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-800 font-medium">👑 Accès administrateur - Configuration système complète</p>
                 </div>
               )}
             </div>
 
-            <AdminPanel ref={adminPanelRef} onUserDeleted={handleUserDeleted} />
-            <PendingUsers ref={pendingUsersRef} onUserValidated={handleUserValidated} />
-            <BackupManager />
+            {/* Grille de cartes responsive */}
+            <div className="parametrages-grid grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+              {/* Carte Gestion des utilisateurs */}
+              <div className="parametrages-card bg-white rounded-lg shadow-md border border-gray-200 min-h-fit">
+                <div className="card-header p-4 sm:p-6 border-b border-gray-100">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
+                    👥 Gestion des utilisateurs
+                  </h3>
+                  <p className="text-gray-600 mt-2 text-sm sm:text-base">Administration des comptes utilisateurs et demandes d'inscription.</p>
+                </div>
+                <div className="card-content p-4 sm:p-6">
+                  <div className="space-y-6">
+                    <PendingUsers ref={pendingUsersRef} onUserValidated={handleUserValidated} />
+                    <AdminPanel ref={adminPanelRef} onUserDeleted={handleUserDeleted} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Carte Sauvegardes */}
+              <div className="parametrages-card bg-white rounded-lg shadow-md border border-gray-200 min-h-fit">
+                <div className="card-header p-4 sm:p-6 border-b border-gray-100">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
+                    💾 Gestion des sauvegardes
+                  </h3>
+                  <p className="text-gray-600 mt-2 text-sm sm:text-base">Création et gestion des sauvegardes de la base de données.</p>
+                </div>
+                <div className="card-content p-4 sm:p-6">
+                  <BackupManager />
+                </div>
+              </div>
+            </div>
           </div>
         );
 

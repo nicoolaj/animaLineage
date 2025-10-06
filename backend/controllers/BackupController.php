@@ -24,12 +24,12 @@ class BackupController {
 
     public function __construct() {
         $this->database = new Database();
-        $this->auth = new AuthMiddleware();
+        $this->auth = new AuthMiddleware($this->database);
     }
 
     public function createBackup() {
         // Vérifier l'authentification et les droits admin
-        $user = $this->auth->checkAuth();
+        $user = $this->auth->getCurrentUser();
         if (!$user || $user['role'] > 1) { // Seuls les admin (role = 1) peuvent faire des sauvegardes
             http_response_code(403);
             echo json_encode(['message' => 'Accès refusé. Seuls les administrateurs peuvent créer des sauvegardes.']);
@@ -100,7 +100,7 @@ class BackupController {
         }
 
         $filename = "{$date}.{$timestamp}.db";
-        $backupDir = dirname(__DIR__, 2) . '/sqlsave';
+        $backupDir = dirname(__DIR__, 3) . '/sqlsave';
 
         // Créer le répertoire s'il n'existe pas
         if (!is_dir($backupDir)) {
@@ -133,7 +133,7 @@ class BackupController {
         $password = Config::get('DB_PASS', '');
 
         $filename = "{$date}.{$timestamp}.sql";
-        $backupDir = dirname(__DIR__, 2) . '/sqlsave';
+        $backupDir = dirname(__DIR__, 3) . '/sqlsave';
 
         // Créer le répertoire s'il n'existe pas
         if (!is_dir($backupDir)) {
@@ -187,7 +187,7 @@ class BackupController {
         $password = Config::get('DB_PASS', '');
 
         $filename = "{$date}.{$timestamp}.sql";
-        $backupDir = dirname(__DIR__, 2) . '/sqlsave';
+        $backupDir = dirname(__DIR__, 3) . '/sqlsave';
 
         // Créer le répertoire s'il n'existe pas
         if (!is_dir($backupDir)) {
@@ -243,7 +243,7 @@ class BackupController {
 
     public function listBackups() {
         // Vérifier l'authentification et les droits admin
-        $user = $this->auth->checkAuth();
+        $user = $this->auth->getCurrentUser();
         if (!$user || $user['role'] > 1) {
             http_response_code(403);
             echo json_encode(['message' => 'Accès refusé']);
@@ -251,7 +251,7 @@ class BackupController {
         }
 
         try {
-            $backupDir = dirname(__DIR__, 2) . '/sqlsave';
+            $backupDir = dirname(__DIR__, 3) . '/sqlsave';
             $backups = [];
 
             // Créer le répertoire s'il n'existe pas
@@ -327,17 +327,5 @@ class BackupController {
             return $bytes . ' B';
         }
     }
-}
-
-// Gestion des routes
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $controller = new BackupController();
-    $controller->createBackup();
-} elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $controller = new BackupController();
-    $controller->listBackups();
-} else {
-    http_response_code(405);
-    echo json_encode(['message' => 'Méthode non autorisée']);
 }
 ?>
