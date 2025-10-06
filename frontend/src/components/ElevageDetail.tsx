@@ -64,6 +64,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         sexe: '',
         race: ''
     });
+    const [selectedAgeGroup, setSelectedAgeGroup] = useState<{group: string, animals: Animal[], type: 'males' | 'femelles'} | null>(null);
     const [sortConfig, setSortConfig] = useState<{
         key: string | null;
         direction: 'asc' | 'desc' | null;
@@ -598,8 +599,8 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
         animauxAvecAge.forEach(animal => {
             const ageGroup = getAgeGroup(animal.age);
-            // Ne traiter que les animaux avec un sexe défini et un âge connu
-            if ((animal.sexe === 'M' || animal.sexe === 'F') && ageGroup !== 'Inconnu') {
+            // Ne traiter que les animaux vivants avec un sexe défini et un âge connu
+            if (animal.statut === 'vivant' && (animal.sexe === 'M' || animal.sexe === 'F') && ageGroup !== 'Inconnu') {
                 const sexe = animal.sexe === 'M' ? 'males' : 'femelles';
                 pyramideData[sexe][ageGroup] = (pyramideData[sexe][ageGroup] || 0) + 1;
             }
@@ -621,6 +622,21 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             pyramideData,
             animauxAvecAge
         };
+    };
+
+    const handleAgeGroupClick = (ageGroup: string, type: 'males' | 'femelles') => {
+        const stats = calculateStatistics();
+        const filteredAnimals = stats.animauxAvecAge.filter(animal => {
+            const animalAgeGroup = getAgeGroup(animal.age);
+            const animalSexe = animal.sexe === 'M' ? 'males' : 'femelles';
+            return animal.statut === 'vivant' && animalAgeGroup === ageGroup && animalSexe === type;
+        });
+
+        setSelectedAgeGroup({
+            group: ageGroup,
+            animals: filteredAnimals,
+            type
+        });
     };
 
     const filteredAnimaux = sortAnimaux(animaux.filter(animal => {
@@ -1066,7 +1082,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
                                     {/* Pyramide des âges */}
                                     <div className="age-pyramid bg-gray-700 rounded-lg p-4 sm:p-6">
-                                        <h4 className="text-base sm:text-lg font-semibold text-white mb-4">🔺 Pyramide des âges</h4>
+                                        <h4 className="text-base sm:text-lg font-semibold text-white mb-4">🔺 Pyramide des âges (animaux vivants)</h4>
                                         <div className="space-y-3">
                                             {ageGroups.map(ageGroup => {
                                                 const malesCount = stats.pyramideData.males[ageGroup] || 0;
@@ -1083,11 +1099,12 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                             {/* Barres mâles (à gauche) */}
                                                             <div className="flex-1 flex justify-end pr-1">
                                                                 <div
-                                                                    className="bg-blue-500 h-full rounded-l flex items-center justify-center text-xs text-white font-medium"
+                                                                    className="bg-blue-500 h-full rounded-l flex items-center justify-center text-xs text-white font-medium cursor-pointer hover:bg-blue-600 transition-colors duration-200"
                                                                     style={{
                                                                         width: maxCount > 0 ? `${Math.max((malesCount / maxCount) * 100, malesCount > 0 ? 15 : 0)}%` : '0%'
                                                                     }}
-                                                                    title={`♂️ ${malesCount} mâles`}
+                                                                    title={`♂️ ${malesCount} mâles - Cliquer pour voir le détail`}
+                                                                    onClick={() => handleAgeGroupClick(ageGroup, 'males')}
                                                                 >
                                                                     {malesCount > 0 && <span>♂️{malesCount}</span>}
                                                                 </div>
@@ -1097,11 +1114,12 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                             {/* Barres femelles (à droite) */}
                                                             <div className="flex-1 flex justify-start pl-1">
                                                                 <div
-                                                                    className="bg-pink-500 h-full rounded-r flex items-center justify-center text-xs text-white font-medium"
+                                                                    className="bg-pink-500 h-full rounded-r flex items-center justify-center text-xs text-white font-medium cursor-pointer hover:bg-pink-600 transition-colors duration-200"
                                                                     style={{
                                                                         width: maxCount > 0 ? `${Math.max((femellesCount / maxCount) * 100, femellesCount > 0 ? 15 : 0)}%` : '0%'
                                                                     }}
-                                                                    title={`♀️ ${femellesCount} femelles`}
+                                                                    title={`♀️ ${femellesCount} femelles - Cliquer pour voir le détail`}
+                                                                    onClick={() => handleAgeGroupClick(ageGroup, 'femelles')}
                                                                 >
                                                                     {femellesCount > 0 && <span>♀️{femellesCount}</span>}
                                                                 </div>
@@ -1134,6 +1152,73 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                 </div>
                             );
                         })()}
+
+                        {/* Pop-in pour afficher les animaux d'un groupe d'âge */}
+                        {selectedAgeGroup && (
+                            <div
+                                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                                onClick={() => setSelectedAgeGroup(null)}
+                            >
+                                <div
+                                    className="bg-gray-700 rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <div className="p-6 border-b border-gray-600">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-lg sm:text-xl font-semibold text-white">
+                                                {selectedAgeGroup.type === 'males' ? '♂️ Mâles' : '♀️ Femelles'} vivants - {selectedAgeGroup.group}
+                                                <span className="text-gray-400 ml-2">({selectedAgeGroup.animals.length} animal{selectedAgeGroup.animals.length > 1 ? 'aux' : ''})</span>
+                                            </h3>
+                                            <button
+                                                onClick={() => setSelectedAgeGroup(null)}
+                                                className="text-gray-400 hover:text-white text-2xl font-bold"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="p-6 overflow-y-auto max-h-[60vh]">
+                                        {selectedAgeGroup.animals.length === 0 ? (
+                                            <p className="text-gray-300 text-center py-8">Aucun animal dans ce groupe.</p>
+                                        ) : (
+                                            <div className="grid gap-4">
+                                                {selectedAgeGroup.animals.map((animal) => (
+                                                    <div key={animal.id} className="bg-gray-600 rounded-lg p-4 border border-gray-500">
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                                            <div className="flex-1">
+                                                                <h4 className="font-semibold text-white text-lg">
+                                                                    {animal.identifiant_officiel}
+                                                                    {animal.nom && <span className="text-gray-300 ml-2">({animal.nom})</span>}
+                                                                </h4>
+                                                                <div className="text-sm text-gray-300 mt-1">
+                                                                    <span className="inline-block mr-4">
+                                                                        <strong>Race:</strong> {animal.race_nom || 'Non définie'}
+                                                                    </span>
+                                                                    <span className="inline-block mr-4">
+                                                                        <strong>Sexe:</strong> {animal.sexe === 'M' ? 'Mâle' : animal.sexe === 'F' ? 'Femelle' : 'Non défini'}
+                                                                    </span>
+                                                                    <span className="inline-block mr-4">
+                                                                        <strong>Âge:</strong> {calculateAge(animal).age}
+                                                                    </span>
+                                                                    <span className="inline-block">
+                                                                        <strong>Statut:</strong> {animal.statut === 'vivant' ? '🟢 Vivant' : '⚫ Décédé'}
+                                                                    </span>
+                                                                </div>
+                                                                {animal.date_naissance && (
+                                                                    <div className="text-xs text-gray-400 mt-1">
+                                                                        Né le {new Date(animal.date_naissance).toLocaleDateString('fr-FR')}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
