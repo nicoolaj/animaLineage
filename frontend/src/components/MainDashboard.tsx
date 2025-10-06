@@ -14,8 +14,11 @@ import AnimalDashboard from './AnimalDashboard';
 import TransferRequestManager from './TransferRequestManager';
 import CompatibilityTester from './CompatibilityTester';
 import LanguageSelector from './LanguageSelector';
+import Footer from './Footer';
+import MentionsLegales from './MentionsLegales';
+import PolitiqueConfidentialite from './PolitiqueConfidentialite';
 
-type TabType = 'elevages' | 'animals' | 'users' | 'types-races' | 'transfer-requests' | 'compatibility-tester' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form';
+type TabType = 'elevages' | 'animals' | 'users' | 'types-races' | 'transfer-requests' | 'compatibility-tester' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form' | 'mentions-legales' | 'politique-confidentialite';
 
 interface TabData {
   id: TabType;
@@ -156,6 +159,10 @@ const MainDashboard: React.FC = () => {
 
       case 'compatibility-tester':
         return <CompatibilityTester />;
+      case 'mentions-legales':
+        return <MentionsLegales onRetour={() => setActiveTab('elevages')} />;
+      case 'politique-confidentialite':
+        return <PolitiqueConfidentialite onRetour={() => setActiveTab('elevages')} />;
 
       case 'elevage-detail':
         return selectedElevageId ? (
@@ -282,6 +289,11 @@ const MainDashboard: React.FC = () => {
       <main className="dashboard-content">
         {renderTabContent()}
       </main>
+
+      <Footer
+        onMentionsLegalesClick={() => setActiveTab('mentions-legales')}
+        onPolitiqueConfidentialiteClick={() => setActiveTab('politique-confidentialite')}
+      />
     </div>
   );
 };

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ApiTest from './ApiTest';
 import AdSenseScript from './AdSenseScript';
+import Footer from './Footer';
+import MentionsLegales from './MentionsLegales';
+import PolitiqueConfidentialite from './PolitiqueConfidentialite';
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +15,8 @@ const Auth: React.FC = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showMentionsLegales, setShowMentionsLegales] = useState(false);
+  const [showPolitiqueConfidentialite, setShowPolitiqueConfidentialite] = useState(false);
 
   const { login, register } = useAuth();
 
@@ -60,11 +65,20 @@ const Auth: React.FC = () => {
     setError('');
   };
 
+  if (showMentionsLegales) {
+    return <MentionsLegales onRetour={() => setShowMentionsLegales(false)} />;
+  }
+
+  if (showPolitiqueConfidentialite) {
+    return <PolitiqueConfidentialite onRetour={() => setShowPolitiqueConfidentialite(false)} />;
+  }
+
   return (
-    <div id="auth-container" className="auth-container min-h-screen bg-gray-800 flex items-center justify-center p-4 sm:p-6">
+    <div id="auth-container" className="auth-container min-h-screen bg-gray-800 flex flex-col">
       <AdSenseScript />
       {process.env.NODE_ENV === 'development' && <ApiTest />}
-      <div id="auth-card" className="auth-card bg-gray-700 rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm sm:max-w-md border border-gray-600">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <div id="auth-card" className="auth-card bg-gray-700 rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm sm:max-w-md border border-gray-600">
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3">🦕 AnimaLineage</h1>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-200 mb-3 sm:mb-4">{isLogin ? 'Connexion' : 'Créer un compte'}</h2>
@@ -136,7 +150,13 @@ const Auth: React.FC = () => {
             {isLogin ? '📝 Créer un compte' : '🔐 Se connecter'}
           </button>
         </div>
+        </div>
       </div>
+
+      <Footer
+        onMentionsLegalesClick={() => setShowMentionsLegales(true)}
+        onPolitiqueConfidentialiteClick={() => setShowPolitiqueConfidentialite(true)}
+      />
     </div>
   );
 };

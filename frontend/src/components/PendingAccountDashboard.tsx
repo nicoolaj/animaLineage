@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Footer from './Footer';
+import MentionsLegales from './MentionsLegales';
+import PolitiqueConfidentialite from './PolitiqueConfidentialite';
 
 const PendingAccountDashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const [showMentionsLegales, setShowMentionsLegales] = useState(false);
+  const [showPolitiqueConfidentialite, setShowPolitiqueConfidentialite] = useState(false);
 
   const handleLogout = () => {
     logout();
   };
+
+  if (showMentionsLegales) {
+    return <MentionsLegales onRetour={() => setShowMentionsLegales(false)} />;
+  }
+
+  if (showPolitiqueConfidentialite) {
+    return <PolitiqueConfidentialite onRetour={() => setShowPolitiqueConfidentialite(false)} />;
+  }
 
   return (
     <div id="pendingaccountdashboard-pending-dashboard-1" className="pending-dashboard">
@@ -64,6 +77,11 @@ const PendingAccountDashboard: React.FC = () => {
           </div>
         </div>
       </main>
+
+      <Footer
+        onMentionsLegalesClick={() => setShowMentionsLegales(true)}
+        onPolitiqueConfidentialiteClick={() => setShowPolitiqueConfidentialite(true)}
+      />
     </div>
   );
 };
