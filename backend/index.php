@@ -554,6 +554,10 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                     break;
             }
         }
+    } elseif (isset($path_parts[1]) && $path_parts[1] === 'backup') {
+        // Routes pour les sauvegardes - nécessitent authentification Admin uniquement
+        require_once __DIR__ . '/controllers/BackupController.php';
+        // Le contrôleur BackupController gère lui-même l'authentification et les autorisations
     } else {
         http_response_code(404);
         echo json_encode(['message' => 'Endpoint not found']);

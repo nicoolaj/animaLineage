@@ -17,6 +17,7 @@ import LanguageSelector from './LanguageSelector';
 import Footer from './Footer';
 import MentionsLegales from './MentionsLegales';
 import PolitiqueConfidentialite from './PolitiqueConfidentialite';
+import BackupManager from './BackupManager';
 
 type TabType = 'elevages' | 'animals' | 'users' | 'types-races' | 'transfer-requests' | 'compatibility-tester' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form' | 'mentions-legales' | 'politique-confidentialite';
 
@@ -137,7 +138,7 @@ const MainDashboard: React.FC = () => {
     {
       id: 'users',
       label: ui.users,
-      icon: '👥',
+      icon: '⚙️',
       requiredRole: 1 // Admin uniquement
     }
   ];
@@ -229,17 +230,18 @@ const MainDashboard: React.FC = () => {
         return (
           <div id="maindashboard-users-management-4" className="users-management">
             <div id="maindashboard-users-section-5" className="users-section">
-              <h3>🛡️ Gestion des utilisateurs</h3>
-              <p>Administration des comptes utilisateurs du système.</p>
+              <h3>⚙️ Paramétrages du système</h3>
+              <p>Configuration et administration des paramètres globaux.</p>
               {canAdministrate() && (
                 <div id="maindashboard-admin-notice-6" className="admin-notice">
-                  <p>👑 Accès administrateur - Gestion complète des utilisateurs</p>
+                  <p>👑 Accès administrateur - Configuration système complète</p>
                 </div>
               )}
             </div>
 
             <AdminPanel ref={adminPanelRef} onUserDeleted={handleUserDeleted} />
             <PendingUsers ref={pendingUsersRef} onUserValidated={handleUserValidated} />
+            <BackupManager />
           </div>
         );
 

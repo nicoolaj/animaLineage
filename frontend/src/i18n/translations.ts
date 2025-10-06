@@ -143,7 +143,7 @@ export const fr: Translations = {
     dashboard: 'Tableau de bord',
     elevages: 'Élevages',
     animals: 'Animaux',
-    users: 'Utilisateurs',
+    users: 'Paramétrages',
     typesRaces: 'Types & Races',
     logout: 'Déconnexion',
 
