@@ -444,6 +444,14 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                             echo json_encode(['message' => 'Method not allowed']);
                         }
                         break;
+                    case 'genealogie':
+                        if ($request_method === 'GET') {
+                            $animalController->getFamilyTree($animal_id, $user_id, $user_role);
+                        } else {
+                            http_response_code(405);
+                            echo json_encode(['message' => 'Method not allowed']);
+                        }
+                        break;
                     case 'stats-reproduction':
                         if ($request_method === 'GET') {
                             $animalController->getStatsReproduction($animal_id, $user_id, $user_role);

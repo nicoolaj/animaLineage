@@ -184,7 +184,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
   return (
     <div className="management-container p-4 sm:p-6">
       <div className="management-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 pb-3 sm:pb-4 border-b-2 border-gray-600 gap-3 sm:gap-4">
-        <h3 className="text-lg sm:text-xl font-semibold text-white">Gestion des utilisateurs - {elevageName}</h3>
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Gestion des utilisateurs - {elevageName}</h3>
         <div className="header-actions flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {isAdmin() && (
             <span className="admin-badge bg-yellow-500 text-yellow-900 px-2 sm:px-3 py-1 rounded-full text-xs font-bold">👑 Accès administrateur</span>
@@ -199,16 +199,16 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
         </div>
       )}
 
-      {loading && <div className="loading text-center text-gray-300 py-4">Chargement...</div>}
+      {loading && <div className="loading text-center text-gray-700 py-4">Chargement...</div>}
 
       {/* Liste des utilisateurs actuels */}
       <div className="current-users-section mb-6">
-        <h4 className="text-base sm:text-lg font-medium text-gray-300 mb-3 sm:mb-4">
+        <h4 className="text-base sm:text-lg font-medium text-gray-700 mb-3 sm:mb-4">
           Utilisateurs autorisés ({Array.isArray(elevageUsers) ? elevageUsers.length : 0})
         </h4>
 
         {!Array.isArray(elevageUsers) || elevageUsers.length === 0 ? (
-          <div className="no-users text-center text-gray-300 py-4 italic">Aucun utilisateur trouvé pour cet élevage.</div>
+          <div className="no-users text-center text-gray-700 py-4 italic">Aucun utilisateur trouvé pour cet élevage.</div>
         ) : (
           <div className="users-list space-y-3">
             {elevageUsers.map((elevageUser) => (
@@ -267,7 +267,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
 
               <div className="available-users-list max-h-48 sm:max-h-64 overflow-y-auto space-y-2 mb-4">
                 {filteredAvailableUsers.length === 0 ? (
-                  <div className="no-available-users text-center text-gray-300 py-4 italic text-sm">
+                  <div className="no-available-users text-center text-gray-700 py-4 italic text-sm">
                     {searchTerm ? 'Aucun utilisateur trouvé.' : 'Tous les utilisateurs sont déjà ajoutés.'}
                   </div>
                 ) : (

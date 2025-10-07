@@ -527,6 +527,43 @@ class AnimalController {
         }
     }
 
+    // Obtenir l'arbre généalogique d'un animal
+    public function getFamilyTree($id, $user_id, $user_role) {
+        try {
+            $animal_data = $this->animal->getById($id);
+
+            if (!$animal_data) {
+                http_response_code(404);
+                echo json_encode(['message' => 'Animal non trouvé']);
+                return;
+            }
+
+            // Vérifier les droits d'accès
+            if ($user_role != 1) {
+                if ($animal_data['elevage_id']) {
+                    $this->elevage->id = $animal_data['elevage_id'];
+                    if (!$this->elevage->canEdit($user_id, $user_role)) {
+                        http_response_code(403);
+                        echo json_encode(['message' => 'Accès non autorisé']);
+                        return;
+                    }
+                }
+            }
+
+            $levels = isset($_GET['levels']) ? (int)$_GET['levels'] : 3;
+            $levels = max(1, min(5, $levels)); // Limiter entre 1 et 5 générations
+
+            $this->animal->id = $id;
+            $familyTree = $this->animal->getFamilyTree($levels);
+
+            echo json_encode($familyTree);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+    }
+
     // Vérifier l'existence d'un animal par identifiant officiel
     public function checkAnimalExists($identifiant_officiel, $user_id, $user_role) {
         try {

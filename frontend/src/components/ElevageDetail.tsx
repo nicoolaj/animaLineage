@@ -836,7 +836,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                     </thead>
                                     <tbody className="block sm:table-row-group">
                                         {filteredAnimaux.map(animal => (
-                                            <tr key={animal.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${animal.statut === 'mort' ? 'opacity-75' : ''}`}>
+                                            <tr key={animal.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-gray-700 rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${animal.statut === 'mort' ? 'opacity-75' : ''}`}>
                                                 <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-mono font-bold">{animal.identifiant_officiel}</td>
                                                 <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{animal.nom || '-'}</td>
                                                 <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
@@ -867,7 +867,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                     <div className="flex flex-wrap gap-1 sm:gap-0.5">
                                                         <button
                                                             onClick={() => handleViewDescendants(animal.id)}
-                                                            className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
+                                                            className="bg-gray-600 border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
                                                             title="Voir descendants"
                                                         >
                                                             🌳
@@ -877,7 +877,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                             <>
                                                                 <button
                                                                     onClick={() => handleEditAnimal(animal)}
-                                                                    className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
+                                                                    className="bg-gray-600 border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
                                                                     title="Modifier"
                                                                 >
                                                                     ✏️
@@ -886,7 +886,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                                 {animal.statut === 'vivant' && (
                                                                     <button
                                                                         onClick={() => handleMarkDead(animal.id, animal.identifiant_officiel)}
-                                                                        className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-yellow-600 transition-colors duration-150 text-white"
+                                                                        className="bg-gray-600 border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-yellow-600 transition-colors duration-150 text-white"
                                                                         title="Marquer comme décédé"
                                                                     >
                                                                         💀
@@ -895,7 +895,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
                                                                 <button
                                                                     onClick={() => handleDeleteAnimal(animal.id, animal.identifiant_officiel)}
-                                                                    className="bg-transparent border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-red-600 transition-colors duration-150 text-white"
+                                                                    className="bg-gray-600 border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-red-600 transition-colors duration-150 text-white"
                                                                     title="Supprimer"
                                                                 >
                                                                     🗑️
@@ -943,7 +943,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                     </thead>
                                     <tbody className="block sm:table-row-group">
                                         {descendants.map(descendant => (
-                                            <tr key={descendant.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${descendant.statut === 'mort' ? 'opacity-75' : ''}`}>
+                                            <tr key={descendant.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-gray-700 rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${descendant.statut === 'mort' ? 'opacity-75' : ''}`}>
                                                 <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-mono font-bold">{descendant.identifiant_officiel}</td>
                                                 <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{descendant.nom || '-'}</td>
                                                 <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">

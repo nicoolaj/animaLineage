@@ -367,5 +367,51 @@ class Animal {
 
         return false;
     }
+
+    // Obtenir l'arbre généalogique d'un animal
+    public function getFamilyTree($maxLevels = 3) {
+        return $this->buildFamilyTreeNode($this->id, 0, $maxLevels);
+    }
+
+    // Construire récursivement un nœud de l'arbre généalogique
+    private function buildFamilyTreeNode($animalId, $currentLevel, $maxLevels) {
+        // Obtenir les données de l'animal
+        $animalData = $this->getById($animalId);
+        if (!$animalData) {
+            return null;
+        }
+
+        // Structure du nœud
+        $node = [
+            'animal' => [
+                'id' => (int)$animalData['id'],
+                'identifiant_officiel' => $animalData['identifiant_officiel'],
+                'nom' => $animalData['nom'],
+                'sexe' => $animalData['sexe'],
+                'race_nom' => $animalData['race_nom'],
+                'date_naissance' => $animalData['date_naissance'],
+                'date_deces' => $animalData['date_deces'],
+                'statut' => $animalData['statut'],
+                'pere_id' => $animalData['pere_id'] ? (int)$animalData['pere_id'] : null,
+                'mere_id' => $animalData['mere_id'] ? (int)$animalData['mere_id'] : null
+            ],
+            'level' => $currentLevel
+        ];
+
+        // Si nous n'avons pas atteint le niveau maximum, récupérer les parents
+        if ($currentLevel < $maxLevels) {
+            // Récupérer le père
+            if ($animalData['pere_id']) {
+                $node['pere'] = $this->buildFamilyTreeNode($animalData['pere_id'], $currentLevel + 1, $maxLevels);
+            }
+
+            // Récupérer la mère
+            if ($animalData['mere_id']) {
+                $node['mere'] = $this->buildFamilyTreeNode($animalData['mere_id'], $currentLevel + 1, $maxLevels);
+            }
+        }
+
+        return $node;
+    }
 }
 ?>

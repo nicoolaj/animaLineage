@@ -116,7 +116,7 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
       )}
 
       {loading ? (
-        <p className="text-center text-gray-300 py-4">Chargement...</p>
+        <p className="text-center text-gray-700 py-4">Chargement...</p>
       ) : pendingUsers.length === 0 ? (
         <div id="pendingusers-pending-placeholder-4" className="pending-placeholder text-center py-8 bg-gray-600 rounded-lg border border-gray-500">
           <p className="text-base sm:text-lg text-gray-200 mb-2">📝 Aucun compte en attente pour le moment</p>
@@ -136,7 +136,7 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
               </thead>
               <tbody className="block sm:table-row-group">
                 {pendingUsers.map((user) => (
-                  <tr key={user.id} className="block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ring-2 ring-yellow-500">
+                  <tr key={user.id} className="block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-gray-700 rounded-lg sm:rounded-none p-4 sm:p-0 text-white ring-2 ring-yellow-500">
                     <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-semibold">
                       {user.name}
                     </td>

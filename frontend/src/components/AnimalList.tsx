@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDate, formatAgeDisplay, getAgeTooltip } from '../utils/dateUtils';
 import { API_BASE_URL } from '../config/api';
+import FamilyTree from './FamilyTree';
 
 interface Animal {
     id: number;
@@ -31,6 +32,7 @@ interface AnimalListProps {
     onDelete: (animalId: number) => void;
     onViewDescendants: (animalId: number) => void;
     onMarkDead: (animalId: number) => void;
+    onViewFamilyTree?: (animalId: number) => void;
     refreshTrigger?: number;
 }
 
@@ -39,6 +41,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
     onDelete,
     onViewDescendants,
     onMarkDead,
+    onViewFamilyTree,
     refreshTrigger
 }) => {
     const { getAuthHeaders } = useAuth();
@@ -53,6 +56,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
     });
     const [sortBy, setSortBy] = useState<keyof Animal>('identifiant_officiel');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [selectedAnimalForTree, setSelectedAnimalForTree] = useState<number | null>(null);
 
     const loadAnimaux = useCallback(async () => {
         try {
@@ -332,6 +336,14 @@ const AnimalList: React.FC<AnimalListProps> = ({
                                                 🌳
                                             </button>
 
+                                            <button
+                                                onClick={() => onViewFamilyTree ? onViewFamilyTree(animal.id) : setSelectedAnimalForTree(animal.id)}
+                                                className="p-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                                                title="Arbre généalogique"
+                                            >
+                                                🧬
+                                            </button>
+
                                             {animal.statut === 'vivant' && (
                                                 <button
                                                     onClick={() => handleMarkDead(animal.id, animal.identifiant_officiel)}
@@ -359,6 +371,14 @@ const AnimalList: React.FC<AnimalListProps> = ({
             )}
 
             {/* Styles now handled by Tailwind CSS classes */}
+
+            {/* Arbre généalogique modal - seulement si pas de handler externe */}
+            {!onViewFamilyTree && selectedAnimalForTree && (
+                <FamilyTree
+                    animalId={selectedAnimalForTree}
+                    onClose={() => setSelectedAnimalForTree(null)}
+                />
+            )}
         </div>
     );
 };

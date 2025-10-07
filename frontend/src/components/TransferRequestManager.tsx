@@ -116,12 +116,12 @@ const TransferRequestManager: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="text-center p-4 sm:p-8 text-gray-300">Chargement des demandes de transfert...</div>;
+        return <div className="text-center p-4 sm:p-8 text-gray-700">Chargement des demandes de transfert...</div>;
     }
 
     if (error) {
         return (
-            <div className="text-center p-4 sm:p-8 text-gray-300">
+            <div className="text-center p-4 sm:p-8 text-gray-700">
                 <p className="text-sm sm:text-base">Erreur: {error}</p>
                 <button className="btn-primary mt-4 w-full sm:w-auto" onClick={loadTransferRequests}>Réessayer</button>
             </div>
@@ -134,20 +134,20 @@ const TransferRequestManager: React.FC = () => {
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
             <div className="mb-6 sm:mb-8">
-                <h2 className="text-white text-lg sm:text-xl lg:text-2xl font-semibold mb-2">🔄 Gestion des demandes de transfert</h2>
-                <p className="text-gray-300 text-sm sm:text-base">Gérez les demandes de transfert d'animaux entre élevages.</p>
+                <h2 className="text-gray-900 text-lg sm:text-xl lg:text-2xl font-semibold mb-2">🔄 Gestion des demandes de transfert</h2>
+                <p className="text-gray-700 text-sm sm:text-base">Gérez les demandes de transfert d'animaux entre élevages.</p>
             </div>
 
             {pendingRequests.length > 0 && (
                 <div className="mb-6 sm:mb-8">
-                    <h3 className="text-gray-300 text-base sm:text-lg font-medium mb-3 sm:mb-4 pb-2 border-b-2 border-gray-600">📥 Demandes en attente ({pendingRequests.length})</h3>
+                    <h3 className="text-gray-700 text-base sm:text-lg font-medium mb-3 sm:mb-4 pb-2 border-b-2 border-gray-600">📥 Demandes en attente ({pendingRequests.length})</h3>
                     <div className="flex flex-col gap-4 sm:gap-6">
                         {pendingRequests.map(request => (
                             <div key={request.id} className="bg-gray-700 border border-gray-600 border-l-4 border-l-yellow-500 rounded-lg p-4 sm:p-6 shadow-md">
                                 <div className="mb-4 sm:mb-6">
                                     <div className="text-base sm:text-lg mb-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                         <strong className="text-white">{request.identifiant_officiel}</strong>
-                                        {request.animal_nom && <span className="text-gray-300 text-sm sm:text-base">({request.animal_nom})</span>}
+                                        {request.animal_nom && <span className="text-gray-700 text-sm sm:text-base">({request.animal_nom})</span>}
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-3 text-xs sm:text-sm text-gray-400">
                                         <div className="bg-gray-600 p-2 sm:p-3 rounded">
@@ -210,7 +210,7 @@ const TransferRequestManager: React.FC = () => {
 
             {processedRequests.length > 0 && (
                 <div className="mb-6 sm:mb-8">
-                    <h3 className="text-gray-300 text-base sm:text-lg font-medium mb-3 sm:mb-4 pb-2 border-b-2 border-gray-600">📋 Demandes traitées ({processedRequests.length})</h3>
+                    <h3 className="text-gray-700 text-base sm:text-lg font-medium mb-3 sm:mb-4 pb-2 border-b-2 border-gray-600">📋 Demandes traitées ({processedRequests.length})</h3>
                     <div className="flex flex-col gap-4 sm:gap-6">
                         {processedRequests.map(request => (
                             <div key={request.id} className={`bg-gray-700 border border-gray-600 rounded-lg p-4 sm:p-6 shadow-md ${
@@ -220,7 +220,7 @@ const TransferRequestManager: React.FC = () => {
                                     <div className="text-base sm:text-lg mb-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                         <strong className="text-white">{request.identifiant_officiel}</strong>
                                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                            {request.animal_nom && <span className="text-gray-300 text-sm sm:text-base">({request.animal_nom})</span>}
+                                            {request.animal_nom && <span className="text-gray-700 text-sm sm:text-base">({request.animal_nom})</span>}
                                             {getStatusBadge(request.status)}
                                         </div>
                                     </div>
@@ -260,7 +260,7 @@ const TransferRequestManager: React.FC = () => {
             )}
 
             {requests.length === 0 && (
-                <div className="text-center p-6 sm:p-8 text-gray-300">
+                <div className="text-center p-6 sm:p-8 text-gray-700">
                     <p className="text-sm sm:text-base">Aucune demande de transfert trouvée.</p>
                 </div>
             )}

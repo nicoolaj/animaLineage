@@ -200,7 +200,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
               </thead>
               <tbody className="block sm:table-row-group">
                 {adminUsers.map((user) => (
-                  <tr key={user.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${user.status === 0 ? 'ring-2 ring-yellow-500' : ''}`}>
+                  <tr key={user.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-gray-700 rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${user.status === 0 ? 'ring-2 ring-yellow-500' : ''}`}>
                     <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-semibold">
                       {user.name}
                     </td>

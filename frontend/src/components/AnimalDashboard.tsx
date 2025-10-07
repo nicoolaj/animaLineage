@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AnimalForm from './AnimalForm';
 import AnimalList from './AnimalList';
+import FamilyTree from './FamilyTree';
 import { API_BASE_URL } from '../config/api';
 
 interface Animal {
@@ -44,6 +45,7 @@ const AnimalDashboard: React.FC = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [selectedAnimalForTree, setSelectedAnimalForTree] = useState<number | null>(null);
 
     const handleCreateAnimal = () => {
         setEditingAnimal(undefined);
@@ -110,6 +112,10 @@ const AnimalDashboard: React.FC = () => {
     const handleMarkDead = (animalId: number) => {
         // Le marquage comme décédé est géré directement dans AnimalList
         setRefreshTrigger(prev => prev + 1);
+    };
+
+    const handleViewFamilyTree = (animalId: number) => {
+        setSelectedAnimalForTree(animalId);
     };
 
     const handleViewDescendants = async (animalId: number) => {
@@ -202,6 +208,7 @@ const AnimalDashboard: React.FC = () => {
                     onDelete={handleDeleteAnimal}
                     onViewDescendants={handleViewDescendants}
                     onMarkDead={handleMarkDead}
+                    onViewFamilyTree={handleViewFamilyTree}
                     refreshTrigger={refreshTrigger}
                 />
             )}
@@ -270,6 +277,14 @@ const AnimalDashboard: React.FC = () => {
                         </div>
                     )}
                 </div>
+            )}
+
+            {/* Arbre généalogique modal */}
+            {selectedAnimalForTree && (
+                <FamilyTree
+                    animalId={selectedAnimalForTree}
+                    onClose={() => setSelectedAnimalForTree(null)}
+                />
             )}
 
         </div>
