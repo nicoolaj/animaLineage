@@ -89,6 +89,10 @@ echo "RewriteCond %{REQUEST_FILENAME} !-d" >> deploy/api/.htaccess
 echo "RewriteRule . index.php [L]" >> deploy/api/.htaccess
 
 
+if [ -f ads.txt ] ; then
+  echo "📢 Copie de ads.txt"
+  cp ads.txt $DEPLOY_DIR/
+fi
 
 # Permissions
 echo "🔒 Configuration des permissions..."
