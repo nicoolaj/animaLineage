@@ -17,14 +17,14 @@ const Footer: React.FC<FooterProps> = ({ onMentionsLegalesClick, onPolitiqueConf
                         <div className="flex items-center gap-2 sm:gap-4">
                             <button
                                 onClick={onMentionsLegalesClick}
-                                className="text-gray-400 hover:text-gray-300 transition-colors duration-200 underline"
+                                className="text-gray-400 hover:text-gray-300 transition-colors duration-200 underline focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-sm"
                             >
                                 Mentions légales
                             </button>
                             <span className="text-gray-600">•</span>
                             <button
                                 onClick={onPolitiqueConfidentialiteClick}
-                                className="text-gray-400 hover:text-gray-300 transition-colors duration-200 underline"
+                                className="text-gray-400 hover:text-gray-300 transition-colors duration-200 underline focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-sm"
                             >
                                 Politique de confidentialité
                             </button>

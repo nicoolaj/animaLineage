@@ -163,26 +163,38 @@ const AnimalDashboard: React.FC = () => {
     };
 
     return (
-        <div className="p-4 sm:p-5 max-w-6xl mx-auto bg-gray-700 min-h-screen text-white">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 pb-4 sm:pb-5 border-b-2 border-gray-600 gap-4">
-                <h2 className="text-lg sm:text-2xl font-semibold text-white">🦕 Gestion des Animaux</h2>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+        <div className="max-w-7xl mx-auto">
+            {/* En-tête */}
+            <div className="mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                    🦕 Gestion des Animaux
+                </h2>
+                <p className="text-gray-700 mt-2 text-base sm:text-lg">Suivi détaillé des animaux, généalogie et reproduction.</p>
+                <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <button
                         onClick={() => setCurrentView('list')}
-                        className={`${currentView === 'list' ? 'btn-primary' : 'btn-outline'} w-full sm:w-auto text-sm px-3 py-2`}
+                        className={`${
+                            currentView === 'list'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-50'
+                        } px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
                     >
                         📋 Liste des animaux
                     </button>
                     <button
                         onClick={handleCreateAnimal}
-                        className={`${currentView === 'form' && !editingAnimal ? 'btn-primary ring-2 ring-blue-300' : 'btn-primary'} w-full sm:w-auto text-sm px-3 py-2`}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                         🦕 Nouvel animal
                     </button>
                 </div>
             </div>
 
-            {error && <div className="error-message">{error}</div>}
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-lg mb-6">
+                    ⚠️ {error}
+                </div>
+            )}
 
             {currentView === 'list' && (
                 <AnimalList
@@ -195,7 +207,7 @@ const AnimalDashboard: React.FC = () => {
             )}
 
             {currentView === 'form' && (
-                <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
                     <AnimalForm
                         animal={editingAnimal}
                         onSubmit={handleSubmitAnimal}
@@ -205,49 +217,50 @@ const AnimalDashboard: React.FC = () => {
             )}
 
             {currentView === 'descendants' && (
-                <div className="bg-gray-700 rounded-lg shadow-card overflow-hidden">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-5 bg-gray-700 border-b border-gray-600 gap-3 sm:gap-4">
-                        <h2 className="text-lg sm:text-xl font-semibold text-white">Descendants de {selectedAnimalForDescendants}</h2>
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-6 border-b border-gray-100 gap-3 sm:gap-4">
+                        <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Descendants de {selectedAnimalForDescendants}</h2>
                         <button
                             onClick={() => setCurrentView('list')}
-                            className="btn-secondary text-sm py-2 px-4 w-full sm:w-auto"
+                            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 w-full sm:w-auto"
                         >
                             ← Retour à la liste
                         </button>
                     </div>
 
                     {descendants.length === 0 ? (
-                        <div className="py-8 sm:py-10 px-4 sm:px-5 text-center text-gray-400 italic">
-                            Cet animal n'a pas de descendants connus.
+                        <div className="py-8 sm:py-10 px-4 sm:px-6 text-center text-gray-700">
+                            <div className="text-4xl mb-4">🦕</div>
+                            <p className="text-lg">Cet animal n'a pas de descendants connus.</p>
                         </div>
                     ) : (
-                        <div className="table-responsive">
-                            <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                                 <thead className="hidden sm:table-header-group">
                                     <tr>
-                                        <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Identifiant</th>
-                                        <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Nom</th>
-                                        <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Sexe</th>
-                                        <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Race</th>
-                                        <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Naissance</th>
-                                        <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Statut</th>
+                                        <th className="bg-gray-50 px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Identifiant</th>
+                                        <th className="bg-gray-50 px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Nom</th>
+                                        <th className="bg-gray-50 px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Sexe</th>
+                                        <th className="bg-gray-50 px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Race</th>
+                                        <th className="bg-gray-50 px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Naissance</th>
+                                        <th className="bg-gray-50 px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Statut</th>
                                     </tr>
                                 </thead>
                                 <tbody className="block sm:table-row-group">
                                     {descendants.map(descendant => (
-                                        <tr key={descendant.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${descendant.statut === 'mort' ? 'opacity-75' : ''}`}>
-                                            <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-mono font-bold">{descendant.identifiant_officiel}</td>
-                                            <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{descendant.nom || '-'}</td>
-                                            <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
-                                                <span className="sexe-badge text-lg">
+                                        <tr key={descendant.id} className={`block sm:table-row border-b border-gray-200 mb-4 sm:mb-0 bg-gray-50 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0 hover:bg-gray-50 transition-colors ${descendant.statut === 'mort' ? 'opacity-75' : ''}`}>
+                                            <td data-label="Identifiant" className="block sm:table-cell text-left px-0 sm:px-4 py-1 sm:py-4 text-sm text-gray-900 font-mono font-bold">{descendant.identifiant_officiel}</td>
+                                            <td data-label="Nom" className="block sm:table-cell text-left px-0 sm:px-4 py-1 sm:py-4 text-sm text-gray-900">{descendant.nom || '-'}</td>
+                                            <td data-label="Sexe" className="block sm:table-cell text-left px-0 sm:px-4 py-1 sm:py-4 text-sm text-gray-900">
+                                                <span className="text-lg">
                                                     {descendant.sexe === 'M' ? '♂️' : '♀️'}
                                                 </span>
                                             </td>
-                                            <td data-label="Race" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{descendant.race_nom}</td>
-                                            <td data-label="Naissance" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{formatDate(descendant.date_naissance)}</td>
-                                            <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
-                                                <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${descendant.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
-                                                    {descendant.statut === 'vivant' ? '✅' : '💀'}
+                                            <td data-label="Race" className="block sm:table-cell text-left px-0 sm:px-4 py-1 sm:py-4 text-sm text-gray-900">{descendant.race_nom}</td>
+                                            <td data-label="Naissance" className="block sm:table-cell text-left px-0 sm:px-4 py-1 sm:py-4 text-sm text-gray-900">{formatDate(descendant.date_naissance)}</td>
+                                            <td data-label="Statut" className="block sm:table-cell text-left px-0 sm:px-4 py-1 sm:py-4 text-sm text-gray-900">
+                                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${descendant.statut === 'vivant' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                    {descendant.statut === 'vivant' ? '✅ Vivant' : '💀 Décédé'}
                                                 </span>
                                             </td>
                                         </tr>

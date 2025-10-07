@@ -808,14 +808,14 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                         {/* Liste des animaux */}
                         {filteredAnimaux.length === 0 ? (
                             <div id="elevagedetail-no-animals-5" className="no-animals text-center py-8">
-                                <p className="text-gray-400 mb-4">Aucun animal dans cet élevage.</p>
+                                <p className="text-gray-700 mb-4">Aucun animal dans cet élevage.</p>
                                 {canEditElevage() && (
                                     <button onClick={handleCreateAnimal} className="btn-primary">
                                         Ajouter le premier animal
                                     </button>
                                 )}
                                 {isReader() && !canEditElevage() && (
-                                    <p className="read-only-text text-gray-500 italic">Mode consultation uniquement</p>
+                                    <p className="read-only-text text-gray-700 italic">Mode consultation uniquement</p>
                                 )}
                             </div>
                         ) : (
@@ -925,7 +925,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                         </div>
 
                         {descendants.length === 0 ? (
-                            <div id="elevagedetail-no-descendants-6" className="no-descendants text-center py-8 text-gray-400">
+                            <div id="elevagedetail-no-descendants-6" className="no-descendants text-center py-8 text-gray-700">
                                 Cet animal n'a pas de descendants connus.
                             </div>
                         ) : (

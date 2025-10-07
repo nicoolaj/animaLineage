@@ -95,28 +95,41 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
   };
 
   if (loading) {
-    return <div id="elevagelist-loading-1" className="loading">Chargement des élevages...</div>;
+    return (
+      <div className="max-w-7xl mx-auto py-6 sm:py-8">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-gray-900">Chargement des élevages...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div id="elevagelist-elevage-list-2" className="elevage-list">
-      <div id="elevagelist-elevage-header-3" className="elevage-header">
-        <h2>Gestion des Élevages</h2>
-        <div id="elevagelist-elevage-controls-4" className="elevage-controls">
-          {/* Afficher le filtre pour les admins et modérateurs */}
+    <div className="max-w-7xl mx-auto">
+      {/* En-tête */}
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+          🚜 Gestion des Élevages
+        </h2>
+        <p className="text-gray-700 mt-2 text-base sm:text-lg">Création et gestion des élevages d'animaux.</p>
+        <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
+          {/* Filtre pour les admins et modérateurs */}
           {(isAdmin() || canModerate()) && (
-            <label>
+            <label className="flex items-center gap-2 text-gray-700">
               <input
                 type="checkbox"
                 checked={showMyOnly}
                 onChange={(e) => setShowMyOnly(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              {isAdmin() ? 'Afficher seulement mes élevages' : 'Mes élevages uniquement'}
+              <span className="text-sm">
+                {isAdmin() ? 'Afficher seulement mes élevages' : 'Mes élevages uniquement'}
+              </span>
             </label>
           )}
           {(isAdmin() || canModerate()) && (
             <button
-              className="btn-primary"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               onClick={onNewElevage}
             >
               Nouveau élevage
@@ -126,91 +139,96 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
       </div>
 
       {error && (
-        <div id="elevagelist-error-message-5" className="error-message">
+        <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-lg mb-6">
           ⚠️ {error}
         </div>
       )}
 
       {elevages.length === 0 ? (
-        <div id="elevagelist-empty-state-6" className="empty-state">
-          <p>Aucun élevage trouvé.</p>
+        <div className="text-center py-12">
+          <div className="text-gray-700 mb-4">
+            <div className="text-4xl mb-4">🚜</div>
+            <p className="text-lg">Aucun élevage trouvé.</p>
+          </div>
           {showMyOnly && (
-            <p>
-              <button
-                className="btn-secondary"
-                onClick={() => setShowMyOnly(false)}
-              >
-                Voir tous les élevages
-              </button>
-            </p>
+            <button
+              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              onClick={() => setShowMyOnly(false)}
+            >
+              Voir tous les élevages
+            </button>
           )}
         </div>
       ) : (
-        <div id="elevagelist-elevages-grid-7" className="elevages-grid">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
           {elevages.map((elevage) => (
-            <div key={elevage.id} className="elevage-card">
-              <div id="elevagelist-elevage-card-header-8" className="elevage-card-header">
-                <h3>{elevage.nom}</h3>
-                <div id="elevagelist-elevage-actions-9" className="elevage-actions">
-                  <button
-                    className="btn-edit"
-                    onClick={() => onViewAnimaux?.(elevage.id)}
-                    title="Gestion des animaux 🦕 et utilisateurs"
-                  >
-                    ✏️
-                  </button>
-                  {canEdit(elevage) && (
-                    <>
-                      <button
-                        className="btn-edit"
-                        onClick={() => onEditElevage?.(elevage.id.toString())}
-                        title="Configuration de l'élevage"
-                      >
-                        ⚙️
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => deleteElevage(elevage.id)}
-                        title="Supprimer"
-                      >
-                        🗑️
-                      </button>
-                    </>
-                  )}
+            <div key={elevage.id} className="bg-white rounded-lg shadow-md border border-gray-200 min-h-fit">
+              <div className="p-4 sm:p-6 border-b border-gray-100">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex-1">{elevage.nom}</h3>
+                  <div className="flex gap-2 ml-3">
+                    <button
+                      className="p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      onClick={() => onViewAnimaux?.(elevage.id)}
+                      title="Gestion des animaux 🦕 et utilisateurs"
+                    >
+                      🐄
+                    </button>
+                    {canEdit(elevage) && (
+                      <>
+                        <button
+                          className="p-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                          onClick={() => onEditElevage?.(elevage.id.toString())}
+                          title="Configuration de l'élevage"
+                        >
+                          ⚙️
+                        </button>
+                        <button
+                          className="p-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                          onClick={() => deleteElevage(elevage.id)}
+                          title="Supprimer"
+                        >
+                          🗑️
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div id="elevagelist-elevage-info-10" className="elevage-info">
-                <div id="elevagelist-info-item-11" className="info-item">
-                  <strong>Propriétaire:</strong> {elevage.proprietaire_nom}
+              <div className="p-4 sm:p-6 space-y-3">
+                <div className="text-sm text-gray-800">
+                  <span className="font-medium text-gray-900">Propriétaire:</span> {elevage.proprietaire_nom}
                 </div>
-                <div id="elevagelist-info-item-12" className="info-item">
-                  <strong>Adresse:</strong> {elevage.adresse}
+                <div className="text-sm text-gray-800">
+                  <span className="font-medium text-gray-900">Adresse:</span> {elevage.adresse}
                 </div>
                 {elevage.description && (
-                  <div id="elevagelist-info-item-13" className="info-item">
-                    <strong>Description:</strong> {elevage.description}
+                  <div className="text-sm text-gray-800">
+                    <span className="font-medium text-gray-900">Description:</span> {elevage.description}
                   </div>
                 )}
               </div>
 
-              <div id="elevagelist-races-animaux-14" className="races-animaux">
-                <strong>Races d'animaux 🦕:</strong>
+              <div className="px-4 sm:px-6 pb-4">
+                <div className="text-sm font-medium text-gray-900 mb-2">Races d'animaux 🦕:</div>
                 {elevage.races.length > 0 ? (
-                  <div id="elevagelist-races-tags-15" className="races-tags">
+                  <div className="flex flex-wrap gap-2">
                     {elevage.races.map((race) => (
-                      <span key={race.id} className="race-tag">
-                        {race.nom} <small>({race.type_animal_nom})</small>
+                      <span key={race.id} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {race.nom} <span className="ml-1 text-blue-600">({race.type_animal_nom})</span>
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <span className="no-races">Aucune race spécifiée</span>
+                  <span className="text-sm text-gray-700 italic">Aucune race spécifiée</span>
                 )}
               </div>
 
-              <div id="elevagelist-elevage-date-16" className="elevage-date">
-                Créé le {new Date(elevage.created_at).toLocaleDateString('fr-FR')}
+              <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-100">
+                <div className="text-xs text-gray-700">
+                  Créé le {new Date(elevage.created_at).toLocaleDateString('fr-FR')}
+                </div>
               </div>
             </div>
           ))}

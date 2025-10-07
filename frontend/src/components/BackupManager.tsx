@@ -101,10 +101,8 @@ const BackupManager: React.FC = () => {
         <button
           onClick={createBackup}
           disabled={creating}
-          className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors ${
-            creating
-              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
+          className={`w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+            creating ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           {creating ? '⏳ Création...' : '📁 Créer une sauvegarde'}
@@ -112,13 +110,13 @@ const BackupManager: React.FC = () => {
       </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
             ❌ {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
             ✅ {success}
           </div>
         )}
@@ -127,18 +125,18 @@ const BackupManager: React.FC = () => {
           <button
             onClick={fetchBackups}
             disabled={loading}
-            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 w-full sm:w-auto"
+            className="bg-gray-200 text-gray-700 px-3 py-1 text-sm rounded-lg font-medium hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 w-full sm:w-auto"
           >
             {loading ? '⏳ Actualisation...' : '🔄 Actualiser'}
           </button>
         </div>
 
         {loading && backups.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-700">
             ⏳ Chargement des sauvegardes...
           </div>
         ) : backups.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-700">
             📂 Aucune sauvegarde trouvée
           </div>
         ) : (
@@ -146,16 +144,16 @@ const BackupManager: React.FC = () => {
             <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Nom du fichier
                   </th>
-                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Taille
                   </th>
-                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                     Date de création
                   </th>
                 </tr>
@@ -175,7 +173,7 @@ const BackupManager: React.FC = () => {
                         }`}>
                           {backup.type}
                         </span>
-                        <span className="text-xs text-gray-500 md:hidden">
+                        <span className="text-xs text-gray-700 md:hidden">
                           {formatDateTime(backup.created_at)}
                         </span>
                       </div>
@@ -192,7 +190,7 @@ const BackupManager: React.FC = () => {
                     <td className="px-3 sm:px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                       {backup.size}
                     </td>
-                    <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                       {formatDateTime(backup.created_at)}
                     </td>
                   </tr>
@@ -202,7 +200,7 @@ const BackupManager: React.FC = () => {
           </div>
         )}
 
-        <div className="mt-4 text-sm text-gray-600 bg-gray-50 p-3 rounded">
+        <div className="mt-4 text-sm text-gray-700 bg-gray-50 p-3 rounded">
           <p>
             ℹ️ Les sauvegardes sont stockées dans le répertoire ../../sqlsave/ par rapport à la racine du site.
             Les fichiers SQLite sont copiés directement (.db), tandis que les bases MySQL/PostgreSQL

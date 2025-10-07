@@ -21,7 +21,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { initializeLanguage } from './store/slices/languageSlice';
 import { useApiHealthWithRedux } from './hooks/useApiHealthWithRedux';
-import Auth from './components/Auth';
+import LandingPage from './components/LandingPage';
 import MainDashboard from './components/MainDashboard';
 import PendingAccountDashboard from './components/PendingAccountDashboard';
 import MaintenanceMessage from './components/MaintenanceMessage';
@@ -58,7 +58,7 @@ const AppContent: React.FC = () => {
 
   const renderContent = () => {
     if (!isAuthenticated) {
-      return <Auth />;
+      return <LandingPage />;
     }
 
     // Si l'utilisateur est connecté mais son compte est en attente (status = 0)

@@ -208,19 +208,19 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
         </h4>
 
         {!Array.isArray(elevageUsers) || elevageUsers.length === 0 ? (
-          <div className="no-users text-center text-gray-400 py-4 italic">Aucun utilisateur trouvé pour cet élevage.</div>
+          <div className="no-users text-center text-gray-300 py-4 italic">Aucun utilisateur trouvé pour cet élevage.</div>
         ) : (
           <div className="users-list space-y-3">
             {elevageUsers.map((elevageUser) => (
               <div key={elevageUser.user_id} className="user-item bg-gray-700 border border-gray-600 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                 <div className="user-info flex flex-col gap-1 flex-1">
                   <span className="user-name font-semibold text-white text-sm sm:text-base">{elevageUser.user_name}</span>
-                  <span className="user-email text-xs sm:text-sm text-gray-400">{elevageUser.user_email}</span>
+                  <span className="user-email text-xs sm:text-sm text-gray-300">{elevageUser.user_email}</span>
                   <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 sm:items-center">
                     <span className={`user-role ${elevageUser.role_in_elevage} px-2 py-1 rounded text-xs font-bold ${elevageUser.role_in_elevage === 'owner' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`}>
                       {elevageUser.role_in_elevage === 'owner' ? '👑 Propriétaire' : '🤝 Collaborateur'}
                     </span>
-                    <span className="added-date text-xs text-gray-500 italic">
+                    <span className="added-date text-xs text-gray-400 italic">
                       Ajouté le {new Date(elevageUser.added_at).toLocaleDateString('fr-FR')}
                     </span>
                   </div>
@@ -267,7 +267,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
 
               <div className="available-users-list max-h-48 sm:max-h-64 overflow-y-auto space-y-2 mb-4">
                 {filteredAvailableUsers.length === 0 ? (
-                  <div className="no-available-users text-center text-gray-400 py-4 italic text-sm">
+                  <div className="no-available-users text-center text-gray-300 py-4 italic text-sm">
                     {searchTerm ? 'Aucun utilisateur trouvé.' : 'Tous les utilisateurs sont déjà ajoutés.'}
                   </div>
                 ) : (
@@ -275,7 +275,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
                     <div key={availableUser.id} className="available-user-item flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-gray-600 rounded border border-gray-500 gap-2 sm:gap-3">
                       <div className="user-info flex flex-col gap-1 flex-1">
                         <span className="user-name font-semibold text-white text-sm">{availableUser.name}</span>
-                        <span className="user-email text-xs text-gray-400">{availableUser.email}</span>
+                        <span className="user-email text-xs text-gray-300">{availableUser.email}</span>
                         <span className="user-role-badge text-xs px-2 py-1 bg-gray-500 text-gray-200 rounded">{availableUser.role_name}</span>
                       </div>
                       <button

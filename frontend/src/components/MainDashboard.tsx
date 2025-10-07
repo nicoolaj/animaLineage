@@ -228,15 +228,15 @@ const MainDashboard: React.FC = () => {
 
       case 'users':
         return (
-          <div id="maindashboard-users-management-4" className="parametrages-container">
+          <div className="max-w-7xl mx-auto">
             {/* En-tête */}
-            <div className="parametrages-header mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
                 ⚙️ Paramétrages du système
               </h2>
-              <p className="text-gray-600 mt-2">Configuration et administration des paramètres globaux.</p>
+              <p className="text-gray-700 mt-2 text-base sm:text-lg">Configuration et administration des paramètres globaux.</p>
               {canAdministrate() && (
-                <div className="admin-notice mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="mt-4 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-blue-800 font-medium">👑 Accès administrateur - Configuration système complète</p>
                 </div>
               )}
@@ -250,7 +250,7 @@ const MainDashboard: React.FC = () => {
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
                     👥 Gestion des utilisateurs
                   </h3>
-                  <p className="text-gray-600 mt-2 text-sm sm:text-base">Administration des comptes utilisateurs et demandes d'inscription.</p>
+                  <p className="text-gray-700 mt-2 text-sm sm:text-base">Administration des comptes utilisateurs et demandes d'inscription.</p>
                 </div>
                 <div className="card-content p-4 sm:p-6">
                   <div className="space-y-6">
@@ -266,7 +266,7 @@ const MainDashboard: React.FC = () => {
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
                     💾 Gestion des sauvegardes
                   </h3>
-                  <p className="text-gray-600 mt-2 text-sm sm:text-base">Création et gestion des sauvegardes de la base de données.</p>
+                  <p className="text-gray-700 mt-2 text-sm sm:text-base">Création et gestion des sauvegardes de la base de données.</p>
                 </div>
                 <div className="card-content p-4 sm:p-6">
                   <BackupManager />
@@ -282,44 +282,52 @@ const MainDashboard: React.FC = () => {
   };
 
   return (
-    <div id="maindashboard-dashboard-7" className="dashboard">
-      <header className="dashboard-header">
-        <img
-          src="/logo_full.svg"
-          alt="AnimaLineage"
-          className="dashboard-logo"
-          style={{ height: '40px', width: 'auto' }}
-        />
-        <div id="maindashboard-user-info-8" className="user-info">
-          <div id="maindashboard-user-details-9" className="user-details">
-            <span>{messages.welcomeUser}, {user?.name}!</span>
-            <span className="user-role">({user?.role_name})</span>
-          </div>
-          <div className="header-controls">
-            <LanguageSelector />
-            <button onClick={handleLogout} className="logout-button">
-              {ui.logout}
-            </button>
+    <div id="maindashboard-dashboard-7" className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex justify-between items-center">
+          <img
+            src="/logo_full.svg"
+            alt="AnimaLineage"
+            className="h-8 sm:h-10 w-auto"
+          />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="text-right hidden sm:block">
+              <div className="text-sm font-medium text-gray-900">{messages.welcomeUser}, {user?.name}!</div>
+              <div className="text-xs text-gray-700">({user?.role_name})</div>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <LanguageSelector />
+              <button
+                onClick={handleLogout}
+                className="bg-gray-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm"
+              >
+                {ui.logout}
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      <nav className="dashboard-nav">
-        <div id="maindashboard-nav-tabs-10" className="nav-tabs">
+      <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8">
+        <div className="flex space-x-1 sm:space-x-2 overflow-x-auto py-2">
           {availableTabs.map((tab) => (
             <button
               key={tab.id}
-              className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+              className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                activeTab === tab.id
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+              }`}
               onClick={() => setActiveTab(tab.id)}
             >
-              <span className="tab-icon">{tab.icon}</span>
-              <span className="tab-label">{tab.label}</span>
+              <span className="text-base">{tab.icon}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </div>
       </nav>
 
-      <main className="dashboard-content">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-gray-50">
         {renderTabContent()}
       </main>
 

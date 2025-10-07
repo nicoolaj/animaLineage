@@ -183,7 +183,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
       )}
 
       {loading ? (
-        <p className="text-center text-gray-500 py-4">Chargement...</p>
+        <p className="text-center text-gray-700 py-4">Chargement...</p>
       ) : (
         <div id="adminpanel-admin-users-table-4" className="admin-users-table">
           <div className="table-responsive">

@@ -6,7 +6,11 @@ import Footer from './Footer';
 import MentionsLegales from './MentionsLegales';
 import PolitiqueConfidentialite from './PolitiqueConfidentialite';
 
-const Auth: React.FC = () => {
+interface AuthProps {
+  onBackToLanding?: () => void;
+}
+
+const Auth: React.FC<AuthProps> = ({ onBackToLanding }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
@@ -74,12 +78,20 @@ const Auth: React.FC = () => {
   }
 
   return (
-    <div id="auth-container" className="auth-container min-h-screen bg-gray-800 flex flex-col">
+    <div className="min-h-screen bg-gray-800 flex flex-col">
       <AdSenseScript />
       {process.env.NODE_ENV === 'development' && <ApiTest />}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        <div id="auth-card" className="auth-card bg-gray-700 rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-sm sm:max-w-md border border-gray-600">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="bg-gray-700 rounded-lg shadow-md border border-gray-600 p-4 sm:p-6 w-full max-w-sm sm:max-w-md">
         <div className="text-center mb-6 sm:mb-8">
+          {onBackToLanding && (
+            <button
+              onClick={onBackToLanding}
+              className="mb-4 text-gray-400 hover:text-white transition-colors text-sm flex items-center mx-auto focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-sm"
+            >
+              ← Retour à l'accueil
+            </button>
+          )}
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3">🦕 AnimaLineage</h1>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-200 mb-3 sm:mb-4">{isLogin ? 'Connexion' : 'Créer un compte'}</h2>
           <div className="bg-gray-600 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
@@ -92,9 +104,9 @@ const Auth: React.FC = () => {
           </div>
         </div>
 
-        {error && <div id="auth-error-message" className="error-message bg-red-600 text-white px-3 py-2.5 rounded-md mb-4 sm:mb-6 text-sm">{error}</div>}
+        {error && <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded-lg mb-4 sm:mb-6 text-sm">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form space-y-4 sm:space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {!isLogin && (
             <input
               type="text"
@@ -103,7 +115,7 @@ const Auth: React.FC = () => {
               value={formData.name}
               onChange={handleInputChange}
               required={!isLogin}
-              className="form-input w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+              className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
             />
           )}
 
@@ -114,7 +126,7 @@ const Auth: React.FC = () => {
             value={formData.email}
             onChange={handleInputChange}
             required
-            className="form-input w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
           />
 
           <input
@@ -125,26 +137,26 @@ const Auth: React.FC = () => {
             onChange={handleInputChange}
             required
             minLength={6}
-            className="form-input w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+            className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="auth-button w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 text-sm sm:text-base mt-6"
+            className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base mt-6"
           >
             {loading ? '⏳ Chargement...' : (isLogin ? '🔓 Se connecter' : '🚀 S\'enregistrer')}
           </button>
         </form>
 
-        <div id="auth-toggle" className="auth-toggle mt-6 sm:mt-8 text-center">
+        <div className="mt-6 sm:mt-8 text-center">
           <p className="text-sm sm:text-base text-gray-300 mb-3">
             {isLogin ? 'Pas encore de compte ?' : 'Déjà un compte ?'}
           </p>
           <button
             type="button"
             onClick={toggleMode}
-            className="toggle-button text-blue-400 hover:text-blue-300 font-medium text-sm sm:text-base underline transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="text-blue-400 hover:text-blue-300 font-medium text-sm sm:text-base underline transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-sm"
             disabled={loading}
           >
             {isLogin ? '📝 Créer un compte' : '🔐 Se connecter'}
