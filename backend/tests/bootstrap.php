@@ -5,7 +5,22 @@
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../config/env.php';
+
+// Chargement du EnvLoader si disponible, sinon définir une version simple
+if (file_exists(__DIR__ . '/../config/env.php')) {
+    require_once __DIR__ . '/../config/env.php';
+} else {
+    // Version minimale de EnvLoader pour les tests
+    class EnvLoader {
+        public static function loadArray($envArray) {
+            foreach ($envArray as $key => $value) {
+                $_ENV[$key] = $value;
+                putenv("$key=$value");
+            }
+            return true;
+        }
+    }
+}
 
 // Configuration d'environnement de test
 $_ENV['APP_ENV'] = 'testing';

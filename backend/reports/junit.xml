@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="AnimalModelTest" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" tests="28" assertions="77" errors="0" failures="1" skipped="1" time="0.017720">
-    <testcase name="testGetAll" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="130" class="AnimalModelTest" classname="AnimalModelTest" assertions="6" time="0.002842"/>
-    <testcase name="testGetByElevageId" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="146" class="AnimalModelTest" classname="AnimalModelTest" assertions="5" time="0.000435"/>
-    <testcase name="testGetByElevageIdWithInvalidId" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="160" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000419"/>
-    <testcase name="testGetVivantsByElevageId" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="167" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000349"/>
-    <testcase name="testGetById" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="257" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000460"/>
-    <testcase name="testGetByIdInvalid" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="266" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000405"/>
-    <testcase name="testGetByIdentifiant" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="272" class="AnimalModelTest" classname="AnimalModelTest" assertions="3" time="0.000325"/>
-    <testcase name="testGetByIdentifiantInvalid" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="280" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000290"/>
-    <testcase name="testCreate" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="286" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000882"/>
-    <testcase name="testUpdate" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="306" class="AnimalModelTest" classname="AnimalModelTest" assertions="3" time="0.000353"/>
-    <testcase name="testMarquerDeces" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="326" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.004762">
+  <testsuite name="AnimalModelTest" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" tests="28" assertions="77" errors="0" failures="1" skipped="1" time="0.018208">
+    <testcase name="testGetByElevageId" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="146" class="AnimalModelTest" classname="AnimalModelTest" assertions="5" time="0.003665"/>
+    <testcase name="testGetByElevageIdWithInvalidId" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="160" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000537"/>
+    <testcase name="testGetVivantsByElevageId" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="167" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000374"/>
+    <testcase name="testGetById" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="257" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000517"/>
+    <testcase name="testGetByIdInvalid" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="266" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000549"/>
+    <testcase name="testGetByIdentifiant" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="272" class="AnimalModelTest" classname="AnimalModelTest" assertions="3" time="0.000331"/>
+    <testcase name="testGetByIdentifiantInvalid" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="280" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000310"/>
+    <testcase name="testUpdate" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="306" class="AnimalModelTest" classname="AnimalModelTest" assertions="3" time="0.000391"/>
+    <testcase name="testDelete" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="341" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000344"/>
+    <testcase name="testGetDescendants" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="359" class="AnimalModelTest" classname="AnimalModelTest" assertions="3" time="0.000321"/>
+    <testcase name="testCanEdit" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="393" class="AnimalModelTest" classname="AnimalModelTest" assertions="3" time="0.000293"/>
+    <testcase name="testCanTransfer" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="411" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000346"/>
+    <testcase name="testDataSanitization" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="423" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000747"/>
+    <testcase name="testCreate" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="286" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000398"/>
+    <testcase name="testGetAll" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="130" class="AnimalModelTest" classname="AnimalModelTest" assertions="6" time="0.000427"/>
+    <testcase name="testMarquerDeces" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="326" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.004635">
       <failure type="PHPUnit\Framework\ExpectationFailedException">AnimalModelTest::testMarquerDeces
 Failed asserting that 1 is null.
 
 /Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php:338</failure>
     </testcase>
-    <testcase name="testDelete" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="341" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000326"/>
-    <testcase name="testGetDescendants" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="359" class="AnimalModelTest" classname="AnimalModelTest" assertions="3" time="0.000307"/>
-    <testcase name="testDataSanitization" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="423" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000453"/>
-    <testcase name="testCanEdit" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="393" class="AnimalModelTest" classname="AnimalModelTest" assertions="3" time="0.000283"/>
-    <testcase name="testCanTransfer" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="411" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000283"/>
-    <testcase name="testIdentifiantExists" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="352" class="AnimalModelTest" classname="AnimalModelTest" assertions="0" time="0.000412">
+    <testcase name="testIdentifiantExists" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="352" class="AnimalModelTest" classname="AnimalModelTest" assertions="0" time="0.000454">
       <skipped/>
     </testcase>
-    <testcase name="testConstructor" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="112" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000257"/>
-    <testcase name="testAnimalProperties" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="117" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000279"/>
-    <testcase name="testSexeValidation" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="182" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000443"/>
-    <testcase name="testStatutDefault" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="193" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000347"/>
-    <testcase name="testForeignKeyRelationships" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="199" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000328"/>
-    <testcase name="testDateProperties" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="213" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000309"/>
-    <testcase name="testNotesProperty" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="224" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000269"/>
-    <testcase name="testDatabaseConnection" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="232" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000465"/>
-    <testcase name="testTableStructure" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="238" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000424"/>
-    <testcase name="testQueryExecution" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="248" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000412"/>
-    <testcase name="testGetStatsReproduction" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="374" class="AnimalModelTest" classname="AnimalModelTest" assertions="7" time="0.000599"/>
+    <testcase name="testConstructor" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="112" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000314"/>
+    <testcase name="testAnimalProperties" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="117" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000291"/>
+    <testcase name="testSexeValidation" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="182" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000436"/>
+    <testcase name="testStatutDefault" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="193" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000337"/>
+    <testcase name="testForeignKeyRelationships" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="199" class="AnimalModelTest" classname="AnimalModelTest" assertions="4" time="0.000335"/>
+    <testcase name="testDateProperties" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="213" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000306"/>
+    <testcase name="testNotesProperty" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="224" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000298"/>
+    <testcase name="testDatabaseConnection" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="232" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000306"/>
+    <testcase name="testTableStructure" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="238" class="AnimalModelTest" classname="AnimalModelTest" assertions="2" time="0.000301"/>
+    <testcase name="testQueryExecution" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="248" class="AnimalModelTest" classname="AnimalModelTest" assertions="1" time="0.000262"/>
+    <testcase name="testGetStatsReproduction" file="/Users/njalibert/Downloads/AnimaLineage/backend/tests/Unit/AnimalModelTest.php" line="374" class="AnimalModelTest" classname="AnimalModelTest" assertions="7" time="0.000381"/>
   </testsuite>
 </testsuites>
