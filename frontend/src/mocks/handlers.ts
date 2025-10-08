@@ -1,4 +1,4 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 // Types pour les réponses API
 interface User {
@@ -94,59 +94,47 @@ const mockAnimals: Animal[] = [
 
 export const handlers = [
   // Authentification
-  rest.post('http://localhost:3001/api/auth/login', (req, res, ctx) => {
-    const { email, password } = req.body as { email: string; password: string };
+  http.post('http://localhost:3001/api/auth/login', async ({ request }) => {
+    const { email, password } = await request.json() as { email: string; password: string };
 
     if (email === 'test@example.com' && password === 'password123') {
-      return res(
-        ctx.status(200),
-        ctx.json({
-          status: 200,
-          data: {
-            token: 'mock-jwt-token-valid',
-            user: mockUsers[0]
-          }
-        })
-      );
+      return HttpResponse.json({
+        status: 200,
+        data: {
+          token: 'mock-jwt-token-valid',
+          user: mockUsers[0]
+        }
+      });
     }
 
     if (email === 'admin@example.com' && password === 'admin123') {
-      return res(
-        ctx.status(200),
-        ctx.json({
-          status: 200,
-          data: {
-            token: 'mock-jwt-token-admin',
-            user: mockUsers[1]
-          }
-        })
-      );
+      return HttpResponse.json({
+        status: 200,
+        data: {
+          token: 'mock-jwt-token-admin',
+          user: mockUsers[1]
+        }
+      });
     }
 
-    return res(
-      ctx.status(401),
-      ctx.json({
-        status: 401,
-        message: 'Identifiants incorrects'
-      })
-    );
+    return HttpResponse.json({
+      status: 401,
+      message: 'Identifiants incorrects'
+    }, { status: 401 });
   }),
 
-  rest.post('http://localhost:3001/api/auth/register', (req, res, ctx) => {
-    const userData = req.body as any;
+  http.post('http://localhost:3001/api/auth/register', async ({ request }) => {
+    const userData = await request.json() as any;
 
     if (!userData.nom || !userData.email || !userData.password) {
-      return res(
-        ctx.status(422),
-        ctx.json({
-          status: 422,
-          errors: {
-            nom: userData.nom ? [] : ['Le nom est requis'],
-            email: userData.email ? [] : ['L\'email est requis'],
-            password: userData.password ? [] : ['Le mot de passe est requis']
-          }
-        })
-      );
+      return HttpResponse.json({
+        status: 422,
+        errors: {
+          nom: userData.nom ? [] : ['Le nom est requis'],
+          email: userData.email ? [] : ['L\'email est requis'],
+          password: userData.password ? [] : ['Le mot de passe est requis']
+        }
+      }, { status: 422 });
     }
 
     const newUser = {
@@ -157,82 +145,65 @@ export const handlers = [
       role: 'eleveur'
     };
 
-    return res(
-      ctx.status(201),
-      ctx.json({
-        status: 201,
-        data: {
-          user: newUser
-        }
-      })
-    );
+    return HttpResponse.json({
+      status: 201,
+      data: {
+        user: newUser
+      }
+    }, { status: 201 });
   }),
 
-  rest.post('http://localhost:3001/api/auth/logout', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        message: 'Déconnexion réussie'
-      })
-    );
+  http.post('http://localhost:3001/api/auth/logout', () => {
+    return HttpResponse.json({
+      status: 200,
+      message: 'Déconnexion réussie'
+    });
   }),
 
   // Utilisateurs
-  rest.get('http://localhost:3001/api/users', (req, res, ctx) => {
-    const authHeader = req.headers.get('Authorization');
+  http.get('http://localhost:3001/api/users', ({ request }) => {
+    const authHeader = request.headers.get('Authorization');
 
     if (!authHeader || !authHeader.includes('mock-jwt-token')) {
-      return res(
-        ctx.status(401),
-        ctx.json({
-          status: 401,
-          message: 'Token d\'authentification requis'
-        })
-      );
+      return HttpResponse.json({
+        status: 401,
+        message: 'Token d\'authentification requis'
+      }, { status: 401 });
     }
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        data: mockUsers
-      })
-    );
+    return HttpResponse.json({
+      status: 200,
+      data: mockUsers
+    });
   }),
 
-  rest.post('http://localhost:3001/api/users', (req, res, ctx) => {
-    const userData = req.body as any;
+  http.post('http://localhost:3001/api/users', async ({ request }) => {
+    const userData = await request.json() as any;
     const newUser = {
       id: mockUsers.length + 1,
       ...userData,
       status: 0
     };
 
-    return res(
-      ctx.status(201),
-      ctx.json({
-        status: 201,
-        data: newUser
-      })
-    );
+    return HttpResponse.json({
+      status: 201,
+      data: newUser
+    }, { status: 201 });
   }),
 
   // Élevages
-  rest.get('http://localhost:3001/api/elevages', (req, res, ctx) => {
-    const authHeader = req.headers.get('Authorization');
+  http.get('http://localhost:3001/api/elevages', ({ request }) => {
+    const authHeader = request.headers.get('Authorization');
 
     if (!authHeader || !authHeader.includes('mock-jwt-token')) {
-      return res(
-        ctx.status(401),
-        ctx.json({
-          status: 401,
-          message: 'Token d\'authentification requis'
-        })
-      );
+      return HttpResponse.json({
+        status: 401,
+        message: 'Token d\'authentification requis'
+      }, { status: 401 });
     }
 
-    const search = req.url.searchParams.get('search');
+    const url = new URL(request.url);
+    const search = url.searchParams.get('search');
     let filteredElevages = mockElevages;
 
     if (search) {
@@ -242,52 +213,40 @@ export const handlers = [
       );
     }
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        data: filteredElevages
-      })
-    );
+    return HttpResponse.json({
+      status: 200,
+      data: filteredElevages
+    });
   }),
 
-  rest.get('http://localhost:3001/api/elevages/:id', (req, res, ctx) => {
-    const { id } = req.params;
+  http.get('http://localhost:3001/api/elevages/:id', ({ params }) => {
+    const { id } = params;
     const elevage = mockElevages.find(e => e.id === parseInt(id as string));
 
     if (!elevage) {
-      return res(
-        ctx.status(404),
-        ctx.json({
-          status: 404,
-          message: 'Élevage non trouvé'
-        })
-      );
+      return HttpResponse.json({
+        status: 404,
+        message: 'Élevage non trouvé'
+      }, { status: 404 });
     }
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        data: elevage
-      })
-    );
+    return HttpResponse.json({
+      status: 200,
+      data: elevage
+    });
   }),
 
-  rest.post('http://localhost:3001/api/elevages', (req, res, ctx) => {
-    const elevageData = req.body as any;
+  http.post('http://localhost:3001/api/elevages', async ({ request }) => {
+    const elevageData = await request.json() as any;
 
     if (!elevageData.nom || !elevageData.adresse) {
-      return res(
-        ctx.status(422),
-        ctx.json({
-          status: 422,
-          errors: {
-            nom: elevageData.nom ? [] : ['Le nom est requis'],
-            adresse: elevageData.adresse ? [] : ['L\'adresse est requise']
-          }
-        })
-      );
+      return HttpResponse.json({
+        status: 422,
+        errors: {
+          nom: elevageData.nom ? [] : ['Le nom est requis'],
+          adresse: elevageData.adresse ? [] : ['L\'adresse est requise']
+        }
+      }, { status: 422 });
     }
 
     const newElevage = {
@@ -297,67 +256,53 @@ export const handlers = [
       created_at: new Date().toISOString()
     };
 
-    return res(
-      ctx.status(201),
-      ctx.json({
-        status: 201,
-        data: newElevage
-      })
-    );
+    return HttpResponse.json({
+      status: 201,
+      data: newElevage
+    }, { status: 201 });
   }),
 
-  rest.put('http://localhost:3001/api/elevages/:id', (req, res, ctx) => {
-    const { id } = req.params;
-    const updateData = req.body as any;
+  http.put('http://localhost:3001/api/elevages/:id', async ({ params, request }) => {
+    const { id } = params;
+    const updateData = await request.json() as any;
     const elevage = mockElevages.find(e => e.id === parseInt(id as string));
 
     if (!elevage) {
-      return res(
-        ctx.status(404),
-        ctx.json({
-          status: 404,
-          message: 'Élevage non trouvé'
-        })
-      );
+      return HttpResponse.json({
+        status: 404,
+        message: 'Élevage non trouvé'
+      }, { status: 404 });
     }
 
     const updatedElevage = { ...elevage, ...updateData };
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        data: updatedElevage
-      })
-    );
+    return HttpResponse.json({
+      status: 200,
+      data: updatedElevage
+    });
   }),
 
-  rest.delete('http://localhost:3001/api/elevages/:id', (req, res, ctx) => {
-    const { id } = req.params;
+  http.delete('http://localhost:3001/api/elevages/:id', ({ params }) => {
+    const { id } = params;
     const elevageIndex = mockElevages.findIndex(e => e.id === parseInt(id as string));
 
     if (elevageIndex === -1) {
-      return res(
-        ctx.status(404),
-        ctx.json({
-          status: 404,
-          message: 'Élevage non trouvé'
-        })
-      );
+      return HttpResponse.json({
+        status: 404,
+        message: 'Élevage non trouvé'
+      }, { status: 404 });
     }
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        message: 'Élevage supprimé avec succès'
-      })
-    );
+    return HttpResponse.json({
+      status: 200,
+      message: 'Élevage supprimé avec succès'
+    });
   }),
 
   // Animaux
-  rest.get('http://localhost:3001/api/animals', (req, res, ctx) => {
-    const elevageId = req.url.searchParams.get('elevage_id');
+  http.get('http://localhost:3001/api/animals', ({ request }) => {
+    const url = new URL(request.url);
+    const elevageId = url.searchParams.get('elevage_id');
     let filteredAnimals = mockAnimals;
 
     if (elevageId) {
@@ -366,29 +311,23 @@ export const handlers = [
       );
     }
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        data: filteredAnimals
-      })
-    );
+    return HttpResponse.json({
+      status: 200,
+      data: filteredAnimals
+    });
   }),
 
-  rest.post('http://localhost:3001/api/animals', (req, res, ctx) => {
-    const animalData = req.body as any;
+  http.post('http://localhost:3001/api/animals', async ({ request }) => {
+    const animalData = await request.json() as any;
 
     if (!animalData.nom || !animalData.elevage_id) {
-      return res(
-        ctx.status(422),
-        ctx.json({
-          status: 422,
-          errors: {
-            nom: animalData.nom ? [] : ['Le nom est requis'],
-            elevage_id: animalData.elevage_id ? [] : ['L\'élevage est requis']
-          }
-        })
-      );
+      return HttpResponse.json({
+        status: 422,
+        errors: {
+          nom: animalData.nom ? [] : ['Le nom est requis'],
+          elevage_id: animalData.elevage_id ? [] : ['L\'élevage est requis']
+        }
+      }, { status: 422 });
     }
 
     const newAnimal = {
@@ -396,57 +335,45 @@ export const handlers = [
       ...animalData
     };
 
-    return res(
-      ctx.status(201),
-      ctx.json({
-        status: 201,
-        data: newAnimal
-      })
-    );
+    return HttpResponse.json({
+      status: 201,
+      data: newAnimal
+    }, { status: 201 });
   }),
 
   // Races
-  rest.get('http://localhost:3001/api/races', (req, res, ctx) => {
+  http.get('http://localhost:3001/api/races', () => {
     const mockRaces = [
       { id: 1, nom: 'Holstein', type_animal_id: 1, description: 'Race laitière' },
       { id: 2, nom: 'Charolaise', type_animal_id: 1, description: 'Race à viande' },
       { id: 3, nom: 'Lacaune', type_animal_id: 2, description: 'Race ovine laitière' }
     ];
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        data: mockRaces
-      })
-    );
+    return HttpResponse.json({
+      status: 200,
+      data: mockRaces
+    });
   }),
 
   // Types d'animaux
-  rest.get('http://localhost:3001/api/types-animaux', (req, res, ctx) => {
+  http.get('http://localhost:3001/api/types-animaux', () => {
     const mockTypes = [
       { id: 1, nom: 'Bovin', description: 'Bovins domestiques' },
       { id: 2, nom: 'Ovin', description: 'Ovins domestiques' },
       { id: 3, nom: 'Caprin', description: 'Caprins domestiques' }
     ];
 
-    return res(
-      ctx.status(200),
-      ctx.json({
-        status: 200,
-        data: mockTypes
-      })
-    );
+    return HttpResponse.json({
+      status: 200,
+      data: mockTypes
+    });
   }),
 
   // Gestion des erreurs 500
-  rest.get('http://localhost:3001/api/error-test', (req, res, ctx) => {
-    return res(
-      ctx.status(500),
-      ctx.json({
-        status: 500,
-        message: 'Erreur serveur de test'
-      })
-    );
+  http.get('http://localhost:3001/api/error-test', () => {
+    return HttpResponse.json({
+      status: 500,
+      message: 'Erreur serveur de test'
+    }, { status: 500 });
   })
 ];
