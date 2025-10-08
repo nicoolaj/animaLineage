@@ -16,8 +16,10 @@
  */
 
 // Load environment variables
-require_once 'config/env.php';
-EnvLoader::load(__DIR__ . '/.env');
+if (file_exists('config/env.php')) {
+    require_once 'config/env.php';
+    EnvLoader::load(__DIR__ . '/.env');
+}
 
 // CORS configuration from environment
 $allowedOrigins = $_ENV['CORS_ALLOWED_ORIGINS'] ?? 'http://localhost:3002';

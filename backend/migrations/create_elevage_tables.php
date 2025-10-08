@@ -311,8 +311,10 @@ class CreateElevageTables {
 
 // Exécuter la migration si le script est appelé directement
 if (basename(__FILE__) == basename($_SERVER['SCRIPT_NAME'])) {
-    require_once __DIR__ . '/../config/env.php';
-    EnvLoader::load(__DIR__ . '/../.env');
+    if (file_exists(__DIR__ . '/../config/env.php')) {
+        require_once __DIR__ . '/../config/env.php';
+        EnvLoader::load(__DIR__ . '/../.env');
+    }
 
     $migration = new CreateElevageTables();
     $migration->createTables();

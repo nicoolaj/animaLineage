@@ -5,10 +5,12 @@
  */
 
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../config/env.php';
 
 // Charger les variables d'environnement
-EnvLoader::load(__DIR__ . '/../.env');
+if (file_exists(__DIR__ . '/../config/env.php')) {
+    require_once __DIR__ . '/../config/env.php';
+    EnvLoader::load(__DIR__ . '/../.env');
+}
 
 if ($argc < 2) {
     echo "Usage: php validate_user.php <email>\n";

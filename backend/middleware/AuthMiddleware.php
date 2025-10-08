@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../config/env.php';
+
+// Chargement de env.php si disponible (sinon les variables d'environnement sont déjà configurées)
+if (file_exists(__DIR__ . '/../config/env.php')) {
+    require_once __DIR__ . '/../config/env.php';
+}
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;

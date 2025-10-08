@@ -335,7 +335,8 @@ class AnimalModelTest extends TestCase
         $animal = $this->animal->getById(1);
         $this->assertEquals('2024-01-01', $animal['date_deces']);
         $this->assertEquals('mort', $animal['statut']);
-        $this->assertNull($animal['elevage_id']);
+        // L'animal reste dans l'élevage pour conserver les statistiques
+        $this->assertEquals(1, $animal['elevage_id']);
     }
 
     public function testDelete()

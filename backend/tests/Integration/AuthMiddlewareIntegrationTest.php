@@ -33,6 +33,18 @@ class AuthMiddlewareIntegrationTest extends TestCase
         $property->setAccessible(true);
         $property->setValue($this->database, $this->pdo);
 
+        // Créer la table users pour les tests
+        $this->pdo->exec("
+            CREATE TABLE users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE,
+                role INTEGER DEFAULT 3,
+                status INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ");
+
         // Créer le middleware
         $this->authMiddleware = new AuthMiddleware($this->database);
 
@@ -57,6 +69,12 @@ class AuthMiddlewareIntegrationTest extends TestCase
                 'role' => User::ROLE_READER
             ]
         ];
+
+        // Insérer les utilisateurs de test dans la base de données
+        foreach ($this->testUsers as $user) {
+            $stmt = $this->pdo->prepare("INSERT INTO users (id, name, email, role, status) VALUES (?, ?, ?, ?, 1)");
+            $stmt->execute([$user['id'], $user['name'], $user['email'], $user['role']]);
+        }
     }
 
     public function testFullAuthenticationWorkflow()
