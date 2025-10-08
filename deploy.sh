@@ -101,6 +101,12 @@ chmod -R 644 $DEPLOY_DIR/api/.env*
 chmod 755 $DEPLOY_DIR/api/database
 chmod 644 $DEPLOY_DIR/api/database/*.db 2>/dev/null || true
 
+echo "📋 Audit des modules externes"
+echo "1. Backend "
+cd backend ; composer audit ; cd ..
+echo "2. Frontend "
+cd frontend ; npm audit ; cd ..
+
 echo "✅ Déploiement préparé dans le dossier '$DEPLOY_DIR/'"
 echo ""
 echo "📋 Instructions pour OVH :"
