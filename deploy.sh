@@ -33,7 +33,7 @@ cd ..
 # Préparation de la structure de déploiement
 echo "📂 Préparation de la structure de déploiement..."
 
-# Copie du frontend build vers le dossier racine
+# Copie du frontend build vers le dossier racine (Vite utilise 'dist' au lieu de 'build')
 cp -r $FRONTEND_DIR/build/* $DEPLOY_DIR/
 
 # Copie du backend vers le sous-dossier api

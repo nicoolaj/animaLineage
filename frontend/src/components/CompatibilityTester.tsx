@@ -258,10 +258,10 @@ const CompatibilityTester: React.FC = () => {
   }
 
   return (
-    <div className="p-5 max-w-7xl mx-auto bg-gray-700 min-h-screen text-white">
+    <div className="p-5 max-w-7xl mx-auto bg-white min-h-screen text-gray-900">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-white mb-2">{t('compatibility.title')}</h2>
-        <p className="text-gray-300">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('compatibility.title')}</h2>
+        <p className="text-gray-700">
           {t('compatibility.description')}
         </p>
       </div>
@@ -274,7 +274,7 @@ const CompatibilityTester: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Sélection Animal 1 */}
-        <div className="bg-gray-700 p-6 rounded-lg">
+        <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">{t('animal.select1')}</h3>
           <input
             type="text"
@@ -283,30 +283,30 @@ const CompatibilityTester: React.FC = () => {
             onChange={(e) => setSearchTerm1(e.target.value)}
             className="form-input mb-4"
           />
-          <div className="max-h-40 overflow-y-auto border border-gray-600 rounded">
+          <div className="max-h-40 overflow-y-auto border border-gray-200 rounded">
             {filteredAnimals1.map((animal) => (
               <div
                 key={animal.id}
                 onClick={() => setSelectedAnimal1(animal)}
-                className={`p-3 cursor-pointer border-b border-gray-600 hover:bg-gray-600 ${
-                  selectedAnimal1?.id === animal.id ? 'bg-blue-600' : ''
+                className={`p-3 cursor-pointer border-b border-gray-200 hover:bg-gray-100 ${
+                  selectedAnimal1?.id === animal.id ? 'bg-blue-100 border-blue-300' : ''
                 }`}
               >
                 <div className="font-medium">{animal.identifiant_officiel}</div>
-                <div className="text-sm text-gray-300">
+                <div className="text-sm text-gray-700">
                   {animal.nom || t('animal.noname')} • {animal.sexe === 'M' ? '♂️' : '♀️'} • {animal.race_nom}
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-600">
                   {animal.elevage_nom} • {animal.type_animal_nom || t('animal.type.undefined')}
                 </div>
               </div>
             ))}
           </div>
           {selectedAnimal1 && (
-            <div className="mt-4 p-4 bg-gray-600 rounded">
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
               <strong>{t('animal.selected')}</strong> {selectedAnimal1.identifiant_officiel}
               <br />
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-gray-700">
                 {selectedAnimal1.nom} • {selectedAnimal1.sexe === 'M' ? t('animal.male') : t('animal.female')} • {selectedAnimal1.race_nom} • {selectedAnimal1.type_animal_nom || t('animal.type.undefined')}
               </span>
             </div>
@@ -314,7 +314,7 @@ const CompatibilityTester: React.FC = () => {
         </div>
 
         {/* Sélection Animal 2 */}
-        <div className="bg-gray-700 p-6 rounded-lg">
+        <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">{t('animal.select2')}</h3>
           <input
             type="text"
@@ -323,30 +323,30 @@ const CompatibilityTester: React.FC = () => {
             onChange={(e) => setSearchTerm2(e.target.value)}
             className="form-input mb-4"
           />
-          <div className="max-h-40 overflow-y-auto border border-gray-600 rounded">
+          <div className="max-h-40 overflow-y-auto border border-gray-200 rounded">
             {filteredAnimals2.map((animal) => (
               <div
                 key={animal.id}
                 onClick={() => setSelectedAnimal2(animal)}
-                className={`p-3 cursor-pointer border-b border-gray-600 hover:bg-gray-600 ${
-                  selectedAnimal2?.id === animal.id ? 'bg-blue-600' : ''
+                className={`p-3 cursor-pointer border-b border-gray-200 hover:bg-gray-100 ${
+                  selectedAnimal2?.id === animal.id ? 'bg-blue-100 border-blue-300' : ''
                 }`}
               >
                 <div className="font-medium">{animal.identifiant_officiel}</div>
-                <div className="text-sm text-gray-300">
+                <div className="text-sm text-gray-700">
                   {animal.nom || t('animal.noname')} • {animal.sexe === 'M' ? '♂️' : '♀️'} • {animal.race_nom}
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-600">
                   {animal.elevage_nom} • {animal.type_animal_nom || t('animal.type.undefined')}
                 </div>
               </div>
             ))}
           </div>
           {selectedAnimal2 && (
-            <div className="mt-4 p-4 bg-gray-600 rounded">
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
               <strong>{t('animal.selected')}</strong> {selectedAnimal2.identifiant_officiel}
               <br />
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-gray-700">
                 {selectedAnimal2.nom} • {selectedAnimal2.sexe === 'M' ? t('animal.male') : t('animal.female')} • {selectedAnimal2.race_nom} • {selectedAnimal2.type_animal_nom || t('animal.type.undefined')}
               </span>
             </div>
@@ -387,7 +387,7 @@ const CompatibilityTester: React.FC = () => {
           </div>
 
           {/* Analyse génétique */}
-          <div className="bg-gray-700 p-6 rounded-lg">
+          <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
             <h3 className="text-xl font-bold mb-4">{t('genetic.title')}</h3>
             <div className="space-y-4">
               <div className="whitespace-pre-line">{result.geneticDiversity.analysis}</div>
@@ -396,7 +396,7 @@ const CompatibilityTester: React.FC = () => {
                   <h4 className="font-semibold mb-2">{t('recommendations.title')}</h4>
                   <ul className="list-disc list-inside space-y-1">
                     {result.geneticDiversity.recommendations.map((rec, index) => (
-                      <li key={index} className="text-sm text-gray-300">{rec}</li>
+                      <li key={index} className="text-sm text-gray-700">{rec}</li>
                     ))}
                   </ul>
                 </div>
@@ -405,14 +405,14 @@ const CompatibilityTester: React.FC = () => {
           </div>
 
           {/* Traits possibles de la descendance */}
-          <div className="bg-gray-700 p-6 rounded-lg">
+          <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
             <h3 className="text-xl font-bold mb-4">{t('offspring.title')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-semibold mb-2 text-green-400">{t('offspring.traits')}</h4>
                 <ul className="list-disc list-inside space-y-1">
                   {result.offspring.possibleTraits.map((trait, index) => (
-                    <li key={index} className="text-sm text-gray-300">{trait}</li>
+                    <li key={index} className="text-sm text-gray-700">{trait}</li>
                   ))}
                 </ul>
               </div>
@@ -420,7 +420,7 @@ const CompatibilityTester: React.FC = () => {
                 <h4 className="font-semibold mb-2 text-orange-400">{t('offspring.risks')}</h4>
                 <ul className="list-disc list-inside space-y-1">
                   {result.offspring.riskFactors.map((risk, index) => (
-                    <li key={index} className="text-sm text-gray-300">{risk}</li>
+                    <li key={index} className="text-sm text-gray-700">{risk}</li>
                   ))}
                 </ul>
               </div>

@@ -2,16 +2,12 @@
   "name": "animalineage-frontend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "license": "Apache-2.0",
   "author": "Nicolas Jalibert",
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.0",
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.8.0",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.126",
+    "@types/node": "^20.17.10",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "i18next": "^25.5.2",
@@ -20,65 +16,50 @@
     "react-dom": "^19.1.1",
     "react-i18next": "^15.7.3",
     "react-redux": "^9.2.0",
-    "react-scripts": "^5.0.1",
     "typescript": "^5.9.3",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@vitejs/plugin-react": "^4.3.4",
     "audit-ci": "^6.6.1",
     "autoprefixer": "^10.4.21",
     "axe-core": "^4.8.0",
     "chrome-launcher": "^1.1.0",
     "cypress": "^13.0.0",
     "cypress-axe": "^1.5.0",
+    "jsdom": "^25.0.1",
     "less": "^4.4.1",
     "less-loader": "^12.3.0",
     "lighthouse": "^11.0.0",
     "msw": "^1.3.0",
     "postcss": "^8.5.6",
     "start-server-and-test": "^2.0.0",
-    "tailwindcss": "^3.4.0"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!src/index.tsx",
-      "!src/reportWebVitals.ts",
-      "!src/**/*.d.ts",
-      "!src/mocks/**"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 10,
-        "functions": 25,
-        "lines": 20,
-        "statements": 20
-      }
-    }
+    "tailwindcss": "^3.4.0",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "test:watch": "react-scripts test --watch",
-    "test:coverage": "react-scripts test --coverage --watch=false",
-    "test:ci": "CI=true react-scripts test --coverage --watch=false",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:ci": "vitest run --coverage",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test:e2e": "start-server-and-test start http://localhost:3002 cypress:run",
+    "test:e2e": "start-server-and-test dev http://localhost:5173 cypress:run",
     "test:lighthouse": "node scripts/performance-test.js",
     "test:performance": "npm run test:lighthouse",
     "test:security": "npm run test:e2e -- --spec 'cypress/e2e/security.cy.ts'",
     "test:accessibility": "npm run test:e2e -- --spec 'cypress/e2e/accessibility.cy.ts'",
     "test:audit": "npm audit --audit-level=moderate",
-    "test:all": "npm run test:ci && npm run test:e2e && npm run test:performance && npm run test:audit",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "test:all": "npm run test:ci && npm run test:e2e && npm run test:performance && npm run test:audit"
   },
   "browserslist": {
     "production": [

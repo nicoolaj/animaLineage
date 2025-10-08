@@ -831,21 +831,21 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                             {renderSortableHeader('Naissance', 'date_naissance')}
                                             {renderSortableHeader('Âge', 'age')}
                                             {renderSortableHeader('Statut', 'statut')}
-                                            <th style={{ cursor: 'default' }} className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Actions</th>
+                                            <th style={{ cursor: 'default' }} className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="block sm:table-row-group">
                                         {filteredAnimaux.map(animal => (
-                                            <tr key={animal.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-gray-700 rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${animal.statut === 'mort' ? 'opacity-75' : ''}`}>
-                                                <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-mono font-bold">{animal.identifiant_officiel}</td>
-                                                <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{animal.nom || '-'}</td>
-                                                <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                                            <tr key={animal.id} className={`block sm:table-row border-b border-gray-200 mb-4 sm:mb-0 bg-gray-50 sm:bg-white rounded-lg sm:rounded-none p-4 sm:p-0 text-gray-900 hover:bg-gray-100 transition-colors ${animal.statut === 'mort' ? 'opacity-75' : ''}`}>
+                                                <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 font-mono font-bold">{animal.identifiant_officiel}</td>
+                                                <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{animal.nom || '-'}</td>
+                                                <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">
                                                     <span className="sexe-badge text-lg">
                                                         {animal.sexe === 'M' ? '♂️' : '♀️'}
                                                     </span>
                                                 </td>
-                                                <td data-label="Race" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{animal.race_nom}</td>
-                                                <td data-label="Parents" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-xs leading-relaxed">
+                                                <td data-label="Race" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{animal.race_nom}</td>
+                                                <td data-label="Parents" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 text-xs leading-relaxed">
                                                     {animal.pere_identifiant && (
                                                         <div className="whitespace-nowrap">♂️ {animal.pere_identifiant}</div>
                                                     )}
@@ -854,16 +854,16 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                     )}
                                                     {!animal.pere_identifiant && !animal.mere_identifiant && '-'}
                                                 </td>
-                                                <td data-label="Naissance" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{formatDate(animal.date_naissance)}</td>
-                                                <td data-label="Âge" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600" title={getAgeTooltip(animal)}>
+                                                <td data-label="Naissance" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{formatDate(animal.date_naissance)}</td>
+                                                <td data-label="Âge" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200" title={getAgeTooltip(animal)}>
                                                     {formatAgeDisplay(animal)}
                                                 </td>
-                                                <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                                                <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">
                                                     <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${animal.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`} title={animal.statut === 'vivant' ? 'Vivant' : `Décédé ${formatDate(animal.date_deces)}`}>
                                                         {animal.statut === 'vivant' ? '✅' : '💀'}
                                                     </span>
                                                 </td>
-                                                <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 no-label">
+                                                <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 no-label">
                                                     <div className="flex flex-wrap gap-1 sm:gap-0.5">
                                                         <button
                                                             onClick={() => handleViewDescendants(animal.id)}
@@ -933,27 +933,27 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                 <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
                                     <thead className="hidden sm:table-header-group">
                                         <tr>
-                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Identifiant</th>
-                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Nom</th>
-                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Sexe</th>
-                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Race</th>
-                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Naissance</th>
-                                            <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Statut</th>
+                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Identifiant</th>
+                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Nom</th>
+                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Sexe</th>
+                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Race</th>
+                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Naissance</th>
+                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Statut</th>
                                         </tr>
                                     </thead>
                                     <tbody className="block sm:table-row-group">
                                         {descendants.map(descendant => (
-                                            <tr key={descendant.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-gray-700 rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${descendant.statut === 'mort' ? 'opacity-75' : ''}`}>
-                                                <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-mono font-bold">{descendant.identifiant_officiel}</td>
-                                                <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{descendant.nom || '-'}</td>
-                                                <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                                            <tr key={descendant.id} className={`block sm:table-row border-b border-gray-200 mb-4 sm:mb-0 bg-gray-50 sm:bg-white rounded-lg sm:rounded-none p-4 sm:p-0 text-gray-900 hover:bg-gray-100 transition-colors ${descendant.statut === 'mort' ? 'opacity-75' : ''}`}>
+                                                <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 font-mono font-bold">{descendant.identifiant_officiel}</td>
+                                                <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{descendant.nom || '-'}</td>
+                                                <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">
                                                     <span className="sexe-badge text-lg">
                                                         {descendant.sexe === 'M' ? '♂️' : '♀️'}
                                                     </span>
                                                 </td>
-                                                <td data-label="Race" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{descendant.race_nom}</td>
-                                                <td data-label="Naissance" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">{formatDate(descendant.date_naissance)}</td>
-                                                <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                                                <td data-label="Race" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{descendant.race_nom}</td>
+                                                <td data-label="Naissance" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{formatDate(descendant.date_naissance)}</td>
+                                                <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">
                                                     <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${descendant.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
                                                         {descendant.statut === 'vivant' ? '✅' : '💀'}
                                                     </span>

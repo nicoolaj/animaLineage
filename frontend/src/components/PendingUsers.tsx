@@ -128,22 +128,22 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
             <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
               <thead className="hidden sm:table-header-group">
                 <tr>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Nom</th>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Email</th>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Demande créée le</th>
-                  <th className="bg-gray-700 px-3 py-2.5 text-left text-gray-300 font-bold">Actions</th>
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Nom</th>
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Email</th>
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Demande créée le</th>
+                  <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Actions</th>
                 </tr>
               </thead>
               <tbody className="block sm:table-row-group">
                 {pendingUsers.map((user) => (
-                  <tr key={user.id} className="block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-gray-700 rounded-lg sm:rounded-none p-4 sm:p-0 text-white ring-2 ring-yellow-500">
-                    <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-semibold">
+                  <tr key={user.id} className="block sm:table-row border-b border-gray-200 mb-4 sm:mb-0 bg-gray-50 sm:bg-white rounded-lg sm:rounded-none p-4 sm:p-0 text-gray-900 hover:bg-gray-100 transition-colors ring-2 ring-yellow-500">
+                    <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 font-semibold">
                       {user.name}
                     </td>
-                    <td data-label="Email" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-sm text-gray-300">
+                    <td data-label="Email" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 text-sm text-gray-700">
                       {user.email}
                     </td>
-                    <td data-label="Demande créée le" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-sm">
+                    <td data-label="Demande créée le" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 text-sm">
                       {new Date(user.created_at).toLocaleDateString('fr-FR', {
                         year: 'numeric',
                         month: 'short',
@@ -152,7 +152,7 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
                         minute: '2-digit'
                       })}
                     </td>
-                    <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 no-label">
+                    <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 no-label">
                       <div id="pendingusers-action-buttons-6" className="action-buttons flex flex-col sm:flex-row gap-2 sm:gap-1 mt-3 sm:mt-0">
                         <button
                           onClick={() => handleUserAction(user.id, 'validate')}

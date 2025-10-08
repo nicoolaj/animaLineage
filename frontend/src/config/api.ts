@@ -1,7 +1,7 @@
 // Configuration centralisée de l'API
 export const API_CONFIG = {
-  // Utilise la variable d'environnement REACT_APP_API_URL si définie, sinon localhost pour le développement
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3001/',
+  // Utilise la variable d'environnement VITE_API_BASE_URL si définie, sinon localhost pour le développement
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/',
 
   // Autres configurations API si nécessaire
   TIMEOUT: 10000,

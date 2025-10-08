@@ -200,14 +200,14 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
               </thead>
               <tbody className="block sm:table-row-group">
                 {adminUsers.map((user) => (
-                  <tr key={user.id} className={`block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-gray-700 rounded-lg sm:rounded-none p-4 sm:p-0 text-white ${user.status === 0 ? 'ring-2 ring-yellow-500' : ''}`}>
-                    <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 font-semibold">
+                  <tr key={user.id} className={`block sm:table-row border-b border-gray-200 mb-4 sm:mb-0 bg-gray-50 sm:bg-white rounded-lg sm:rounded-none p-4 sm:p-0 text-gray-900 hover:bg-gray-100 transition-colors ${user.status === 0 ? 'ring-2 ring-yellow-500' : ''}`}>
+                    <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 font-semibold text-gray-900">
                       {user.name}
                     </td>
-                    <td data-label="Email" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-sm text-gray-300">
+                    <td data-label="Email" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 text-sm text-gray-700">
                       {user.email}
                     </td>
-                    <td data-label="Rôle" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                    <td data-label="Rôle" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">
                       <span className={`role-badge px-2 py-1 rounded text-xs font-bold ${
                         user.role === 1 ? 'bg-red-600 text-white' :
                         user.role === 2 ? 'bg-yellow-600 text-white' :
@@ -216,7 +216,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
                         {user.role_name}
                       </span>
                     </td>
-                    <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600">
+                    <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">
                       <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${
                         user.status === 0 ? 'bg-yellow-600 text-white' :
                         user.status === 1 ? 'bg-green-600 text-white' :
@@ -227,11 +227,11 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
                          user.status === 2 ? '❌ Rejeté' : 'Inconnu'}
                       </span>
                     </td>
-                    <td data-label="Créé le" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 text-sm">
+                    <td data-label="Créé le" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 text-sm text-gray-700">
                       {new Date(user.created_at).toLocaleDateString('fr-FR')}
                     </td>
                     {canAdministrate() && (
-                      <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600 no-label">
+                      <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 no-label">
                         <div id="adminpanel-action-buttons-5" className="action-buttons flex flex-col sm:flex-row gap-2 sm:gap-1">
                           <button
                             onClick={() => handleRoleChange(user)}
