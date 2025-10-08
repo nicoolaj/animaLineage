@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '../../test-utils/test-helpers';
 import userEvent from '@testing-library/user-event';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Mock du composant ElevageList pour simplifier les tests
 const MockElevageList = ({ onNewElevage, onEditElevage, onViewAnimaux }: any) => {
@@ -109,24 +110,24 @@ const MockElevageList = ({ onNewElevage, onEditElevage, onViewAnimaux }: any) =>
 };
 
 // Mock du vrai composant
-jest.mock('../ElevageList', () => MockElevageList);
+vi.mock('../ElevageList', () => ({ default: MockElevageList }));
 
 // Mock de window.confirm
 Object.defineProperty(window, 'confirm', {
   writable: true,
-  value: jest.fn(),
+  value: vi.fn(),
 });
 
 describe('ElevageList Component', () => {
   const mockProps = {
-    onNewElevage: jest.fn(),
-    onEditElevage: jest.fn(),
-    onViewAnimaux: jest.fn()
+    onNewElevage: vi.fn(),
+    onEditElevage: vi.fn(),
+    onViewAnimaux: vi.fn()
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (window.confirm as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (window.confirm as any).mockReturnValue(true);
   });
 
   describe('Rendu du composant', () => {

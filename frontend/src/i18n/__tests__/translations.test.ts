@@ -45,7 +45,7 @@ describe('Translations', () => {
       expect(fr.ui.dashboard).toBe('Tableau de bord');
       expect(fr.ui.elevages).toBe('Élevages');
       expect(fr.ui.animals).toBe('Animaux');
-      expect(fr.ui.users).toBe('Utilisateurs');
+      expect(fr.ui.users).toBe('Paramétrages');
       expect(fr.ui.logout).toBe('Déconnexion');
 
       expect(fr.ui.save).toBe('Enregistrer');

@@ -2,32 +2,36 @@ import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Mock the translation files first
 vi.mock('../locales/fr.json', () => ({
-  welcome: 'Bienvenue',
-  error: {
-    generic: 'Une erreur est survenue'
-  },
-  ui: {
-    dashboard: 'Tableau de bord',
-    save: 'Enregistrer',
-    cancel: 'Annuler'
-  },
-  messages: {
-    welcomeUser: 'Bienvenue'
+  default: {
+    welcome: 'Bienvenue',
+    error: {
+      generic: 'Une erreur est survenue'
+    },
+    ui: {
+      dashboard: 'Tableau de bord',
+      save: 'Enregistrer',
+      cancel: 'Annuler'
+    },
+    messages: {
+      welcomeUser: 'Bienvenue'
+    }
   }
 }));
 
 vi.mock('../locales/en.json', () => ({
-  welcome: 'Welcome',
-  error: {
-    generic: 'An error occurred'
-  },
-  ui: {
-    dashboard: 'Dashboard',
-    save: 'Save',
-    cancel: 'Cancel'
-  },
-  messages: {
-    welcomeUser: 'Welcome'
+  default: {
+    welcome: 'Welcome',
+    error: {
+      generic: 'An error occurred'
+    },
+    ui: {
+      dashboard: 'Dashboard',
+      save: 'Save',
+      cancel: 'Cancel'
+    },
+    messages: {
+      welcomeUser: 'Welcome'
+    }
   }
 }));
 
