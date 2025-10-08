@@ -3,9 +3,10 @@ import { render, RenderOptions } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { store } from '../store/store';
 import { AuthProvider } from '../contexts/AuthContext';
+import { vi } from 'vitest';
 
 // Mock fetch globally for tests
-global.fetch = jest.fn(() =>
+global.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
     json: () => Promise.resolve([])
@@ -22,9 +23,9 @@ const mockAuthContext = {
     status: 1
   },
   token: 'test-token',
-  login: jest.fn(),
-  register: jest.fn(),
-  logout: jest.fn(),
+  login: vi.fn(),
+  register: vi.fn(),
+  logout: vi.fn(),
   isAuthenticated: true,
   isLoading: false,
   isAdmin: () => true,
@@ -39,8 +40,7 @@ const mockAuthContext = {
 };
 
 // Mock AuthContext
-jest.mock('../contexts/AuthContext', () => ({
-  ...jest.requireActual('../contexts/AuthContext'),
+vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => mockAuthContext,
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));

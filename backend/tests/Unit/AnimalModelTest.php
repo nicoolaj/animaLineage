@@ -45,12 +45,21 @@ class AnimalModelTest extends TestCase
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )");
 
+        // Table types_animaux
+        $this->pdo->exec("CREATE TABLE IF NOT EXISTS types_animaux (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nom TEXT NOT NULL,
+            description TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )");
+
         // Table races
         $this->pdo->exec("CREATE TABLE IF NOT EXISTS races (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nom TEXT NOT NULL,
             type_animal_id INTEGER,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (type_animal_id) REFERENCES types_animaux(id)
         )");
 
         // Table animaux
@@ -85,8 +94,13 @@ class AnimalModelTest extends TestCase
         // Élevage de test
         $this->pdo->exec("INSERT INTO elevages (id, nom) VALUES (1, 'Elevage Test')");
 
+        // Types d'animaux de test
+        $this->pdo->exec("INSERT INTO types_animaux (id, nom, description) VALUES
+            (1, 'Bovin', 'Bovins domestiques'),
+            (2, 'Ovin', 'Ovins domestiques')");
+
         // Race de test
-        $this->pdo->exec("INSERT INTO races (id, nom) VALUES (1, 'Holstein'), (2, 'Normande')");
+        $this->pdo->exec("INSERT INTO races (id, nom, type_animal_id) VALUES (1, 'Holstein', 1), (2, 'Normande', 1)");
 
         // Animaux de test
         $this->pdo->exec("INSERT INTO animaux (id, identifiant_officiel, nom, sexe, race_id, elevage_id, statut) VALUES

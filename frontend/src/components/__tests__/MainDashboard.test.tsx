@@ -1,22 +1,23 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '../../test-utils/test-helpers';
 import userEvent from '@testing-library/user-event';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 import MainDashboard from '../MainDashboard';
 
 // Mock des composants enfants
-jest.mock('../AdminPanel', () => {
+vi.mock('../AdminPanel', () => {
   return function AdminPanel() {
     return <div data-testid="admin-panel">AdminPanel Component</div>;
   };
 });
 
-jest.mock('../PendingUsers', () => {
+vi.mock('../PendingUsers', () => {
   return function PendingUsers() {
     return <div data-testid="pending-users">PendingUsers Component</div>;
   };
 });
 
-jest.mock('../ElevageList', () => {
+vi.mock('../ElevageList', () => {
   return function ElevageList({ onNewElevage, onEditElevage, onViewAnimaux }: any) {
     return (
       <div data-testid="elevage-list">
@@ -29,7 +30,7 @@ jest.mock('../ElevageList', () => {
   };
 });
 
-jest.mock('../ElevageForm', () => {
+vi.mock('../ElevageForm', () => {
   return function ElevageForm({ elevageId, onSave, onCancel }: any) {
     return (
       <div data-testid="elevage-form">
@@ -41,7 +42,7 @@ jest.mock('../ElevageForm', () => {
   };
 });
 
-jest.mock('../ElevageDetail', () => {
+vi.mock('../ElevageDetail', () => {
   return function ElevageDetail({ elevageId, onBack }: any) {
     return (
       <div data-testid="elevage-detail">
@@ -52,7 +53,7 @@ jest.mock('../ElevageDetail', () => {
   };
 });
 
-jest.mock('../TypesAnimauxList', () => {
+vi.mock('../TypesAnimauxList', () => {
   return function TypesAnimauxList({ onNewType, onEditType }: any) {
     return (
       <div data-testid="types-animaux-list">
@@ -64,7 +65,7 @@ jest.mock('../TypesAnimauxList', () => {
   };
 });
 
-jest.mock('../TypeAnimalForm', () => {
+vi.mock('../TypeAnimalForm', () => {
   return function TypeAnimalForm({ typeId, onSave, onCancel }: any) {
     return (
       <div data-testid="type-animal-form">
@@ -76,7 +77,7 @@ jest.mock('../TypeAnimalForm', () => {
   };
 });
 
-jest.mock('../RacesList', () => {
+vi.mock('../RacesList', () => {
   return function RacesList({ onNewRace, onEditRace }: any) {
     return (
       <div data-testid="races-list">
@@ -88,7 +89,7 @@ jest.mock('../RacesList', () => {
   };
 });
 
-jest.mock('../RaceForm', () => {
+vi.mock('../RaceForm', () => {
   return function RaceForm({ raceId, onSave, onCancel }: any) {
     return (
       <div data-testid="race-form">
@@ -100,13 +101,13 @@ jest.mock('../RaceForm', () => {
   };
 });
 
-jest.mock('../CompatibilityTester', () => {
+vi.mock('../CompatibilityTester', () => {
   return function CompatibilityTester() {
     return <div data-testid="compatibility-tester">CompatibilityTester Component</div>;
   };
 });
 
-jest.mock('../LanguageSelector', () => {
+vi.mock('../LanguageSelector', () => {
   return function LanguageSelector() {
     return <div data-testid="language-selector">Language Selector</div>;
   };
@@ -114,7 +115,7 @@ jest.mock('../LanguageSelector', () => {
 
 describe('MainDashboard Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Rendu du composant', () => {

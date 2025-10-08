@@ -1,5 +1,7 @@
+import { vi, describe, test, expect, beforeEach } from 'vitest';
+
 // Mock the translation files first
-jest.mock('../locales/fr.json', () => ({
+vi.mock('../locales/fr.json', () => ({
   welcome: 'Bienvenue',
   error: {
     generic: 'Une erreur est survenue'
@@ -14,7 +16,7 @@ jest.mock('../locales/fr.json', () => ({
   }
 }));
 
-jest.mock('../locales/en.json', () => ({
+vi.mock('../locales/en.json', () => ({
   welcome: 'Welcome',
   error: {
     generic: 'An error occurred'
@@ -30,13 +32,13 @@ jest.mock('../locales/en.json', () => ({
 }));
 
 // Mock i18next-browser-languagedetector
-jest.mock('i18next-browser-languagedetector', () => ({
+vi.mock('i18next-browser-languagedetector', () => ({
   __esModule: true,
   default: {
     type: 'languageDetector',
-    init: jest.fn(),
-    detect: jest.fn(() => 'fr'),
-    cacheUserLanguage: jest.fn(),
+    init: vi.fn(),
+    detect: vi.fn(() => 'fr'),
+    cacheUserLanguage: vi.fn(),
   },
 }));
 
@@ -45,7 +47,7 @@ import i18n from '../i18n';
 
 describe('i18n Configuration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('i18n is initialized and configured', () => {

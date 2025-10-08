@@ -1,10 +1,11 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import languageReducer, { setLanguage, initializeLanguage, selectCurrentLanguage } from '../languageSlice';
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  clear: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
@@ -14,7 +15,7 @@ describe('languageSlice', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorageMock.getItem.mockReturnValue(null);
     Object.defineProperty(navigator, 'language', {
       writable: true,
