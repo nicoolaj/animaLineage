@@ -100,10 +100,10 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
   }
 
   return (
-    <div id="pendingusers-pending-users-2" className="pending-users bg-gray-700 rounded-lg p-4 sm:p-6 border border-gray-600">
+    <div id="pendingusers-pending-users-2" className="pending-users bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
       <div className="mb-4 sm:mb-6">
-        <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">👤 Comptes en attente de validation</h2>
-        <p className="text-sm sm:text-base text-gray-300">Les nouveaux comptes créés via la page d'inscription apparaissent ici.</p>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">👤 Comptes en attente de validation</h2>
+        <p className="text-sm sm:text-base text-gray-700">Les nouveaux comptes créés via la page d'inscription apparaissent ici.</p>
       </div>
 
       {error && (
@@ -118,14 +118,14 @@ const PendingUsers = forwardRef<PendingUsersRef, PendingUsersProps>(({ onUserVal
       {loading ? (
         <p className="text-center text-gray-700 py-4">Chargement...</p>
       ) : pendingUsers.length === 0 ? (
-        <div id="pendingusers-pending-placeholder-4" className="pending-placeholder text-center py-8 bg-gray-600 rounded-lg border border-gray-500">
-          <p className="text-base sm:text-lg text-gray-200 mb-2">📝 Aucun compte en attente pour le moment</p>
-          <small className="text-xs sm:text-sm text-gray-400">Les utilisateurs peuvent créer un compte via la page de connexion</small>
+        <div id="pendingusers-pending-placeholder-4" className="pending-placeholder text-center py-8 bg-gray-100 rounded-lg border border-gray-300">
+          <p className="text-base sm:text-lg text-gray-700 mb-2">📝 Aucun compte en attente pour le moment</p>
+          <small className="text-xs sm:text-sm text-gray-600">Les utilisateurs peuvent créer un compte via la page de connexion</small>
         </div>
       ) : (
         <div id="pendingusers-pending-users-table-5" className="pending-users-table">
           <div className="table-responsive">
-            <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+            <table className="table-mobile w-full border-collapse bg-white rounded-lg shadow-card">
               <thead className="hidden sm:table-header-group">
                 <tr>
                   <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Nom</th>

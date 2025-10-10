@@ -126,8 +126,15 @@ const CompatibilityTester: React.FC = () => {
     // Vérification de la consanguinité
     const isRelated = checkRelationship(selectedAnimal1, selectedAnimal2);
     if (isRelated.related) {
-      compatible = false;
-      reasons.push(`❌ ${t('check.relationship.detected')}: ${isRelated.relationship}`);
+      // Cousins germains : avertissement mais pas blocage total
+      if (isRelated.relationship.includes('Cousins germains')) {
+        reasons.push(`⚠️ ${t('check.relationship.detected')}: ${isRelated.relationship}`);
+        reasons.push(`ℹ️ Reproduction possible mais surveillance génétique recommandée`);
+      } else {
+        // Autres relations : blocage complet
+        compatible = false;
+        reasons.push(`❌ ${t('check.relationship.detected')}: ${isRelated.relationship}`);
+      }
     } else {
       reasons.push(`✅ ${t('check.relationship.none')}`);
     }
@@ -152,18 +159,72 @@ const CompatibilityTester: React.FC = () => {
       return { related: true, relationship: t('relationship.same') };
     }
 
-    // Vérifier relation parent-enfant
+    // Vérifier relation parent-enfant directe
     if (animal1.pere_id === animal2.id || animal1.mere_id === animal2.id) {
-      return { related: true, relationship: t('relationship.parent') };
+      return { related: true, relationship: 'Parent/Enfant (coefficient de consanguinité: 25%)' };
     }
     if (animal2.pere_id === animal1.id || animal2.mere_id === animal1.id) {
-      return { related: true, relationship: t('relationship.parent') };
+      return { related: true, relationship: 'Parent/Enfant (coefficient de consanguinité: 25%)' };
     }
 
-    // Vérifier fratrie (mêmes parents)
-    if ((animal1.pere_id && animal1.pere_id === animal2.pere_id) ||
-        (animal1.mere_id && animal1.mere_id === animal2.mere_id)) {
-      return { related: true, relationship: t('relationship.sibling') };
+    // Vérifier relation grands-parents/petits-enfants
+    // Animal1 est grand-parent d'Animal2
+    const animal2Parents = animals.filter(a => a.id === animal2.pere_id || a.id === animal2.mere_id);
+    for (const parent of animal2Parents) {
+      if (parent.pere_id === animal1.id || parent.mere_id === animal1.id) {
+        return { related: true, relationship: 'Grand-parent/Petit-enfant (coefficient de consanguinité: 12.5%)' };
+      }
+    }
+
+    // Animal2 est grand-parent d'Animal1
+    const animal1Parents = animals.filter(a => a.id === animal1.pere_id || a.id === animal1.mere_id);
+    for (const parent of animal1Parents) {
+      if (parent.pere_id === animal2.id || parent.mere_id === animal2.id) {
+        return { related: true, relationship: 'Grand-parent/Petit-enfant (coefficient de consanguinité: 12.5%)' };
+      }
+    }
+
+    // Vérifier fratrie complète (mêmes père ET mère)
+    if (animal1.pere_id && animal1.mere_id &&
+        animal1.pere_id === animal2.pere_id && animal1.mere_id === animal2.mere_id) {
+      return { related: true, relationship: 'Frères/Sœurs (coefficient de consanguinité: 25%)' };
+    }
+
+    // Vérifier demi-fratrie (même père OU même mère, mais pas les deux)
+    if ((animal1.pere_id && animal1.pere_id === animal2.pere_id && animal1.mere_id !== animal2.mere_id) ||
+        (animal1.mere_id && animal1.mere_id === animal2.mere_id && animal1.pere_id !== animal2.pere_id)) {
+      return { related: true, relationship: 'Demi-frères/Demi-sœurs (coefficient de consanguinité: 12.5%)' };
+    }
+
+    // Vérifier oncle/tante - neveu/nièce
+    // Animal1 parents vs Animal2 grands-parents
+    for (const parent1 of animal1Parents) {
+      for (const parent2 of animal2Parents) {
+        if ((parent1.pere_id && parent1.pere_id === parent2.pere_id) ||
+            (parent1.mere_id && parent1.mere_id === parent2.mere_id)) {
+          return { related: true, relationship: 'Oncle-Tante/Neveu-Nièce (coefficient de consanguinité: 12.5%)' };
+        }
+      }
+    }
+
+    // Vérifier cousins germains (même grands-parents)
+    const animal1GrandParents = [];
+    const animal2GrandParents = [];
+
+    for (const parent1 of animal1Parents) {
+      if (parent1.pere_id) animal1GrandParents.push(parent1.pere_id);
+      if (parent1.mere_id) animal1GrandParents.push(parent1.mere_id);
+    }
+
+    for (const parent2 of animal2Parents) {
+      if (parent2.pere_id) animal2GrandParents.push(parent2.pere_id);
+      if (parent2.mere_id) animal2GrandParents.push(parent2.mere_id);
+    }
+
+    for (const gp1 of animal1GrandParents) {
+      if (animal2GrandParents.includes(gp1)) {
+        return { related: true, relationship: 'Cousins germains (coefficient de consanguinité: 6.25% - Risque modéré)' };
+      }
     }
 
     return { related: false, relationship: '' };
@@ -183,12 +244,15 @@ const CompatibilityTester: React.FC = () => {
     } else {
       // Analyse par race (seulement si pas de consanguinité)
       if (animal1.race_nom === animal2.race_nom) {
-        score = 80; // Score réduit mais toujours bon pour même race
-        analysis.push(`🟡 ${t('genetic.same.race')}`);
-        recommendations.push(t('recommendations.crossbreed'));
+        score = 95; // Score excellent pour race pure
+        analysis.push(`🟢 ${t('genetic.same.race')} - Idéal pour l'élevage de race pure`);
+        recommendations.push('Excellent choix pour maintenir la pureté de la race');
+        recommendations.push('Continuez le suivi généalogique pour éviter la consanguinité');
       } else {
-        analysis.push(`🟢 ${t('genetic.different.race')}`);
-        recommendations.push(t('recommendations.optimal'));
+        score = 85; // Bon pour la diversité génétique
+        analysis.push(`🟢 ${t('genetic.different.race')} - Excellent pour la diversité génétique`);
+        recommendations.push('Idéal pour introduire de la diversité génétique');
+        recommendations.push('Peut créer des animaux croisés de qualité');
       }
     }
 
@@ -375,7 +439,7 @@ const CompatibilityTester: React.FC = () => {
       {result && (
         <div className="space-y-6">
           {/* Status de compatibilité */}
-          <div className={`p-6 rounded-lg ${result.compatible ? 'bg-green-800' : 'bg-red-800'}`}>
+          <div className={`p-6 rounded-lg ${result.compatible ? 'bg-green-100 border border-green-300' : 'bg-red-100 border border-red-300'}`}>
             <h3 className="text-xl font-bold mb-4">
               {result.compatible ? t('result.compatible') : t('result.incompatible')}
             </h3>

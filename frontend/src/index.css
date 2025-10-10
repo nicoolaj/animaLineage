@@ -29,7 +29,7 @@
   }
 
   .btn-secondary {
-    @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-3 sm:px-5 rounded-md transition-colors duration-200 border border-gray-600 hover:border-gray-700 text-sm sm:text-base;
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-3 sm:px-5 rounded-md transition-colors duration-200 border border-gray-300 hover:border-gray-400 text-sm sm:text-base;
   }
 
   .btn-outline {
@@ -41,19 +41,19 @@
   }
 
   .form-input {
-    @apply w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400;
+    @apply w-full px-3 py-2.5 border border-gray-300 rounded-md bg-white text-gray-900 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500;
   }
 
   .form-select {
-    @apply w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+    @apply w-full px-3 py-2.5 border border-gray-300 rounded-md bg-white text-gray-900 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
   }
 
   .form-textarea {
-    @apply w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y placeholder-gray-400;
+    @apply w-full px-3 py-2.5 border border-gray-300 rounded-md bg-white text-gray-900 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y placeholder-gray-500;
   }
 
   .form-label {
-    @apply text-gray-300 font-medium text-sm mb-2 block;
+    @apply text-gray-700 font-medium text-sm mb-2 block;
   }
 
   .error-message {
@@ -77,11 +77,11 @@
   }
 
   .table-header {
-    @apply bg-gray-800 text-gray-300 font-bold cursor-pointer select-none hover:bg-gray-600 transition-colors duration-150;
+    @apply bg-gray-100 text-gray-700 font-bold cursor-pointer select-none hover:bg-gray-200 transition-colors duration-150;
   }
 
   .btn-edit {
-    @apply bg-transparent hover:bg-gray-600 text-white border-none rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200;
+    @apply bg-transparent hover:bg-gray-200 text-gray-700 border-none rounded-md px-3 py-1.5 text-sm cursor-pointer transition-colors duration-200;
   }
 
   .btn-delete {
@@ -93,24 +93,24 @@
   }
 
   .section-title {
-    @apply m-0 text-white text-2xl font-semibold;
+    @apply m-0 text-gray-900 text-2xl font-semibold;
   }
 
   /* Styles pour les modales et conteneurs de gestion */
   .modal-overlay {
-    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+    @apply fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50;
   }
 
   .modal-container {
-    @apply bg-gray-700 rounded-xl p-6 max-w-2xl mx-auto text-white shadow-2xl;
+    @apply bg-white rounded-xl p-6 max-w-2xl mx-auto text-gray-900 shadow-2xl;
   }
 
   .management-container {
-    @apply bg-gray-700 rounded-xl p-6 max-w-4xl mx-auto my-5 text-white shadow-2xl;
+    @apply bg-white rounded-xl p-6 max-w-4xl mx-auto my-5 text-gray-900 shadow-2xl;
   }
 
   .management-header {
-    @apply flex justify-between items-center mb-5 pb-4 border-b-2 border-gray-600;
+    @apply flex justify-between items-center mb-5 pb-4 border-b-2 border-gray-200;
   }
 
   .admin-badge {
@@ -126,7 +126,7 @@
   }
 
   .user-item {
-    @apply bg-gray-700 border border-gray-600 rounded-lg p-4 flex justify-between items-center;
+    @apply bg-white border border-gray-200 rounded-lg p-4 flex justify-between items-center;
   }
 
   .user-info-detail {
@@ -134,11 +134,11 @@
   }
 
   .user-name {
-    @apply font-semibold text-white;
+    @apply font-semibold text-gray-900;
   }
 
   .user-email {
-    @apply text-sm text-gray-400;
+    @apply text-sm text-gray-600;
   }
 
   .role-badge {
@@ -166,11 +166,11 @@
   }
 
   .add-user-section {
-    @apply bg-gray-700 border border-gray-600 rounded-lg p-4 mb-4;
+    @apply bg-white border border-gray-200 rounded-lg p-4 mb-4;
   }
 
   .search-input {
-    @apply w-full mb-4 px-3 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500;
+    @apply w-full mb-4 px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500;
   }
 
   .available-users-list {
@@ -178,7 +178,7 @@
   }
 
   .available-user-item {
-    @apply flex justify-between items-center p-3 bg-gray-700 rounded border border-gray-600;
+    @apply flex justify-between items-center p-3 bg-white rounded border border-gray-200;
   }
 
   .add-btn {
@@ -186,7 +186,7 @@
   }
 
   .cancel-btn {
-    @apply bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 text-sm cursor-pointer transition-colors duration-200 border-none rounded;
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 text-sm cursor-pointer transition-colors duration-200 border-none rounded;
   }
 
   .no-permission-notice {
@@ -204,7 +204,7 @@
   /* Classes pour ElevageUsersManagement */
   .current-users-section h4,
   .add-user-form h4 {
-    @apply text-gray-300 font-medium mb-3;
+    @apply text-gray-700 font-medium mb-3;
   }
 
   .users-list {
@@ -244,7 +244,7 @@
   }
 
   .add-user-form {
-    @apply bg-gray-700 border border-gray-600 rounded-lg p-4 mb-4;
+    @apply bg-white border border-gray-200 rounded-lg p-4 mb-4;
   }
 
   .available-users-list {
@@ -257,11 +257,11 @@
 
   .no-users,
   .no-available-users {
-    @apply text-center text-gray-400 py-4 italic;
+    @apply text-center text-gray-600 py-4 italic;
   }
 
   .loading {
-    @apply text-center text-gray-300 py-4;
+    @apply text-center text-gray-700 py-4;
   }
 
   .header-actions {
@@ -290,11 +290,11 @@
   }
 
   .info-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300;
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700;
   }
 
   .info-grid strong {
-    @apply text-gray-300 font-semibold;
+    @apply text-gray-900 font-semibold;
   }
 
   /* Section des races améliorée */
@@ -315,19 +315,19 @@
   }
 
   .race-card {
-    @apply bg-gray-600 border border-gray-500 rounded-lg p-3 hover:bg-gray-500 transition-all duration-200 hover:shadow-md transform hover:scale-105;
+    @apply bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-all duration-200 hover:shadow-md transform hover:scale-105;
   }
 
   .race-name {
-    @apply font-semibold text-white text-sm mb-1;
+    @apply font-semibold text-gray-900 text-sm mb-1;
   }
 
   .race-type {
-    @apply text-xs text-blue-300 bg-blue-900/30 px-2 py-1 rounded-full inline-block;
+    @apply text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full inline-block;
   }
 
   .no-races {
-    @apply flex items-center gap-2 text-gray-400 italic bg-gray-600/30 rounded-lg p-3 border border-dashed border-gray-500;
+    @apply flex items-center gap-2 text-gray-600 italic bg-gray-50 rounded-lg p-3 border border-dashed border-gray-300;
   }
 
   .no-races-icon {
@@ -367,7 +367,7 @@
   }
 
   .filters {
-    @apply flex flex-wrap gap-4 mb-4 p-4 bg-gray-700 rounded-lg;
+    @apply flex flex-wrap gap-4 mb-4 p-4 bg-gray-50 rounded-lg;
   }
 
   .filter-group {
@@ -384,7 +384,7 @@
   }
 
   .animals-table-container {
-    @apply overflow-x-auto bg-gray-700 rounded-lg;
+    @apply overflow-x-auto bg-white rounded-lg;
   }
 
   .animals-table,
@@ -399,7 +399,7 @@
 
   .animals-table td,
   .descendants-table td {
-    @apply p-3 border-b border-gray-600 text-gray-300;
+    @apply p-3 border-b border-gray-200 text-gray-700;
   }
 
   .animals-table tr.deceased,
@@ -437,16 +437,16 @@
   }
 
   .table-mobile tr {
-    @apply block sm:table-row border-b border-gray-600 mb-4 sm:mb-0 bg-gray-800 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0;
+    @apply block sm:table-row border-b border-gray-200 mb-4 sm:mb-0 bg-gray-50 sm:bg-transparent rounded-lg sm:rounded-none p-4 sm:p-0;
   }
 
   .table-mobile td {
-    @apply block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-600;
+    @apply block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200;
   }
 
   .table-mobile td:before {
     content: attr(data-label) ": ";
-    @apply font-bold text-gray-300 sm:hidden;
+    @apply font-bold text-gray-700 sm:hidden;
   }
 
   .table-mobile td.no-label:before {
@@ -485,11 +485,11 @@
 
   .no-animals,
   .no-descendants {
-    @apply text-center py-8 text-gray-400;
+    @apply text-center py-8 text-gray-600;
   }
 
   .read-only-text {
-    @apply text-gray-400 italic;
+    @apply text-gray-600 italic;
   }
 
   .form-container {

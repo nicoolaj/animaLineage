@@ -22,7 +22,7 @@ const LanguageSelector: React.FC = () => {
         title="Language"
       >
         {languages.map((lang) => (
-          <option key={lang.code} value={lang.code} className="bg-gray-700 text-white">
+          <option key={lang.code} value={lang.code} className="bg-white text-gray-900">
             {lang.code === 'fr' ? '🇫🇷' : '🇬🇧'} {lang.name}
           </option>
         ))}

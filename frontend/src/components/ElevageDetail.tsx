@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AnimalForm from './AnimalForm';
 import ElevageUsersManagement from './ElevageUsersManagement';
+import FamilyTree from './FamilyTree';
 import { formatDate, formatAgeDisplay, getAgeTooltip, calculateAge } from '../utils/dateUtils';
 import { API_BASE_URL } from '../config/api';
 
@@ -65,6 +66,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
         race: ''
     });
     const [selectedAgeGroup, setSelectedAgeGroup] = useState<{group: string, animals: Animal[], type: 'males' | 'femelles'} | null>(null);
+    const [selectedAnimalForTree, setSelectedAnimalForTree] = useState<number | null>(null);
     const [sortConfig, setSortConfig] = useState<{
         key: string | null;
         direction: 'asc' | 'desc' | null;
@@ -207,6 +209,10 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     const handleEditAnimal = (animal: Animal) => {
         setEditingAnimal(animal);
         setCurrentView('form');
+    };
+
+    const handleViewFamilyTree = (animalId: number) => {
+        setSelectedAnimalForTree(animalId);
     };
 
     const handleSubmitAnimal = async (animalData: any) => {
@@ -659,7 +665,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                     <button id="elevage-detail-back-btn" onClick={onBack} className="back-btn order-2 sm:order-1">
                         ← Retour aux élevages
                     </button>
-                    <h1 id="elevage-detail-title" className="text-lg sm:text-2xl font-bold text-white order-1 sm:order-2">{elevage?.nom}</h1>
+                    <h1 id="elevage-detail-title" className="text-lg sm:text-2xl font-bold text-gray-900 order-1 sm:order-2">{elevage?.nom}</h1>
                 </div>
             </div>
 
@@ -702,7 +708,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             {/* Navigation des animaux */}
             <div id="elevage-animals-section" className="animals-section">
                 <div id="elevage-animals-header" className="animals-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                    <h2 id="elevage-animals-title" className="text-lg sm:text-xl font-semibold text-white">
+                    <h2 id="elevage-animals-title" className="text-lg sm:text-xl font-semibold text-gray-900">
                         Animaux de l'élevage ({filteredAnimaux.length})
                     </h2>
                     <div id="elevage-animals-nav" className="animals-nav w-full sm:w-auto">
@@ -820,7 +826,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                             </div>
                         ) : (
                             <div id="elevage-animals-table-container" className="table-responsive">
-                                <table id="elevage-animals-table" className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+                                <table id="elevage-animals-table" className="table-mobile w-full border-collapse bg-white rounded-lg shadow-card">
                                     <thead className="hidden sm:table-header-group">
                                         <tr>
                                             {renderSortableHeader('Identifiant', 'identifiant_officiel')}
@@ -867,7 +873,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                     <div className="flex flex-wrap gap-1 sm:gap-0.5">
                                                         <button
                                                             onClick={() => handleViewDescendants(animal.id)}
-                                                            className="bg-gray-600 border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
+                                                            className="bg-gray-100 border border-gray-200 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-100 transition-colors duration-150 text-gray-900"
                                                             title="Voir descendants"
                                                         >
                                                             🌳
@@ -877,16 +883,24 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                             <>
                                                                 <button
                                                                     onClick={() => handleEditAnimal(animal)}
-                                                                    className="bg-gray-600 border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-600 transition-colors duration-150 text-white"
+                                                                    className="bg-gray-100 border border-gray-200 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-100 transition-colors duration-150 text-gray-900"
                                                                     title="Modifier"
                                                                 >
                                                                     ✏️
                                                                 </button>
 
+                                                                <button
+                                                                    onClick={() => handleViewFamilyTree(animal.id)}
+                                                                    className="bg-gray-100 border border-gray-200 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-purple-100 transition-colors duration-150 text-gray-900"
+                                                                    title="Arbre généalogique"
+                                                                >
+                                                                    🧬
+                                                                </button>
+
                                                                 {animal.statut === 'vivant' && (
                                                                     <button
                                                                         onClick={() => handleMarkDead(animal.id, animal.identifiant_officiel)}
-                                                                        className="bg-gray-600 border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-yellow-600 transition-colors duration-150 text-white"
+                                                                        className="bg-gray-100 border border-gray-200 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-yellow-600 transition-colors duration-150 text-gray-900"
                                                                         title="Marquer comme décédé"
                                                                     >
                                                                         💀
@@ -895,7 +909,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
                                                                 <button
                                                                     onClick={() => handleDeleteAnimal(animal.id, animal.identifiant_officiel)}
-                                                                    className="bg-gray-600 border border-gray-500 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-red-600 transition-colors duration-150 text-white"
+                                                                    className="bg-gray-100 border border-gray-200 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-red-600 transition-colors duration-150 text-gray-900"
                                                                     title="Supprimer"
                                                                 >
                                                                     🗑️
@@ -916,7 +930,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                 {currentView === 'descendants' && (
                     <div id="elevage-descendants-view" className="descendants-view">
                         <div id="elevage-descendants-header" className="descendants-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                            <h3 id="elevage-descendants-title" className="text-lg sm:text-xl font-semibold text-white">
+                            <h3 id="elevage-descendants-title" className="text-lg sm:text-xl font-semibold text-gray-900">
                                 Descendants de {selectedAnimalForDescendants}
                             </h3>
                             <button id="elevage-descendants-back-btn" onClick={() => setCurrentView('list')} className="back-btn">
@@ -930,7 +944,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                             </div>
                         ) : (
                             <div id="elevagedetail-descendants-table-container-7" className="table-responsive">
-                                <table className="table-mobile w-full border-collapse bg-gray-700 rounded-lg shadow-card">
+                                <table className="table-mobile w-full border-collapse bg-white rounded-lg shadow-card">
                                     <thead className="hidden sm:table-header-group">
                                         <tr>
                                             <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Identifiant</th>
@@ -970,7 +984,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                 {currentView === 'statistics' && (
                     <div id="elevage-statistics-view" className="statistics-view">
                         <div id="elevage-statistics-header" className="statistics-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                            <h3 id="elevage-statistics-title" className="text-lg sm:text-xl font-semibold text-white">📊 Statistiques du troupeau</h3>
+                            <h3 id="elevage-statistics-title" className="text-lg sm:text-xl font-semibold text-gray-900">📊 Statistiques du troupeau</h3>
                             <button id="elevage-statistics-back-btn" onClick={() => setCurrentView('list')} className="back-btn">
                                 ← Retour à la liste
                             </button>
@@ -985,104 +999,104 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                     {/* Résumé général */}
                                     <div className="stats-summary">
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                            <div className="bg-gray-700 rounded-lg p-4 text-center">
+                                            <div className="bg-white rounded-lg p-4 text-center">
                                                 <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">{stats.total}</div>
-                                                <div className="text-sm text-gray-300">Total animaux</div>
+                                                <div className="text-sm text-gray-700">Total animaux</div>
                                             </div>
-                                            <div className="bg-gray-700 rounded-lg p-4 text-center">
+                                            <div className="bg-white rounded-lg p-4 text-center">
                                                 <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">{stats.vivants}</div>
-                                                <div className="text-sm text-gray-300">Vivants</div>
+                                                <div className="text-sm text-gray-700">Vivants</div>
                                             </div>
-                                            <div className="bg-gray-700 rounded-lg p-4 text-center">
+                                            <div className="bg-white rounded-lg p-4 text-center">
                                                 <div className="text-2xl sm:text-3xl font-bold text-red-400 mb-2">{stats.morts}</div>
-                                                <div className="text-sm text-gray-300">Décédés</div>
+                                                <div className="text-sm text-gray-700">Décédés</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Âge moyen et longévité */}
-                                    <div className="longevity-stats bg-gray-700 rounded-lg p-4 sm:p-6">
-                                        <h4 className="text-base sm:text-lg font-semibold text-white mb-4">📈 Longévité et âges</h4>
+                                    <div className="longevity-stats bg-white rounded-lg p-4 sm:p-6">
+                                        <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">📈 Longévité et âges</h4>
                                         <div className="space-y-4">
                                             {/* Âge moyen des vivants */}
-                                            <h5 className="text-sm font-semibold text-gray-300 mb-2">📊 Âge moyen des animaux vivants</h5>
+                                            <h5 className="text-sm font-semibold text-gray-700 mb-2">📊 Âge moyen des animaux vivants</h5>
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                     <div className="text-lg sm:text-xl font-bold text-blue-300 mb-1">
                                                         {stats.ageMoyenVivants !== null ? `${stats.ageMoyenVivants} ans` : 'N/A'}
                                                     </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">Âge moyen mixte</div>
+                                                    <div className="text-xs sm:text-sm text-gray-600">Âge moyen mixte</div>
                                                 </div>
-                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                     <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
                                                         {stats.ageMoyenVivantsMales !== null ? `${stats.ageMoyenVivantsMales} ans` : 'N/A'}
                                                     </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">♂️ Mâles vivants</div>
+                                                    <div className="text-xs sm:text-sm text-gray-600">♂️ Mâles vivants</div>
                                                 </div>
-                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                     <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
                                                         {stats.ageMoyenVivantsFemelles !== null ? `${stats.ageMoyenVivantsFemelles} ans` : 'N/A'}
                                                     </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">♀️ Femelles vivantes</div>
+                                                    <div className="text-xs sm:text-sm text-gray-600">♀️ Femelles vivantes</div>
                                                 </div>
                                             </div>
 
                                             {/* Longévité moyenne (décédés) */}
-                                            <h5 className="text-sm font-semibold text-gray-300 mb-2 mt-6">⚰️ Longévité moyenne des animaux décédés</h5>
+                                            <h5 className="text-sm font-semibold text-gray-700 mb-2 mt-6">⚰️ Longévité moyenne des animaux décédés</h5>
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                     <div className="text-lg sm:text-xl font-bold text-orange-300 mb-1">
                                                         {stats.longeviteMoyenne !== null ? `${stats.longeviteMoyenne} ans` : 'N/A'}
                                                     </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">Longévité mixte</div>
+                                                    <div className="text-xs sm:text-sm text-gray-600">Longévité mixte</div>
                                                 </div>
-                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                     <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
                                                         {stats.longeviteMoyenneMales !== null ? `${stats.longeviteMoyenneMales} ans` : 'N/A'}
                                                     </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">♂️ Mâles décédés</div>
+                                                    <div className="text-xs sm:text-sm text-gray-600">♂️ Mâles décédés</div>
                                                 </div>
-                                                <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                                <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                     <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
                                                         {stats.longeviteMoyenneFemelles !== null ? `${stats.longeviteMoyenneFemelles} ans` : 'N/A'}
                                                     </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">♀️ Femelles décédées</div>
+                                                    <div className="text-xs sm:text-sm text-gray-600">♀️ Femelles décédées</div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Espérance de vie (identique à la longévité) */}
-                                    <div className="life-expectancy-stats bg-gray-700 rounded-lg p-4 sm:p-6">
-                                        <h4 className="text-base sm:text-lg font-semibold text-white mb-4">🎯 Espérance de vie</h4>
-                                        <p className="text-xs text-gray-400 mb-4">
+                                    <div className="life-expectancy-stats bg-white rounded-lg p-4 sm:p-6">
+                                        <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">🎯 Espérance de vie</h4>
+                                        <p className="text-xs text-gray-600 mb-4">
                                             💡 L'espérance de vie est calculée sur les animaux décédés uniquement (= longévité moyenne)
                                         </p>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                            <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                 <div className="text-lg sm:text-xl font-bold text-purple-300 mb-1">
                                                     {stats.esperanceVieMixte !== null ? `${stats.esperanceVieMixte} ans` : 'N/A'}
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">Espérance de vie mixte</div>
+                                                <div className="text-xs sm:text-sm text-gray-600">Espérance de vie mixte</div>
                                             </div>
-                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                            <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                 <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
                                                     {stats.esperanceVieMales !== null ? `${stats.esperanceVieMales} ans` : 'N/A'}
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">♂️ Mâles</div>
+                                                <div className="text-xs sm:text-sm text-gray-600">♂️ Mâles</div>
                                             </div>
-                                            <div className="bg-gray-600 rounded-lg p-3 text-center">
+                                            <div className="bg-gray-100 rounded-lg p-3 text-center">
                                                 <div className="text-lg sm:text-xl font-bold text-pink-400 mb-1">
                                                     {stats.esperanceVieFemelles !== null ? `${stats.esperanceVieFemelles} ans` : 'N/A'}
                                                 </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">♀️ Femelles</div>
+                                                <div className="text-xs sm:text-sm text-gray-600">♀️ Femelles</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Pyramide des âges */}
-                                    <div className="age-pyramid bg-gray-700 rounded-lg p-4 sm:p-6">
-                                        <h4 className="text-base sm:text-lg font-semibold text-white mb-4">🔺 Pyramide des âges (animaux vivants)</h4>
+                                    <div className="age-pyramid bg-white rounded-lg p-4 sm:p-6">
+                                        <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">🔺 Pyramide des âges (animaux vivants)</h4>
                                         <div className="space-y-3">
                                             {ageGroups.map(ageGroup => {
                                                 const malesCount = stats.pyramideData.males[ageGroup] || 0;
@@ -1094,7 +1108,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
 
                                                 return (
                                                     <div key={ageGroup} className="flex items-center gap-2 sm:gap-4">
-                                                        <div className="w-16 sm:w-20 text-xs sm:text-sm text-gray-300 text-right">{ageGroup}</div>
+                                                        <div className="w-16 sm:w-20 text-xs sm:text-sm text-gray-700 text-right">{ageGroup}</div>
                                                         <div className="flex-1 flex items-center h-8 sm:h-10">
                                                             {/* Barres mâles (à gauche) */}
                                                             <div className="flex-1 flex justify-end pr-1">
@@ -1125,26 +1139,26 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="w-8 sm:w-12 text-xs sm:text-sm text-gray-300 text-center font-medium">{totalInGroup}</div>
+                                                        <div className="w-8 sm:w-12 text-xs sm:text-sm text-gray-700 text-center font-medium">{totalInGroup}</div>
                                                     </div>
                                                 );
                                             })}
                                         </div>
 
                                         {/* Légende */}
-                                        <div className="mt-4 pt-4 border-t border-gray-600">
+                                        <div className="mt-4 pt-4 border-t border-gray-300">
                                             <div className="flex justify-between items-center max-w-md mx-auto">
                                                 {/* Mâles à gauche */}
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                                                    <span className="text-xs sm:text-sm text-gray-300">♂️ Mâles</span>
+                                                    <span className="text-xs sm:text-sm text-gray-700">♂️ Mâles</span>
                                                 </div>
                                                 {/* Séparateur central */}
                                                 <div className="w-px h-4 bg-gray-500"></div>
                                                 {/* Femelles à droite */}
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-4 h-4 bg-pink-500 rounded"></div>
-                                                    <span className="text-xs sm:text-sm text-gray-300">♀️ Femelles</span>
+                                                    <span className="text-xs sm:text-sm text-gray-700">♀️ Femelles</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1156,22 +1170,22 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                         {/* Pop-in pour afficher les animaux d'un groupe d'âge */}
                         {selectedAgeGroup && (
                             <div
-                                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                                className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4"
                                 onClick={() => setSelectedAgeGroup(null)}
                             >
                                 <div
-                                    className="bg-gray-700 rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden"
+                                    className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden"
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <div className="p-6 border-b border-gray-600">
+                                    <div className="p-6 border-b border-gray-300">
                                         <div className="flex justify-between items-center">
-                                            <h3 className="text-lg sm:text-xl font-semibold text-white">
+                                            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                                                 {selectedAgeGroup.type === 'males' ? '♂️ Mâles' : '♀️ Femelles'} vivants - {selectedAgeGroup.group}
-                                                <span className="text-gray-400 ml-2">({selectedAgeGroup.animals.length} animal{selectedAgeGroup.animals.length > 1 ? 'aux' : ''})</span>
+                                                <span className="text-gray-600 ml-2">({selectedAgeGroup.animals.length} animal{selectedAgeGroup.animals.length > 1 ? 'aux' : ''})</span>
                                             </h3>
                                             <button
                                                 onClick={() => setSelectedAgeGroup(null)}
-                                                className="text-gray-400 hover:text-white text-2xl font-bold"
+                                                className="text-gray-600 hover:text-gray-900 text-2xl font-bold"
                                             >
                                                 ×
                                             </button>
@@ -1179,18 +1193,18 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                     </div>
                                     <div className="p-6 overflow-y-auto max-h-[60vh]">
                                         {selectedAgeGroup.animals.length === 0 ? (
-                                            <p className="text-gray-300 text-center py-8">Aucun animal dans ce groupe.</p>
+                                            <p className="text-gray-700 text-center py-8">Aucun animal dans ce groupe.</p>
                                         ) : (
                                             <div className="grid gap-4">
                                                 {selectedAgeGroup.animals.map((animal) => (
-                                                    <div key={animal.id} className="bg-gray-600 rounded-lg p-4 border border-gray-500">
+                                                    <div key={animal.id} className="bg-gray-100 rounded-lg p-4 border border-gray-200">
                                                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                                             <div className="flex-1">
-                                                                <h4 className="font-semibold text-white text-lg">
+                                                                <h4 className="font-semibold text-gray-900 text-lg">
                                                                     {animal.identifiant_officiel}
-                                                                    {animal.nom && <span className="text-gray-300 ml-2">({animal.nom})</span>}
+                                                                    {animal.nom && <span className="text-gray-700 ml-2">({animal.nom})</span>}
                                                                 </h4>
-                                                                <div className="text-sm text-gray-300 mt-1">
+                                                                <div className="text-sm text-gray-700 mt-1">
                                                                     <span className="inline-block mr-4">
                                                                         <strong>Race:</strong> {animal.race_nom || 'Non définie'}
                                                                     </span>
@@ -1205,7 +1219,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                                     </span>
                                                                 </div>
                                                                 {animal.date_naissance && (
-                                                                    <div className="text-xs text-gray-400 mt-1">
+                                                                    <div className="text-xs text-gray-600 mt-1">
                                                                         Né le {new Date(animal.date_naissance).toLocaleDateString('fr-FR')}
                                                                     </div>
                                                                 )}
@@ -1227,6 +1241,14 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                         elevageId={elevage.id}
                         elevageName={elevage.nom}
                         onClose={() => setCurrentView('list')}
+                    />
+                )}
+
+                {/* Arbre généalogique modal */}
+                {selectedAnimalForTree && (
+                    <FamilyTree
+                        animalId={selectedAnimalForTree}
+                        onClose={() => setSelectedAnimalForTree(null)}
                     />
                 )}
             </div>

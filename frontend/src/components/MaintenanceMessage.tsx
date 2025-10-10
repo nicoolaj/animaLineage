@@ -18,22 +18,22 @@ const MaintenanceMessage: React.FC<MaintenanceMessageProps> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      backgroundColor: 'rgba(55, 65, 81, 0.9)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 9999,
-      color: 'white',
+      color: '#111827',
       fontFamily: 'Arial, sans-serif'
     }}>
       <div style={{
-        backgroundColor: '#1a1a1a',
+        backgroundColor: '#ffffff',
         padding: '40px',
         borderRadius: '12px',
         textAlign: 'center',
         maxWidth: '500px',
         margin: '20px',
-        border: '2px solid #ff6b6b'
+        border: '2px solid #ef4444',
       }}>
         <div style={{
           fontSize: '48px',
@@ -43,7 +43,7 @@ const MaintenanceMessage: React.FC<MaintenanceMessageProps> = ({
         </div>
 
         <h2 style={{
-          color: '#ff6b6b',
+          color: '#dc2626',
           marginBottom: '20px',
           fontSize: '24px'
         }}>
@@ -51,7 +51,7 @@ const MaintenanceMessage: React.FC<MaintenanceMessageProps> = ({
         </h2>
 
         <p style={{
-          color: '#cccccc',
+          color: '#6b7280',
           marginBottom: '30px',
           lineHeight: '1.6',
           fontSize: '16px'
@@ -68,8 +68,8 @@ const MaintenanceMessage: React.FC<MaintenanceMessageProps> = ({
             onClick={onRetry}
             disabled={isRetrying}
             style={{
-              backgroundColor: isRetrying ? '#666666' : '#4CAF50',
-              color: 'white',
+              backgroundColor: isRetrying ? '#d1d5db' : '#059669',
+              color: isRetrying ? '#6b7280' : 'white',
               border: 'none',
               padding: '12px 24px',
               borderRadius: '6px',
@@ -93,7 +93,7 @@ const MaintenanceMessage: React.FC<MaintenanceMessageProps> = ({
         </div>
 
         <p style={{
-          color: '#888888',
+          color: '#9ca3af',
           fontSize: '14px',
           margin: 0
         }}>

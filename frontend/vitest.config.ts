@@ -18,11 +18,13 @@ export default defineConfig({
         'src/mocks/**'
       ],
       thresholds: {
-        branches: 10,
-        functions: 25,
-        lines: 20,
-        statements: 20
-      }
+        branches: 70,
+        functions: 75,
+        lines: 80,
+        statements: 80
+      },
+      reportsDirectory: './coverage',
+      clean: true
     }
   }
 })

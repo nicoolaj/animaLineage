@@ -21,9 +21,9 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div id="dashboard-container" className="dashboard min-h-screen bg-gray-700 text-white p-4 sm:p-6">
-      <header id="dashboard-header" className="dashboard-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-gray-600 gap-4">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">📊 Tableau de bord</h1>
+    <div id="dashboard-container" className="dashboard min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6">
+      <header id="dashboard-header" className="dashboard-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-gray-300 gap-4">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">📊 Tableau de bord</h1>
         <div id="dashboard-user-info" className="user-info flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
           <div id="dashboard-user-details" className="user-details flex flex-col sm:flex-row gap-1 sm:gap-2 text-sm sm:text-base">
             <span className="text-gray-200">Bienvenue, <span className="font-semibold">{user?.name}</span>!</span>
@@ -37,8 +37,8 @@ const Dashboard: React.FC = () => {
 
       <main id="dashboard-content" className="dashboard-content space-y-6 sm:space-y-8">
         {canModerate() && (
-          <div id="dashboard-admin-section" className="admin-section bg-gray-600 rounded-lg p-4 sm:p-6 border border-gray-500">
-            <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">🛡️ Panel d'administration</h2>
+          <div id="dashboard-admin-section" className="admin-section bg-gray-100 rounded-lg p-4 sm:p-6 border border-gray-200">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">🛡️ Panel d'administration</h2>
             <p className="text-sm sm:text-base text-gray-200 mb-4">Vous avez accès aux fonctionnalités de modération.</p>
             {canAdministrate() && (
               <div id="dashboard-admin-notice" className="admin-notice bg-yellow-600 text-yellow-100 p-3 sm:p-4 rounded-lg border-l-4 border-yellow-400">

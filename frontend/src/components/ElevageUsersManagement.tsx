@@ -183,7 +183,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
 
   return (
     <div className="management-container p-4 sm:p-6">
-      <div className="management-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 pb-3 sm:pb-4 border-b-2 border-gray-600 gap-3 sm:gap-4">
+      <div className="management-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 pb-3 sm:pb-4 border-b-2 border-gray-300 gap-3 sm:gap-4">
         <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Gestion des utilisateurs - {elevageName}</h3>
         <div className="header-actions flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {isAdmin() && (
@@ -212,15 +212,15 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
         ) : (
           <div className="users-list space-y-3">
             {elevageUsers.map((elevageUser) => (
-              <div key={elevageUser.user_id} className="user-item bg-gray-700 border border-gray-600 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+              <div key={elevageUser.user_id} className="user-item bg-white border border-gray-300 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                 <div className="user-info flex flex-col gap-1 flex-1">
-                  <span className="user-name font-semibold text-white text-sm sm:text-base">{elevageUser.user_name}</span>
-                  <span className="user-email text-xs sm:text-sm text-gray-300">{elevageUser.user_email}</span>
+                  <span className="user-name font-semibold text-gray-900 text-sm sm:text-base">{elevageUser.user_name}</span>
+                  <span className="user-email text-xs sm:text-sm text-gray-700">{elevageUser.user_email}</span>
                   <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 sm:items-center">
                     <span className={`user-role ${elevageUser.role_in_elevage} px-2 py-1 rounded text-xs font-bold ${elevageUser.role_in_elevage === 'owner' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`}>
                       {elevageUser.role_in_elevage === 'owner' ? '👑 Propriétaire' : '🤝 Collaborateur'}
                     </span>
-                    <span className="added-date text-xs text-gray-400 italic">
+                    <span className="added-date text-xs text-gray-600 italic">
                       Ajouté le {new Date(elevageUser.added_at).toLocaleDateString('fr-FR')}
                     </span>
                   </div>
@@ -254,15 +254,15 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
               ➕ Ajouter un utilisateur
             </button>
           ) : (
-            <div className="add-user-form bg-gray-700 border border-gray-600 rounded-lg p-4 sm:p-6">
-              <h4 className="text-base sm:text-lg font-medium text-gray-300 mb-3 sm:mb-4">Ajouter un utilisateur</h4>
+            <div className="add-user-form bg-white border border-gray-300 rounded-lg p-4 sm:p-6">
+              <h4 className="text-base sm:text-lg font-medium text-gray-700 mb-3 sm:mb-4">Ajouter un utilisateur</h4>
 
               <input
                 type="text"
                 placeholder="Rechercher un utilisateur par nom ou email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input w-full mb-4 px-3 py-2 border border-gray-600 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="search-input w-full mb-4 px-3 py-2 border border-gray-300 rounded bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
 
               <div className="available-users-list max-h-48 sm:max-h-64 overflow-y-auto space-y-2 mb-4">
@@ -272,10 +272,10 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
                   </div>
                 ) : (
                   filteredAvailableUsers.map((availableUser) => (
-                    <div key={availableUser.id} className="available-user-item flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-gray-600 rounded border border-gray-500 gap-2 sm:gap-3">
+                    <div key={availableUser.id} className="available-user-item flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-gray-100 rounded border border-gray-200 gap-2 sm:gap-3">
                       <div className="user-info flex flex-col gap-1 flex-1">
-                        <span className="user-name font-semibold text-white text-sm">{availableUser.name}</span>
-                        <span className="user-email text-xs text-gray-300">{availableUser.email}</span>
+                        <span className="user-name font-semibold text-gray-900 text-sm">{availableUser.name}</span>
+                        <span className="user-email text-xs text-gray-700">{availableUser.email}</span>
                         <span className="user-role-badge text-xs px-2 py-1 bg-gray-500 text-gray-200 rounded">{availableUser.role_name}</span>
                       </div>
                       <button
@@ -297,7 +297,7 @@ const ElevageUsersManagement: React.FC<ElevageUsersManagementProps> = ({
                     setSearchTerm('');
                     setError('');
                   }}
-                  className="cancel-btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 text-sm cursor-pointer transition-colors duration-200 border-none rounded w-full sm:w-auto"
+                  className="cancel-btn bg-gray-100 hover:bg-white text-gray-900 px-4 py-2 text-sm cursor-pointer transition-colors duration-200 border-none rounded w-full sm:w-auto"
                 >
                   Annuler
                 </button>

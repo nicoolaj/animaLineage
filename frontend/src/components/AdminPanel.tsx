@@ -220,7 +220,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
                       <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${
                         user.status === 0 ? 'bg-yellow-600 text-white' :
                         user.status === 1 ? 'bg-green-600 text-white' :
-                        user.status === 2 ? 'bg-red-600 text-white' : 'bg-gray-600 text-white'
+                        user.status === 2 ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-900'
                       }`}>
                         {user.status === 0 ? '⏳ En attente' :
                          user.status === 1 ? '✅ Validé' :
@@ -258,18 +258,18 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
       )}
 
       {selectedUser && canAdministrate() && (
-        <div id="adminpanel-role-modal-6" className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div id="adminpanel-modal-content-7" className="modal-container bg-gray-700 rounded-xl p-4 sm:p-6 max-w-md sm:max-w-2xl w-full mx-auto text-white shadow-2xl">
-            <h4 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">
+        <div id="adminpanel-role-modal-6" className="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div id="adminpanel-modal-content-7" className="modal-container bg-white rounded-xl p-4 sm:p-6 max-w-md sm:max-w-2xl w-full mx-auto text-gray-900 shadow-2xl">
+            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
               Modifier le rôle de {selectedUser.name}
             </h4>
             <div id="adminpanel-role-form-8" className="role-form space-y-4">
               <div className="flex flex-col gap-2">
-                <label className="text-sm sm:text-base font-medium text-gray-300">Nouveau rôle :</label>
+                <label className="text-sm sm:text-base font-medium text-gray-700">Nouveau rôle :</label>
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(Number(e.target.value))}
-                  className="form-select w-full px-3 py-2.5 border border-gray-600 rounded-md bg-gray-700 text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="form-select w-full px-3 py-2.5 border border-gray-200 rounded-md bg-white text-gray-900 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   {Object.entries(roles).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -278,7 +278,7 @@ const AdminPanel = forwardRef<AdminPanelRef, AdminPanelProps>(({ onUserDeleted }
                   ))}
                 </select>
               </div>
-              <div id="adminpanel-modal-actions-9" className="modal-actions flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-600">
+              <div id="adminpanel-modal-actions-9" className="modal-actions flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-300">
                 <button
                   onClick={cancelRoleChange}
                   className="btn-secondary w-full sm:w-auto order-2 sm:order-1"

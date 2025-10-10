@@ -18,6 +18,7 @@ interface FamilyTreeNode {
     animal: Animal;
     pere?: FamilyTreeNode;
     mere?: FamilyTreeNode;
+    enfants?: FamilyTreeNode[];
     level: number;
 }
 
@@ -71,7 +72,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                 throw new Error('Token d\'authentification manquant');
             }
 
-            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/genealogie?levels=${maxLevels}`, {
+            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/genealogie?levels=${maxLevels}&include_children=true`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -110,6 +111,11 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
             let count = 0;
             if (n.pere) count += countAtLevel(n.pere, level);
             if (n.mere) count += countAtLevel(n.mere, level);
+            if (n.enfants) {
+                n.enfants.forEach(enfant => {
+                    count += countAtLevel(enfant, level);
+                });
+            }
             return count;
         };
 
@@ -123,6 +129,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
             };
             layouts.push(layout);
 
+            // Positionner les parents (vers le haut)
             if (n.pere || n.mere) {
                 const parentY = y - levelHeight;
                 let currentX = x;
@@ -141,6 +148,18 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                 }
             }
 
+            // Positionner les enfants (vers le bas)
+            if (n.enfants && n.enfants.length > 0) {
+                const childrenY = y + levelHeight;
+                const totalChildrenWidth = (cardWidth * n.enfants.length) + (horizontalSpacing * (n.enfants.length - 1));
+                let currentChildX = x - totalChildrenWidth / 2 + cardWidth / 2;
+
+                n.enfants.forEach((enfant, index) => {
+                    positionNode(enfant, currentChildX, childrenY);
+                    currentChildX += cardWidth + horizontalSpacing;
+                });
+            }
+
             return x + cardWidth + horizontalSpacing;
         };
 
@@ -148,7 +167,23 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
             const canvas = canvasRef.current;
             if (canvas) {
                 const startX = canvas.width / 2 - cardWidth / 2;
-                const startY = canvas.height - cardHeight - 50;
+                // Centrer verticalement en tenant compte des parents et enfants
+                const hasParents = !!(node.pere || node.mere);
+                const hasChildren = !!(node.enfants && node.enfants.length > 0);
+
+                let startY = canvas.height / 2 - cardHeight / 2;
+
+                if (hasParents && hasChildren) {
+                    // Centrer l'animal avec ses parents au-dessus et enfants en-dessous
+                    startY = canvas.height / 2 - cardHeight / 2;
+                } else if (hasParents && !hasChildren) {
+                    // Positionner vers le bas pour laisser place aux parents
+                    startY = canvas.height - cardHeight - 100;
+                } else if (!hasParents && hasChildren) {
+                    // Positionner vers le haut pour laisser place aux enfants
+                    startY = 100;
+                }
+
                 positionNode(node, startX, startY);
             }
         }
@@ -193,7 +228,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         ctx.shadowBlur = 0;
 
         // Texte
-        ctx.fillStyle = '#1f2937';
+        ctx.fillStyle = '#111827';
         ctx.font = 'bold 14px sans-serif';
         ctx.textAlign = 'center';
 
@@ -300,6 +335,64 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                     ctx.stroke();
                 }
             }
+
+            // Dessiner les connexions vers les enfants
+            if (node.enfants && node.enfants.length > 0) {
+                const parentCenterX = position.x + width / 2;
+                const parentBottomY = position.y + height;
+
+                // Trouver les positions des enfants
+                const enfantsLayouts = node.enfants.map(enfant =>
+                    layouts.find(l => l.node === enfant)
+                ).filter(Boolean);
+
+                if (enfantsLayouts.length > 0) {
+                    if (enfantsLayouts.length === 1) {
+                        // Un seul enfant
+                        const enfantLayout = enfantsLayouts[0]!;
+                        const enfantX = enfantLayout.position.x + enfantLayout.width / 2;
+                        const enfantTopY = enfantLayout.position.y;
+
+                        ctx.beginPath();
+                        ctx.moveTo(parentCenterX, parentBottomY);
+                        ctx.lineTo(parentCenterX, parentBottomY + 20);
+                        ctx.lineTo(enfantX, parentBottomY + 20);
+                        ctx.lineTo(enfantX, enfantTopY);
+                        ctx.stroke();
+                    } else {
+                        // Plusieurs enfants
+                        const firstEnfant = enfantsLayouts[0]!;
+                        const lastEnfant = enfantsLayouts[enfantsLayouts.length - 1]!;
+
+                        const firstX = firstEnfant.position.x + firstEnfant.width / 2;
+                        const lastX = lastEnfant.position.x + lastEnfant.width / 2;
+                        const childrenY = firstEnfant.position.y;
+
+                        // Ligne verticale du parent
+                        ctx.beginPath();
+                        ctx.moveTo(parentCenterX, parentBottomY);
+                        ctx.lineTo(parentCenterX, parentBottomY + 20);
+                        ctx.stroke();
+
+                        // Ligne horizontale entre tous les enfants
+                        ctx.beginPath();
+                        ctx.moveTo(firstX, parentBottomY + 20);
+                        ctx.lineTo(lastX, parentBottomY + 20);
+                        ctx.stroke();
+
+                        // Lignes verticales vers chaque enfant
+                        enfantsLayouts.forEach(enfantLayout => {
+                            if (enfantLayout) {
+                                const enfantX = enfantLayout.position.x + enfantLayout.width / 2;
+                                ctx.beginPath();
+                                ctx.moveTo(enfantX, parentBottomY + 20);
+                                ctx.lineTo(enfantX, childrenY);
+                                ctx.stroke();
+                            }
+                        });
+                    }
+                }
+            }
         });
     };
 
@@ -404,7 +497,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
                 {/* En-tête */}
                 <div className="flex justify-between items-center p-6 border-b border-gray-200">

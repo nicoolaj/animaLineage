@@ -4,9 +4,9 @@
 /* Classe App principale - conservée pour compatibilité mais utilisation TailwindCSS recommandée */
 .App {
   text-align: center;
-  background-color: #282c34;
+  background-color: #ffffff;
   min-height: 100vh;
-  color: white;
+  color: #1f2937;
 }
 
 /* Animation pour les icônes de chargement */

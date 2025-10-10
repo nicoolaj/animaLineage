@@ -6,7 +6,7 @@ interface PolitiqueConfidentialiteProps {
 
 const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onRetour }) => {
     return (
-        <div className="min-h-screen bg-gray-800 text-gray-100">
+        <div className="min-h-screen bg-gray-50 text-gray-900">
             <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mb-6">
                     <button
@@ -15,18 +15,18 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                     >
                         ← Retour à l'accueil
                     </button>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Politique de Confidentialité</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Politique de Confidentialité</h1>
                     <p className="text-gray-400">Information sur le traitement de vos données personnelles</p>
                     <p className="text-sm text-gray-500 mt-2">Date de dernière mise à jour : 5 octobre 2025</p>
                 </div>
 
-                <div className="bg-gray-700 rounded-lg p-6 sm:p-8 space-y-8">
+                <div className="bg-white rounded-lg p-6 sm:p-8 space-y-8 shadow-sm border border-gray-200">
                     <div className="bg-blue-900 border border-blue-700 rounded p-4 text-blue-200">
                         <p>Le respect de votre vie privée est notre priorité. Cette politique de confidentialité a pour but de vous informer de manière claire et transparente sur la manière dont nous collectons, utilisons et protégeons vos données personnelles.</p>
                     </div>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">1. Responsable du traitement des données</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Responsable du traitement des données</h2>
                         <div className="text-gray-300 space-y-2">
                             <p>Le responsable de la collecte et du traitement de vos données personnelles est :</p>
                             <p><strong>Nicolas Jalibert</strong></p>
@@ -35,7 +35,7 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">2. Données personnelles collectées</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">2. Données personnelles collectées</h2>
                         <div className="text-gray-300 space-y-2">
                             <p>Nous collectons les données suivantes lorsque vous utilisez notre site :</p>
                             <ul className="list-disc list-inside ml-4 space-y-1">
@@ -48,7 +48,7 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">3. Finalité de la collecte des données (Pourquoi nous les utilisons ?)</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">3. Finalité de la collecte des données (Pourquoi nous les utilisons ?)</h2>
                         <div className="text-gray-300 space-y-2">
                             <p>Vos données sont utilisées uniquement pour les finalités suivantes :</p>
                             <ul className="list-disc list-inside ml-4 space-y-2">
@@ -61,28 +61,28 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">4. Durée de conservation des données</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">4. Durée de conservation des données</h2>
                         <div className="text-gray-300">
                             <p>Vos données personnelles sont conservées tant que votre compte est actif sur le site. Vous pouvez demander la suppression de votre compte et de vos données à tout moment (voir section "Vos droits").</p>
                         </div>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">5. Sécurité de vos données</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">5. Sécurité de vos données</h2>
                         <div className="text-gray-300">
                             <p>Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles pour protéger vos données contre tout accès, modification, divulgation ou destruction non autorisés.</p>
                         </div>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">6. Partage des données</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">6. Partage des données</h2>
                         <div className="text-gray-300">
                             <p><strong>Nous ne vendons, n'échangeons et ne transférons aucune de vos données personnelles à des tiers.</strong></p>
                         </div>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">7. Vos droits sur vos données</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">7. Vos droits sur vos données</h2>
                         <div className="text-gray-300 space-y-2">
                             <p>Conformément au RGPD, vous disposez des droits suivants concernant vos données personnelles :</p>
                             <ul className="list-disc list-inside ml-4 space-y-2">
@@ -96,7 +96,7 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">8. Cookies 🍪</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">8. Cookies 🍪</h2>
                         <div className="text-gray-300 space-y-2">
                             <p>Notre site peut utiliser des cookies strictement nécessaires à son bon fonctionnement (par exemple, pour maintenir votre session connectée). Nous n'utilisons pas de cookies de suivi publicitaire.</p>
                             <div className="bg-yellow-900 border border-yellow-700 rounded p-3 text-yellow-200 text-sm mt-3">
@@ -106,7 +106,7 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-white mb-4">9. Modification de la politique de confidentialité</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">9. Modification de la politique de confidentialité</h2>
                         <div className="text-gray-300">
                             <p>Nous nous réservons le droit de modifier cette politique de confidentialité à tout moment. En cas de modification substantielle, nous vous en informerons par e-mail ou via une notification sur le site.</p>
                         </div>

@@ -229,7 +229,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
                             placeholder="Filtrer par élevage"
                             value={filter.elevage}
                             onChange={(e) => setFilter({...filter, elevage: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm text-gray-700 bg-white placeholder-gray-400"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm text-gray-700 bg-white placeholder-gray-500"
                         />
                     </div>
 
@@ -240,7 +240,7 @@ const AnimalList: React.FC<AnimalListProps> = ({
                             placeholder="Filtrer par race"
                             value={filter.race}
                             onChange={(e) => setFilter({...filter, race: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm text-gray-700 bg-white placeholder-gray-400"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm text-gray-700 bg-white placeholder-gray-500"
                         />
                     </div>
                 </div>
