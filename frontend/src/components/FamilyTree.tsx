@@ -216,12 +216,9 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         const { node, position, width, height } = layout;
         const { animal } = node;
 
-        // Couleurs selon le sexe et statut
+        // Couleurs selon le sexe (gardé même pour les décédés)
         let backgroundColor, borderColor;
-        if (animal.statut === 'mort') {
-            backgroundColor = '#fef2f2';
-            borderColor = '#fca5a5';
-        } else if (animal.sexe === 'M') {
+        if (animal.sexe === 'M') {
             backgroundColor = '#eff6ff';
             borderColor = '#93c5fd';
         } else {
@@ -238,6 +235,34 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         // Fond de la carte
         ctx.fillStyle = backgroundColor;
         ctx.fillRect(position.x, position.y, width, height);
+
+        // Hachurage diagonal pour les animaux décédés
+        if (animal.statut === 'mort') {
+            ctx.save();
+
+            // Créer un clipping path pour limiter les hachures au rectangle
+            ctx.beginPath();
+            ctx.rect(position.x, position.y, width, height);
+            ctx.clip();
+
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.lineWidth = 1;
+
+            // Créer le pattern hachuré diagonal
+            const spacing = 8; // Espacement entre les lignes
+            const x = position.x;
+            const y = position.y;
+
+            // Lignes diagonales de bas-gauche vers haut-droite
+            for (let i = -height; i < width + height; i += spacing) {
+                ctx.beginPath();
+                ctx.moveTo(x + i, y + height);
+                ctx.lineTo(x + i + height, y);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
 
         // Bordure
         ctx.strokeStyle = borderColor;
@@ -601,15 +626,21 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                         <div className="flex flex-wrap gap-4 text-xs text-gray-600">
                             <div className="flex items-center gap-2">
                                 <div className="w-4 h-4 bg-blue-50 border-2 border-blue-300 rounded"></div>
-                                <span>Mâle</span>
+                                <span>Mâle vivant</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="w-4 h-4 bg-pink-50 border-2 border-pink-300 rounded"></div>
-                                <span>Femelle</span>
+                                <span>Femelle vivante</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 bg-red-50 border-2 border-red-300 rounded"></div>
-                                <span>Décédé</span>
+                                <div className="relative w-4 h-4 bg-blue-50 border-2 border-blue-300 rounded overflow-hidden">
+                                    <div className="absolute inset-0 opacity-30"
+                                         style={{
+                                             background: 'repeating-linear-gradient(45deg, transparent, transparent 2px, #000 2px, #000 3px)'
+                                         }}>
+                                    </div>
+                                </div>
+                                <span>Décédé (hachuré)</span>
                             </div>
                         </div>
                         <div className="text-xs text-gray-500">
