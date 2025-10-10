@@ -104,91 +104,112 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         const cardHeight = 140;
         const levelHeight = 180;
         const horizontalSpacing = 50;
+        const visited = new Set<FamilyTreeNode>();
 
-        // Calculer le nombre d'animaux à chaque niveau
-        const countAtLevel = (n: FamilyTreeNode, level: number): number => {
-            if (n.level === level) return 1;
-            let count = 0;
-            if (n.pere) count += countAtLevel(n.pere, level);
-            if (n.mere) count += countAtLevel(n.mere, level);
+        // Collecter tous les nœuds par niveau pour éviter les chevauchements
+        const nodesByLevel = new Map<number, FamilyTreeNode[]>();
+
+        const collectNodes = (n: FamilyTreeNode, level: number) => {
+            if (visited.has(n)) return;
+            visited.add(n);
+
+            if (!nodesByLevel.has(level)) {
+                nodesByLevel.set(level, []);
+            }
+            nodesByLevel.get(level)!.push(n);
+
+            // Collecter les parents (niveaux négatifs)
+            if (n.pere) collectNodes(n.pere, level - 1);
+            if (n.mere) collectNodes(n.mere, level - 1);
+
+            // Collecter les enfants (niveaux positifs)
             if (n.enfants) {
-                n.enfants.forEach(enfant => {
-                    count += countAtLevel(enfant, level);
-                });
+                n.enfants.forEach(enfant => collectNodes(enfant, level + 1));
             }
-            return count;
-        };
-
-        // Positionner récursivement les nœuds
-        const positionNode = (n: FamilyTreeNode, x: number, y: number): number => {
-            const layout: NodeLayout = {
-                node: n,
-                position: { x, y },
-                width: cardWidth,
-                height: cardHeight
-            };
-            layouts.push(layout);
-
-            // Positionner les parents (vers le haut)
-            if (n.pere || n.mere) {
-                const parentY = y - levelHeight;
-                let currentX = x;
-
-                if (n.pere && n.mere) {
-                    // Les deux parents : centrer autour de la position de l'enfant
-                    const totalWidth = cardWidth * 2 + horizontalSpacing;
-                    const startX = x - totalWidth / 2 + cardWidth / 2;
-
-                    positionNode(n.pere, startX, parentY);
-                    positionNode(n.mere, startX + cardWidth + horizontalSpacing, parentY);
-                } else if (n.pere) {
-                    positionNode(n.pere, currentX, parentY);
-                } else if (n.mere) {
-                    positionNode(n.mere, currentX, parentY);
-                }
-            }
-
-            // Positionner les enfants (vers le bas)
-            if (n.enfants && n.enfants.length > 0) {
-                const childrenY = y + levelHeight;
-                const totalChildrenWidth = (cardWidth * n.enfants.length) + (horizontalSpacing * (n.enfants.length - 1));
-                let currentChildX = x - totalChildrenWidth / 2 + cardWidth / 2;
-
-                n.enfants.forEach((enfant, index) => {
-                    positionNode(enfant, currentChildX, childrenY);
-                    currentChildX += cardWidth + horizontalSpacing;
-                });
-            }
-
-            return x + cardWidth + horizontalSpacing;
         };
 
         if (node) {
             const canvas = canvasRef.current;
-            if (canvas) {
-                const startX = canvas.width / 2 - cardWidth / 2;
-                // Centrer verticalement en tenant compte des parents et enfants
-                const hasParents = !!(node.pere || node.mere);
-                const hasChildren = !!(node.enfants && node.enfants.length > 0);
+            if (!canvas) return layouts;
 
-                let startY = canvas.height / 2 - cardHeight / 2;
+            // Collecter tous les nœuds en partant du nœud central (niveau 0)
+            collectNodes(node, 0);
 
-                if (hasParents && hasChildren) {
-                    // Centrer l'animal avec ses parents au-dessus et enfants en-dessous
-                    startY = canvas.height / 2 - cardHeight / 2;
-                } else if (hasParents && !hasChildren) {
-                    // Positionner vers le bas pour laisser place aux parents
-                    startY = canvas.height - cardHeight - 100;
-                } else if (!hasParents && hasChildren) {
-                    // Positionner vers le haut pour laisser place aux enfants
-                    startY = 100;
-                }
+            // Calculer les positions pour chaque niveau
+            const levels = Array.from(nodesByLevel.keys()).sort((a, b) => a - b);
+            const centerY = canvas.height / 2;
 
-                positionNode(node, startX, startY);
-            }
+            levels.forEach(level => {
+                const nodesAtLevel = nodesByLevel.get(level)!;
+                const totalWidth = (cardWidth * nodesAtLevel.length) + (horizontalSpacing * (nodesAtLevel.length - 1));
+                const startX = canvas.width / 2 - totalWidth / 2;
+                const y = centerY + (level * levelHeight) - cardHeight / 2;
+
+                nodesAtLevel.forEach((n, index) => {
+                    const x = startX + (index * (cardWidth + horizontalSpacing));
+
+                    const layout: NodeLayout = {
+                        node: n,
+                        position: { x, y },
+                        width: cardWidth,
+                        height: cardHeight
+                    };
+                    layouts.push(layout);
+                });
+            });
+
+            // Réorganiser pour éviter les chevauchements familiaux
+            optimizeLayout(layouts, nodesByLevel);
         }
 
         return layouts;
+    };
+
+    const optimizeLayout = (layouts: NodeLayout[], nodesByLevel: Map<number, FamilyTreeNode[]>) => {
+        // Optimiser la position des parents pour qu'ils soient au-dessus de leurs enfants
+        layouts.forEach(layout => {
+            const { node } = layout;
+
+            if (node.pere || node.mere) {
+                const pereLayout = layouts.find(l => l.node === node.pere);
+                const mereLayout = layouts.find(l => l.node === node.mere);
+
+                if (pereLayout && mereLayout) {
+                    // Centrer les parents au-dessus de l'enfant
+                    const childX = layout.position.x + layout.width / 2;
+                    const totalParentWidth = layout.width * 2 + 50;
+                    const parentStartX = childX - totalParentWidth / 2;
+
+                    pereLayout.position.x = parentStartX;
+                    mereLayout.position.x = parentStartX + layout.width + 50;
+                } else if (pereLayout) {
+                    // Centrer le père au-dessus de l'enfant
+                    pereLayout.position.x = layout.position.x;
+                } else if (mereLayout) {
+                    // Centrer la mère au-dessus de l'enfant
+                    mereLayout.position.x = layout.position.x;
+                }
+            }
+
+            if (node.enfants && node.enfants.length > 0) {
+                // Centrer les enfants en dessous du parent
+                const enfantsLayouts = node.enfants.map(enfant =>
+                    layouts.find(l => l.node === enfant)
+                ).filter(Boolean);
+
+                if (enfantsLayouts.length > 0) {
+                    const parentX = layout.position.x + layout.width / 2;
+                    const totalChildrenWidth = (layout.width * enfantsLayouts.length) + (50 * (enfantsLayouts.length - 1));
+                    const childrenStartX = parentX - totalChildrenWidth / 2;
+
+                    enfantsLayouts.forEach((enfantLayout, index) => {
+                        if (enfantLayout) {
+                            enfantLayout.position.x = childrenStartX + (index * (layout.width + 50));
+                        }
+                    });
+                }
+            }
+        });
     };
 
     const drawCard = (ctx: CanvasRenderingContext2D, layout: NodeLayout, isHovered: boolean = false) => {

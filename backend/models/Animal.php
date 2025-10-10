@@ -369,12 +369,18 @@ class Animal {
     }
 
     // Obtenir l'arbre généalogique d'un animal
-    public function getFamilyTree($maxLevels = 3) {
-        return $this->buildFamilyTreeNode($this->id, 0, $maxLevels);
+    public function getFamilyTree($maxLevels = 3, $includeChildren = false) {
+        return $this->buildFamilyTreeNode($this->id, 0, $maxLevels, $includeChildren);
     }
 
     // Construire récursivement un nœud de l'arbre généalogique
-    private function buildFamilyTreeNode($animalId, $currentLevel, $maxLevels) {
+    private function buildFamilyTreeNode($animalId, $currentLevel, $maxLevels, $includeChildren = false, &$visited = []) {
+        // Éviter la récursion infinie
+        if (in_array($animalId, $visited)) {
+            return null;
+        }
+        $visited[] = $animalId;
+
         // Obtenir les données de l'animal
         $animalData = $this->getById($animalId);
         if (!$animalData) {
@@ -401,17 +407,47 @@ class Animal {
         // Si nous n'avons pas atteint le niveau maximum, récupérer les parents
         if ($currentLevel < $maxLevels) {
             // Récupérer le père
-            if ($animalData['pere_id']) {
-                $node['pere'] = $this->buildFamilyTreeNode($animalData['pere_id'], $currentLevel + 1, $maxLevels);
+            if ($animalData['pere_id'] && !in_array($animalData['pere_id'], $visited)) {
+                $node['pere'] = $this->buildFamilyTreeNode($animalData['pere_id'], $currentLevel + 1, $maxLevels, $includeChildren, $visited);
             }
 
             // Récupérer la mère
-            if ($animalData['mere_id']) {
-                $node['mere'] = $this->buildFamilyTreeNode($animalData['mere_id'], $currentLevel + 1, $maxLevels);
+            if ($animalData['mere_id'] && !in_array($animalData['mere_id'], $visited)) {
+                $node['mere'] = $this->buildFamilyTreeNode($animalData['mere_id'], $currentLevel + 1, $maxLevels, $includeChildren, $visited);
+            }
+        }
+
+        // Si includeChildren est activé et nous sommes au niveau 0 ou descendant, récupérer les enfants
+        if ($includeChildren && $currentLevel <= 0 && $currentLevel > -$maxLevels) {
+            $children = $this->getChildrenOfAnimal($animalId);
+            if (!empty($children)) {
+                $node['enfants'] = [];
+                foreach ($children as $child) {
+                    if (!in_array($child['id'], $visited)) {
+                        $childNode = $this->buildFamilyTreeNode($child['id'], $currentLevel - 1, $maxLevels, $includeChildren, $visited);
+                        if ($childNode) {
+                            $node['enfants'][] = $childNode;
+                        }
+                    }
+                }
             }
         }
 
         return $node;
+    }
+
+    // Obtenir les enfants directs d'un animal
+    private function getChildrenOfAnimal($animalId) {
+        $query = "SELECT a.*, r.nom as race_nom, ta.nom as type_animal_nom
+                  FROM " . $this->table_name . " a
+                  LEFT JOIN races r ON a.race_id = r.id
+                  LEFT JOIN types_animaux ta ON r.type_animal_id = ta.id
+                  WHERE a.pere_id = :animal_id OR a.mere_id = :animal_id
+                  ORDER BY a.date_naissance ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':animal_id', $animalId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 ?>

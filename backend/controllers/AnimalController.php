@@ -552,9 +552,10 @@ class AnimalController {
 
             $levels = isset($_GET['levels']) ? (int)$_GET['levels'] : 3;
             $levels = max(1, min(5, $levels)); // Limiter entre 1 et 5 générations
+            $includeChildren = isset($_GET['include_children']) && $_GET['include_children'] === 'true';
 
             $this->animal->id = $id;
-            $familyTree = $this->animal->getFamilyTree($levels);
+            $familyTree = $this->animal->getFamilyTree($levels, $includeChildren);
 
             echo json_encode($familyTree);
 
