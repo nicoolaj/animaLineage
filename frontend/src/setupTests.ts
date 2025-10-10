@@ -6,6 +6,9 @@ import '@testing-library/jest-dom';
 import { server } from './mocks/server';
 import { vi } from 'vitest';
 
+// Mock fetch globally
+global.fetch = vi.fn();
+
 // Configuration MSW pour les tests
 beforeAll(() => {
   // Démarrer le serveur MSW avant tous les tests
@@ -39,6 +42,45 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Mock HTMLCanvasElement
+HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+  fillRect: vi.fn(),
+  clearRect: vi.fn(),
+  getImageData: vi.fn(() => ({
+    data: new Array(4)
+  })),
+  putImageData: vi.fn(),
+  createImageData: vi.fn(() => []),
+  setTransform: vi.fn(),
+  drawImage: vi.fn(),
+  save: vi.fn(),
+  fillText: vi.fn(),
+  restore: vi.fn(),
+  beginPath: vi.fn(),
+  moveTo: vi.fn(),
+  lineTo: vi.fn(),
+  closePath: vi.fn(),
+  stroke: vi.fn(),
+  translate: vi.fn(),
+  scale: vi.fn(),
+  rotate: vi.fn(),
+  arc: vi.fn(),
+  fill: vi.fn(),
+  measureText: vi.fn(() => ({ width: 0 })),
+  transform: vi.fn(),
+  rect: vi.fn(),
+  clip: vi.fn(),
+  strokeRect: vi.fn(),
+  strokeText: vi.fn(),
+});
+
+// Mock ResizeObserver
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
 // Mock pour localStorage
 const localStorageMock = {
   getItem: vi.fn(),
@@ -63,6 +105,8 @@ Object.defineProperty(window, 'sessionStorage', {
 
 // Réinitialiser les mocks avant chaque test
 beforeEach(() => {
+  vi.clearAllMocks();
+
   localStorageMock.getItem.mockClear();
   localStorageMock.setItem.mockClear();
   localStorageMock.removeItem.mockClear();
@@ -72,4 +116,31 @@ beforeEach(() => {
   sessionStorageMock.setItem.mockClear();
   sessionStorageMock.removeItem.mockClear();
   sessionStorageMock.clear.mockClear();
+
+  // Default sessionStorage behavior
+  sessionStorageMock.getItem.mockImplementation((key: string) => {
+    if (key === 'token') return 'mock-token';
+    if (key === 'user') return JSON.stringify({ id: 1, nom: 'Test User', role: 2 });
+    return null;
+  });
+
+  // Default localStorage behavior
+  localStorageMock.getItem.mockImplementation((key: string) => {
+    if (key === 'language') return 'fr';
+    return null;
+  });
+
+  // Default fetch behavior
+  (global.fetch as any).mockImplementation((url: string) => {
+    if (url.includes('/auth/me')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ user: { id: 1, nom: 'Test User', role: 2 } })
+      });
+    }
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve([])
+    });
+  });
 });
