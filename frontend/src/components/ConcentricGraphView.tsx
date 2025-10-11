@@ -451,8 +451,19 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
                 ctx.fillText(`"${animal.nom}"`, 0, 8);
             }
 
+            // Année de naissance pour l'animal central
+            if (animal.date_naissance) {
+                const birthYear = new Date(animal.date_naissance).getFullYear();
+                ctx.font = '9px sans-serif';
+                ctx.fillStyle = '#4B5563'; // text-gray-600 pour l'année
+                ctx.fillText(`(${birthYear})`, 0, animal.nom ? 18 : 15);
+
+                // Remettre la couleur principale pour le sexe
+                ctx.fillStyle = '#1F2937'; // text-gray-800
+            }
+
             ctx.font = '18px sans-serif';
-            ctx.fillText(animal.sexe === 'M' ? '♂' : '♀', 0, 25);
+            ctx.fillText(animal.sexe === 'M' ? '♂' : '♀', 0, animal.date_naissance ? 30 : 25);
 
         } else {
             // Descendants : dessiner comme des secteurs de camembert
@@ -535,9 +546,20 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
                 ctx.fillStyle = '#1F2937'; // text-gray-800
             }
 
+            // Année de naissance (si disponible)
+            if (animal.date_naissance) {
+                const birthYear = new Date(animal.date_naissance).getFullYear();
+                ctx.font = `${Math.max(6, 8 - generation * 1)}px sans-serif`;
+                ctx.fillStyle = '#4B5563'; // text-gray-600 pour l'année
+                ctx.fillText(`(${birthYear})`, 0, animal.nom ? 8 : 5);
+
+                // Remettre la couleur principale pour le sexe
+                ctx.fillStyle = '#1F2937'; // text-gray-800
+            }
+
             // Sexe
             ctx.font = `${Math.max(12, 16 - generation * 2)}px sans-serif`;
-            ctx.fillText(animal.sexe === 'M' ? '♂' : '♀', 0, 8);
+            ctx.fillText(animal.sexe === 'M' ? '♂' : '♀', 0, animal.date_naissance ? 18 : 8);
 
             ctx.restore();
         }
@@ -698,6 +720,12 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
                     <div className="mt-1 text-xs text-gray-600">
                         <div>Sexe: {hoveredNode.node.animal.sexe === 'M' ? 'Mâle ♂' : 'Femelle ♀'}</div>
                         <div>Race: {hoveredNode.node.animal.race_nom}</div>
+                        {hoveredNode.node.animal.date_naissance && (
+                            <div>Né le: {new Date(hoveredNode.node.animal.date_naissance).toLocaleDateString('fr-FR')}</div>
+                        )}
+                        {hoveredNode.node.animal.date_deces && (
+                            <div>Décédé le: {new Date(hoveredNode.node.animal.date_deces).toLocaleDateString('fr-FR')}</div>
+                        )}
                         <div>Génération: {hoveredNode.generation === 0 ? 'Souche' : hoveredNode.generation}</div>
                         <div>Qualité: {getQualityFromAnimal(hoveredNode.node.animal)}</div>
                         <div>Statut: {hoveredNode.node.animal.statut === 'vivant' ? 'Vivant' : 'Décédé'}</div>
