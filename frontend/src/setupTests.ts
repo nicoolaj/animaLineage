@@ -107,9 +107,19 @@ Object.defineProperty(window, 'sessionStorage', {
 beforeEach(() => {
   vi.clearAllMocks();
 
+  // Create a valid JWT token for testing
+  const createMockJWT = (payload: any) => {
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const body = btoa(JSON.stringify(payload));
+    const signature = 'mock-signature';
+    return `${header}.${body}.${signature}`;
+  };
+
+  const mockToken = createMockJWT({ id: 1, nom: 'Test User', role: 2, elevages: [1] });
+
   // Default sessionStorage behavior
   sessionStorageMock.getItem = vi.fn((key: string) => {
-    if (key === 'token') return 'mock-token';
+    if (key === 'token') return mockToken;
     if (key === 'user') return JSON.stringify({ id: 1, nom: 'Test User', role: 2 });
     return null;
   });

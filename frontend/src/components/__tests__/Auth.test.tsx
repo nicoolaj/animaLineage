@@ -51,7 +51,7 @@ describe('Auth Component', () => {
   });
 
   test('switches to registration form', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     renderWithProviders(<Auth />);
 
     await user.click(screen.getByText(/créer un compte/i));
@@ -72,7 +72,7 @@ describe('Auth Component', () => {
   });
 
   test('handles login form submission', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     mockLogin.mockResolvedValue(true);
 
     renderWithProviders(<Auth />);
@@ -87,7 +87,7 @@ describe('Auth Component', () => {
   });
 
   test('handles registration form submission', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     mockRegister.mockResolvedValue(true);
 
     renderWithProviders(<Auth />);
@@ -106,7 +106,7 @@ describe('Auth Component', () => {
   });
 
   test('shows error message on login failure', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     mockLogin.mockResolvedValue(false);
 
     renderWithProviders(<Auth />);
@@ -121,7 +121,7 @@ describe('Auth Component', () => {
   });
 
   test('validates required name field in registration', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
 
     renderWithProviders(<Auth />);
 
@@ -140,7 +140,7 @@ describe('Auth Component', () => {
   });
 
   test('shows loading state during form submission', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     mockLogin.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(true), 100)));
 
     renderWithProviders(<Auth />);
@@ -157,7 +157,7 @@ describe('Auth Component', () => {
   });
 
   test('disables toggle button during loading', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     mockLogin.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(true), 100)));
 
     renderWithProviders(<Auth />);

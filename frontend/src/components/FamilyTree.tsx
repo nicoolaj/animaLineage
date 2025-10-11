@@ -241,7 +241,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
 
         // Couleurs selon le sexe (gardé même pour les décédés)
         let backgroundColor, borderColor;
-        if (animal.sexe === 'M') {
+        if (animal && animal.sexe === 'M') {
             backgroundColor = '#eff6ff';
             borderColor = '#93c5fd';
         } else {
@@ -260,7 +260,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         ctx.fillRect(position.x, position.y, width, height);
 
         // Hachurage diagonal pour les animaux décédés
-        if (animal.statut === 'mort') {
+        if (animal && animal.statut === 'mort') {
             ctx.save();
 
             // Créer un clipping path pour limiter les hachures au rectangle
@@ -304,11 +304,11 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         let textY = position.y + 25;
 
         // Identifiant officiel
-        ctx.fillText(animal.identifiant_officiel, position.x + width / 2, textY);
+        ctx.fillText(animal?.identifiant_officiel || 'N/A', position.x + width / 2, textY);
         textY += 20;
 
         // Nom
-        if (animal.nom) {
+        if (animal?.nom) {
             ctx.font = '12px sans-serif';
             ctx.fillStyle = '#374151';
             ctx.fillText(`"${animal.nom}"`, position.x + width / 2, textY);
@@ -317,23 +317,23 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
 
         // Sexe
         ctx.font = '20px sans-serif';
-        ctx.fillText(animal.sexe === 'M' ? '♂️' : '♀️', position.x + width / 2, textY);
+        ctx.fillText(animal?.sexe === 'M' ? '♂️' : animal?.sexe === 'F' ? '♀️' : '?', position.x + width / 2, textY);
         textY += 25;
 
         // Race
         ctx.font = '10px sans-serif';
         ctx.fillStyle = '#6b7280';
-        ctx.fillText(animal.race_nom, position.x + width / 2, textY);
+        ctx.fillText(animal?.race_nom || 'Race inconnue', position.x + width / 2, textY);
         textY += 15;
 
         // Date de naissance
-        if (animal.date_naissance) {
+        if (animal?.date_naissance) {
             ctx.fillText(`Né le ${formatDate(animal.date_naissance)}`, position.x + width / 2, textY);
             textY += 12;
         }
 
         // Date de décès
-        if (animal.date_deces) {
+        if (animal?.date_deces) {
             ctx.fillStyle = '#dc2626';
             ctx.fillText(`† ${formatDate(animal.date_deces)}`, position.x + width / 2, textY);
             textY += 15;

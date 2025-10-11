@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const lighthouse = require('lighthouse');
-const chromeLauncher = require('chrome-launcher');
-const fs = require('fs');
-const path = require('path');
+import lighthouse from 'lighthouse';
+import chromeLauncher from 'chrome-launcher';
+import fs from 'fs';
+import path from 'path';
 
 async function runLighthouseTest() {
   const reportsDir = path.join(process.cwd(), 'reports');

@@ -105,7 +105,7 @@ describe('AnimalList Component', () => {
   });
 
   it('filters animals by search term', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     renderWithAuth(<AnimalList />);
 
     await waitFor(() => {
@@ -152,7 +152,7 @@ describe('AnimalList Component', () => {
   });
 
   it('opens animal form when add button is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     renderWithAuth(<AnimalList />);
 
     await waitFor(() => {
@@ -198,7 +198,7 @@ describe('AnimalList Component', () => {
   });
 
   it('refreshes data when refresh button is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     renderWithAuth(<AnimalList />);
 
     await waitFor(() => {

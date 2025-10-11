@@ -74,7 +74,7 @@ describe('PendingUsers Component', () => {
   });
 
   it('allows validating a user', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
 
     setupFetchMock({
       '/simple-admin/pending-users': mockPendingUsers,
@@ -121,7 +121,7 @@ describe('PendingUsers Component', () => {
   });
 
   it('allows rejecting a user', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
 
     setupFetchMock({
       '/simple-admin/pending-users': mockPendingUsers,
@@ -167,7 +167,7 @@ describe('PendingUsers Component', () => {
   });
 
   it('shows confirmation dialog before validation', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     render(<PendingUsers />);
 
     await waitFor(() => {
@@ -181,7 +181,7 @@ describe('PendingUsers Component', () => {
   });
 
   it('shows confirmation dialog before rejection', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     render(<PendingUsers />);
 
     await waitFor(() => {
@@ -195,7 +195,7 @@ describe('PendingUsers Component', () => {
   });
 
   it('filters users by search term', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     render(<PendingUsers />);
 
     await waitFor(() => {
@@ -257,7 +257,7 @@ describe('PendingUsers Component', () => {
   });
 
   it('refreshes data when refresh button is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
     render(<PendingUsers />);
 
     await waitFor(() => {
@@ -271,7 +271,7 @@ describe('PendingUsers Component', () => {
   });
 
   it('shows success message after validation', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
 
     (global.fetch as any).mockImplementation((url: string, options: any) => {
       if (url.includes('/simple-admin/pending-users') && !options?.method) {
@@ -310,7 +310,7 @@ describe('PendingUsers Component', () => {
   });
 
   it('shows error message when validation fails', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({});
 
     (global.fetch as any).mockImplementation((url: string, options: any) => {
       if (url.includes('/simple-admin/pending-users') && !options?.method) {
