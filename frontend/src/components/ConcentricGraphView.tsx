@@ -519,7 +519,21 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
             if (displayText.length > 12) {
                 displayText = displayText.substring(0, 10) + '...';
             }
-            ctx.fillText(displayText, 0, -8);
+            ctx.fillText(displayText, 0, animal.nom ? -12 : -8);
+
+            // Nom de l'animal (si disponible)
+            if (animal.nom) {
+                ctx.font = `${Math.max(6, 10 - generation * 1)}px sans-serif`;
+                ctx.fillStyle = '#4B5563'; // text-gray-600 pour le nom
+                let nomText = `"${animal.nom}"`;
+                if (nomText.length > 15) {
+                    nomText = nomText.substring(0, 13) + '..."';
+                }
+                ctx.fillText(nomText, 0, -2);
+
+                // Remettre la couleur principale pour le sexe
+                ctx.fillStyle = '#1F2937'; // text-gray-800
+            }
 
             // Sexe
             ctx.font = `${Math.max(12, 16 - generation * 2)}px sans-serif`;
