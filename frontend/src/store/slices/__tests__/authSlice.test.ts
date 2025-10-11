@@ -15,7 +15,26 @@ import authReducer, {
 } from '../authSlice';
 import { ERROR_CODES } from '../../../utils/errorCodes';
 
+// Mock fetch globally
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
+
+// Mock sessionStorage
+const mockSessionStorage = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn()
+};
+Object.defineProperty(window, 'sessionStorage', {
+  value: mockSessionStorage
+});
+
 describe('authSlice', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFetch.mockClear();
+  });
   const initialState = {
     user: null,
     token: null,
