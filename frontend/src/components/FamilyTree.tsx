@@ -45,7 +45,6 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [treeData, setTreeData] = useState<FamilyTreeNode | null>(null);
-    const [descendantsData, setDescendantsData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [maxLevels, setMaxLevels] = useState(3);
@@ -58,10 +57,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
 
     useEffect(() => {
         fetchFamilyTree();
-        if (viewMode === 'list' || viewMode === 'concentric') {
-            fetchDescendants();
-        }
-    }, [animalId, maxLevels, viewMode]);
+    }, [animalId, maxLevels]);
 
     useEffect(() => {
         if (treeData) {
@@ -109,7 +105,6 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
             }
 
             const data = await response.json();
-            console.log('Données généalogie reçues:', data);
             setTreeData(data);
 
         } catch (error: any) {
@@ -119,150 +114,12 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         }
     };
 
-    const fetchDescendants = async () => {
-        try {
-            const token = sessionStorage.getItem('token');
-
-            if (!token) {
-                throw new Error('Token d\'authentification manquant');
-            }
-
-            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/descendants`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erreur lors du chargement des descendants');
-            }
-
-            const data = await response.json();
-            console.log('Données descendants reçues:', data);
-            setDescendantsData(data);
-
-        } catch (error: any) {
-            console.error('Erreur lors du chargement des descendants:', error.message);
-            // Ne pas bloquer l'interface si les descendants ne se chargent pas
-        }
-    };
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return '';
         return new Date(dateString).toLocaleDateString('fr-FR');
     };
 
-    // Fonction pour transformer les données descendants en format FamilyTreeNode
-    const transformDescendantsData = (descendantsData: any, rootAnimal: Animal): FamilyTreeNode | null => {
-        if (!descendantsData || !rootAnimal) return null;
-
-        console.log('Transform descendants data:', descendantsData);
-
-        const descendants = descendantsData.descendants || descendantsData || [];
-        console.log('📊 Descendants array:', descendants);
-        console.log('📊 Structure détaillée des descendants:', descendants.map(d => ({
-            id: d.id,
-            identifiant: d.identifiant_officiel,
-            pere_id: d.pere_id,
-            mere_id: d.mere_id,
-            nom: d.nom
-        })));
-
-        // Utiliser un Set pour éviter les doublons
-        const processedAnimals = new Set<number>();
-
-        const buildTreeFromDescendants = (animal: Animal, availableDescendants: any[], level: number = 0): FamilyTreeNode => {
-            // Marquer cet animal comme traité
-            processedAnimals.add(animal.id);
-
-            // Trouver les enfants directs de cet animal qui n'ont pas encore été traités
-            const children = availableDescendants.filter(desc => {
-                const isDirectChild = desc.pere_id === animal.id || desc.mere_id === animal.id;
-                const notProcessed = !processedAnimals.has(desc.id);
-                return isDirectChild && notProcessed;
-            });
-
-            console.log(`🔍 Animal ${animal.identifiant_officiel} (id: ${animal.id}) niveau ${level}:`);
-            console.log(`  - Enfants trouvés: ${children.length}`, children.map(c => `${c.identifiant_officiel} (id: ${c.id})`));
-            console.log(`  - Animaux déjà traités: ${processedAnimals.size}`, Array.from(processedAnimals));
-
-            const enfants = children.map(child =>
-                buildTreeFromDescendants(child, availableDescendants, level + 1)
-            );
-
-            return {
-                animal,
-                enfants: enfants.length > 0 ? enfants : undefined,
-                level
-            };
-        };
-
-        // Approche alternative : construire l'arbre niveau par niveau
-        const buildTreeLevelByLevel = () => {
-            const tree: FamilyTreeNode = {
-                animal: rootAnimal,
-                level: 0
-            };
-
-            const buildLevel = (parentNodes: FamilyTreeNode[], currentLevel: number): FamilyTreeNode[] => {
-                if (parentNodes.length === 0 || currentLevel > 10) return []; // Limite de sécurité
-
-                const nextLevelNodes: FamilyTreeNode[] = [];
-
-                parentNodes.forEach(parentNode => {
-                    const parentId = parentNode.animal.id;
-
-                    // Trouver tous les enfants de ce parent
-                    const children = descendants.filter(desc =>
-                        !processedAnimals.has(desc.id) &&
-                        (desc.pere_id === parentId || desc.mere_id === parentId)
-                    );
-
-                    if (children.length > 0) {
-                        console.log(`📋 Niveau ${currentLevel} - Parent ${parentNode.animal.identifiant_officiel}: ${children.length} enfants trouvés`);
-
-                        const enfants = children.map(child => {
-                            processedAnimals.add(child.id);
-                            return {
-                                animal: child,
-                                level: currentLevel
-                            } as FamilyTreeNode;
-                        });
-
-                        parentNode.enfants = enfants;
-                        nextLevelNodes.push(...enfants);
-                    }
-                });
-
-                if (nextLevelNodes.length > 0) {
-                    buildLevel(nextLevelNodes, currentLevel + 1);
-                }
-
-                return nextLevelNodes;
-            };
-
-            // Marquer l'animal racine comme traité
-            processedAnimals.add(rootAnimal.id);
-
-            // Construire niveau par niveau
-            buildLevel([tree], 1);
-
-            return tree;
-        };
-
-        const result = buildTreeLevelByLevel();
-
-        // Log final pour vérifier la structure
-        const countDescendants = (node: FamilyTreeNode): number => {
-            if (!node.enfants) return 0;
-            return node.enfants.length + node.enfants.reduce((sum, child) => sum + countDescendants(child), 0);
-        };
-
-        console.log(`🌳 Arbre construit - Total descendants: ${countDescendants(result)}`);
-
-        return result;
-    };
 
     const calculateTreeLayout = (node: FamilyTreeNode): NodeLayout[] => {
         const layouts: NodeLayout[] = [];
@@ -787,54 +644,12 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                             )}
                             {viewMode === 'list' && (
                                 <div className="w-full h-full overflow-y-auto">
-                                    {descendantsData && treeData ? (
-                                        (() => {
-                                            const transformedData = transformDescendantsData(descendantsData, treeData.animal);
-                                            return transformedData ? (
-                                                <DescendanceListView treeData={transformedData} />
-                                            ) : (
-                                                <div className="flex items-center justify-center h-64 text-gray-500">
-                                                    <div className="text-center">
-                                                        <div className="text-4xl mb-4">📊</div>
-                                                        <p>Aucune descendance trouvée ou erreur de structure des données.</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()
-                                    ) : (
-                                        <div className="flex items-center justify-center h-64 text-gray-500">
-                                            <div className="text-center">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                                                <p>Chargement des descendants...</p>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <DescendanceListView treeData={treeData} />
                                 </div>
                             )}
                             {viewMode === 'concentric' && (
                                 <div className="w-full h-full">
-                                    {descendantsData && treeData ? (
-                                        (() => {
-                                            const transformedData = transformDescendantsData(descendantsData, treeData.animal);
-                                            return transformedData ? (
-                                                <ConcentricGraphView treeData={transformedData} />
-                                            ) : (
-                                                <div className="flex items-center justify-center h-64 text-gray-500">
-                                                    <div className="text-center">
-                                                        <div className="text-4xl mb-4">⭕</div>
-                                                        <p>Aucune descendance trouvée ou erreur de structure des données.</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()
-                                    ) : (
-                                        <div className="flex items-center justify-center h-64 text-gray-500">
-                                            <div className="text-center">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                                                <p>Chargement des descendants...</p>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <ConcentricGraphView treeData={treeData} />
                                 </div>
                             )}
                         </>

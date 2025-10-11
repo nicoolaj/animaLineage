@@ -52,6 +52,56 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
         const ringThickness = 80;
         const maxGenerations = 5;
 
+        // Fonction simple pour extraire tous les descendants du JSON
+        const extractDescendants = (jsonData: any): Array<{animal: any, generation: number}> => {
+            const descendants: Array<{animal: any, generation: number}> = [];
+
+            // Fonction récursive pour parcourir tout le JSON
+            const traverse = (obj: any) => {
+                if (!obj || typeof obj !== 'object') return;
+
+                // Si c'est un objet avec animal et level négatif, c'est un descendant
+                if (obj.animal && obj.level && obj.level < 0) {
+                    const generation = Math.abs(obj.level);
+                    descendants.push({
+                        animal: obj.animal,
+                        generation: generation
+                    });
+                    console.log(`👶 Descendant trouvé: ${obj.animal.identifiant_officiel} (génération ${generation})`);
+                }
+
+                // Parcourir récursivement toutes les propriétés
+                for (const key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        const value = obj[key];
+                        if (Array.isArray(value)) {
+                            value.forEach(item => traverse(item));
+                        } else if (typeof value === 'object') {
+                            traverse(value);
+                        }
+                    }
+                }
+            };
+
+            console.log(`📊 Analyse du JSON pour extraire descendants...`);
+            traverse(jsonData);
+            console.log(`✅ Total descendants trouvés: ${descendants.length}`);
+
+            return descendants;
+        };
+
+        // Extraire tous les descendants du JSON
+        const rawDescendants = extractDescendants(rootNode);
+
+        // Convertir au format FamilyTreeNode
+        const allDescendants = rawDescendants.map(desc => ({
+            animal: desc.animal,
+            level: desc.generation,
+            enfants: undefined // On s'en fiche des enfants pour l'affichage concentrique
+        }));
+
+        console.log(`Vue concentrique - Descendants collectés: ${allDescendants.length}`);
+
         // Ajouter le nœud central
         positions.push({
             node: rootNode,
@@ -64,53 +114,46 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
             generation: 0
         });
 
-        // Fonction récursive pour positionner les descendants
-        const positionDescendants = (
-            node: FamilyTreeNode,
-            generation: number,
-            angleStart: number,
-            angleEnd: number,
-            parentRadius: number
-        ) => {
-            if (generation >= maxGenerations || !node || !node.enfants || node.enfants.length === 0) {
-                return;
-            }
+        // Organiser les descendants par génération
+        const descendantsByGeneration = allDescendants.reduce((acc, descendant) => {
+            const gen = descendant.level;
+            if (!acc[gen]) acc[gen] = [];
+            acc[gen].push(descendant);
+            return acc;
+        }, {} as Record<number, FamilyTreeNode[]>);
 
-            const currentRadius = centerRadius + (generation * ringThickness);
-            const angleRange = angleEnd - angleStart;
-            const anglePerChild = angleRange / node.enfants.length;
+        // Positionner chaque génération en cercles concentriques
+        Object.entries(descendantsByGeneration)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .forEach(([generation, descendants]) => {
+                const gen = Number(generation);
+                if (gen >= maxGenerations) return;
 
-            node.enfants.forEach((enfant, index) => {
-                if (!enfant || !enfant.animal) return;
+                const currentRadius = centerRadius + (gen * ringThickness);
+                const anglePerDescendant = (2 * Math.PI) / descendants.length;
 
-                const childAngleStart = angleStart + (index * anglePerChild);
-                const childAngleEnd = angleStart + ((index + 1) * anglePerChild);
-                const childAngle = (childAngleStart + childAngleEnd) / 2;
+                descendants.forEach((descendant, index) => {
+                    const angle = index * anglePerDescendant;
+                    const x = Math.cos(angle) * currentRadius;
+                    const y = Math.sin(angle) * currentRadius;
 
-                const x = Math.cos(childAngle) * currentRadius;
-                const y = Math.sin(childAngle) * currentRadius;
+                    const angleStart = angle - anglePerDescendant / 2;
+                    const angleEnd = angle + anglePerDescendant / 2;
 
-                positions.push({
-                    node: enfant,
-                    x,
-                    y,
-                    angle: childAngle,
-                    radius: currentRadius,
-                    angleStart: childAngleStart,
-                    angleEnd: childAngleEnd,
-                    generation
+                    positions.push({
+                        node: descendant,
+                        x,
+                        y,
+                        angle,
+                        radius: currentRadius,
+                        angleStart,
+                        angleEnd,
+                        generation: gen
+                    });
                 });
-
-                // Récursion pour la génération suivante
-                positionDescendants(enfant, generation + 1, childAngleStart, childAngleEnd, currentRadius);
             });
-        };
 
-        // Commencer avec les enfants directs du nœud racine
-        if (rootNode.enfants && rootNode.enfants.length > 0) {
-            positionDescendants(rootNode, 1, 0, 2 * Math.PI, centerRadius);
-        }
-
+        console.log(`Vue concentrique - Positions calculées: ${positions.length} (${positions.length - 1} descendants + 1 racine)`);
         return positions;
     }, []);
 

@@ -53,50 +53,65 @@ const DescendanceListView: React.FC<DescendanceListViewProps> = ({ treeData }) =
     }, []);
 
     const collectDescendants = (node: FamilyTreeNode): FamilyTreeNode[] => {
-        const descendants: FamilyTreeNode[] = [];
-        const visited = new Set<number>();
+        // Fonction simple pour extraire tous les descendants du JSON (même logique que ConcentricGraphView)
+        const extractDescendants = (jsonData: any): Array<{animal: any, generation: number}> => {
+            const descendants: Array<{animal: any, generation: number}> = [];
 
-        const traverse = (currentNode: FamilyTreeNode, generation: number) => {
-            if (!currentNode || !currentNode.animal || visited.has(currentNode.animal.id)) return;
+            // Fonction récursive pour parcourir tout le JSON
+            const traverse = (obj: any) => {
+                if (!obj || typeof obj !== 'object') return;
 
-            if (currentNode.enfants && currentNode.enfants.length > 0) {
-                currentNode.enfants.forEach(enfant => {
-                    if (enfant && enfant.animal && !visited.has(enfant.animal.id)) {
-                        // Marquer comme visité AVANT de l'ajouter à la liste
-                        visited.add(enfant.animal.id);
+                // Si c'est un objet avec animal et level négatif, c'est un descendant
+                if (obj.animal && obj.level && obj.level < 0) {
+                    const generation = Math.abs(obj.level);
+                    descendants.push({
+                        animal: obj.animal,
+                        generation: generation
+                    });
+                    console.log(`📋 Descendant trouvé: ${obj.animal.identifiant_officiel} (génération ${generation})`);
+                }
 
-                        const enfantWithGeneration = {
-                            ...enfant,
-                            level: generation
-                        };
-                        descendants.push(enfantWithGeneration);
-
-                        // Récursion pour collecter toute la descendance
-                        traverse(enfant, generation + 1);
+                // Parcourir récursivement toutes les propriétés
+                for (const key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        const value = obj[key];
+                        if (Array.isArray(value)) {
+                            value.forEach(item => traverse(item));
+                        } else if (typeof value === 'object') {
+                            traverse(value);
+                        }
                     }
-                });
-            }
+                }
+            };
+
+            traverse(jsonData);
+            return descendants;
         };
 
-        // Commencer la collecte à partir de la génération 1 (enfants directs)
-        // Ne pas marquer le nœud racine comme visité
-        traverse(node, 1);
+        // Extraire tous les descendants du JSON
+        const rawDescendants = extractDescendants(node);
+
+        // Convertir au format FamilyTreeNode
+        const allDescendants = rawDescendants.map(desc => ({
+            animal: desc.animal,
+            level: desc.generation,
+            enfants: undefined
+        }));
 
         // Debug: log pour vérifier la collecte
-        console.log(`Collecte descendance - Total: ${descendants.length}`, descendants.map(d => ({
+        console.log(`📋 Collecte descendance - Total: ${allDescendants.length}`, allDescendants.map(d => ({
             id: d.animal.id,
             nom: d.animal.identifiant_officiel,
-            generation: d.level,
-            enfants: d.enfants?.length || 0
+            generation: d.level
         })));
 
         // Vérifier s'il y a des doublons
-        const uniqueIds = new Set(descendants.map(d => d.animal.id));
-        if (uniqueIds.size !== descendants.length) {
-            console.warn(`⚠️ Doublons détectés! ${descendants.length} descendants mais seulement ${uniqueIds.size} IDs uniques`);
+        const uniqueIds = new Set(allDescendants.map(d => d.animal.id));
+        if (uniqueIds.size !== allDescendants.length) {
+            console.warn(`⚠️ Doublons détectés! ${allDescendants.length} descendants mais seulement ${uniqueIds.size} IDs uniques`);
         }
 
-        return descendants;
+        return allDescendants;
     };
 
     const descendants = collectDescendants(treeData);
