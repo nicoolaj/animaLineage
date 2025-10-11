@@ -62,7 +62,16 @@
     "test:audit": "npm audit --audit-level=moderate",
     "test:all": "npm run test:ci && npm run test:e2e && npm run test:performance && npm run test:audit",
     "test:coverage:open": "npm run test:coverage && open coverage/index.html",
-    "test:coverage:threshold": "vitest run --coverage --coverage.thresholds.statements=80 --coverage.thresholds.branches=70 --coverage.thresholds.functions=75 --coverage.thresholds.lines=80"
+    "test:coverage:threshold": "vitest run --coverage --coverage.thresholds.statements=80 --coverage.thresholds.branches=70 --coverage.thresholds.functions=75 --coverage.thresholds.lines=80",
+    "test:unit": "vitest run --reporter=verbose",
+    "test:integration": "vitest run --reporter=verbose src/**/*Integration.test.tsx",
+    "test:performance:unit": "vitest run --reporter=verbose src/**/*Performance.test.tsx",
+    "test:accessibility:unit": "vitest run --reporter=verbose src/**/*Accessibility.test.tsx",
+    "test:components": "vitest run src/components/__tests__",
+    "test:utils": "vitest run src/utils/__tests__",
+    "test:watch:coverage": "vitest --watch --coverage",
+    "test:debug": "vitest --inspect-brk --no-coverage",
+    "test:ui": "vitest --ui"
   },
   "browserslist": {
     "production": [
