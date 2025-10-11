@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../../test-utils';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
@@ -31,9 +31,7 @@ const mockAuthContext = {
   error: null
 };
 
-vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: () => mockAuthContext
-}));
+// Using real AuthProvider from test-utils
 
 // Mock fetch
 global.fetch = vi.fn(() =>

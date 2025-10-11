@@ -1,9 +1,7 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../../test-utils';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import AnimalForm from '../AnimalForm';
-import { AuthContext } from '../../contexts/AuthContext';
-import { LanguageContext } from '../../contexts/LanguageContext';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -59,15 +57,7 @@ const defaultProps = {
   onCancel: mockOnCancel
 };
 
-const renderWithProviders = (ui: React.ReactElement) => {
-  return render(
-    <AuthContext.Provider value={mockAuthContext}>
-      <LanguageContext.Provider value={mockLanguageContext}>
-        {ui}
-      </LanguageContext.Provider>
-    </AuthContext.Provider>
-  );
-};
+// Using enhanced render from test-utils
 
 describe('AnimalForm Component', () => {
   beforeEach(() => {
@@ -93,7 +83,7 @@ describe('AnimalForm Component', () => {
   });
 
   test('renders form with required fields', async () => {
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByLabelText(/identifiant officiel/i)).toBeInTheDocument();
@@ -104,7 +94,7 @@ describe('AnimalForm Component', () => {
   });
 
   test('loads races and animals on mount', async () => {
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
@@ -130,7 +120,7 @@ describe('AnimalForm Component', () => {
       mere_id: 2
     };
 
-    renderWithProviders(<AnimalForm {...defaultProps} animal={existingAnimal} />);
+    render(<AnimalForm {...defaultProps} animal={existingAnimal} />);
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('TEST001')).toBeInTheDocument();
@@ -141,7 +131,7 @@ describe('AnimalForm Component', () => {
 
   test('validates required fields', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     // Try to submit without filling required fields
     const submitButton = screen.getByRole('button', { name: /enregistrer/i });
@@ -153,7 +143,7 @@ describe('AnimalForm Component', () => {
 
   test('submits form with valid data', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByLabelText(/identifiant officiel/i)).toBeInTheDocument();
@@ -197,7 +187,7 @@ describe('AnimalForm Component', () => {
 
   test('shows death date warning when filled', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByLabelText(/date de décès/i)).toBeInTheDocument();
@@ -209,7 +199,7 @@ describe('AnimalForm Component', () => {
   });
 
   test('filters parent options by sex', async () => {
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     await waitFor(() => {
       const pereSelect = screen.getByLabelText(/père/i);
@@ -229,7 +219,7 @@ describe('AnimalForm Component', () => {
 
   test('calls onCancel when cancel button is clicked', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     await user.click(screen.getByRole('button', { name: /annuler/i }));
 
@@ -238,7 +228,7 @@ describe('AnimalForm Component', () => {
 
   test('validates date constraints', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     const birthDateInput = screen.getByLabelText(/date de naissance/i);
     const deathDateInput = screen.getByLabelText(/date de décès/i);
@@ -258,7 +248,7 @@ describe('AnimalForm Component', () => {
     const user = userEvent.setup();
     const slowOnSubmit = vi.fn(() => new Promise(resolve => setTimeout(resolve, 100)));
 
-    renderWithProviders(<AnimalForm {...defaultProps} onSubmit={slowOnSubmit} />);
+    render(<AnimalForm {...defaultProps} onSubmit={slowOnSubmit} />);
 
     await waitFor(() => {
       expect(screen.getByLabelText(/identifiant officiel/i)).toBeInTheDocument();
@@ -278,7 +268,7 @@ describe('AnimalForm Component', () => {
   test('handles API errors gracefully', async () => {
     (fetch as any).mockRejectedValue(new Error('API Error'));
 
-    renderWithProviders(<AnimalForm {...defaultProps} />);
+    render(<AnimalForm {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByText(/erreur lors du chargement/i)).toBeInTheDocument();

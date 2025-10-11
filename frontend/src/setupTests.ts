@@ -115,12 +115,12 @@ beforeEach(() => {
     return `${header}.${body}.${signature}`;
   };
 
-  const mockToken = createMockJWT({ id: 1, nom: 'Test User', role: 2, elevages: [1] });
+  const mockToken = createMockJWT({ id: 1, nom: 'Test User', role: 1, elevages: [1] });
 
   // Default sessionStorage behavior
   sessionStorageMock.getItem = vi.fn((key: string) => {
     if (key === 'token') return mockToken;
-    if (key === 'user') return JSON.stringify({ id: 1, nom: 'Test User', role: 2 });
+    if (key === 'user') return JSON.stringify({ id: 1, nom: 'Test User', role: 1, role_name: 'Admin' });
     return null;
   });
 
@@ -135,7 +135,7 @@ beforeEach(() => {
     if (url.includes('/auth/me')) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ user: { id: 1, nom: 'Test User', role: 2 } })
+        json: () => Promise.resolve({ user: { id: 1, nom: 'Test User', role: 1, role_name: 'Admin' } })
       });
     }
     return Promise.resolve({

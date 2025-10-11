@@ -1,17 +1,72 @@
 import React from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, act, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import { AuthProvider } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { vi } from 'vitest';
+import authReducer from './store/slices/authSlice';
+import elevageReducer from './store/slices/elevageSlice';
+import animalReducer from './store/slices/animalSlice';
+import userReducer from './store/slices/userSlice';
+import languageReducer from './store/slices/languageSlice';
+import apiHealthReducer from './store/slices/apiHealthSlice';
 
 // Mock fetch globally
 global.fetch = vi.fn();
 
+// Mock authenticated user (admin role for tests)
+export const mockAuthenticatedUser = {
+  id: 1,
+  nom: 'Test User',
+  email: 'test@example.com',
+  role: 1, // Admin role
+  role_name: 'Admin'
+};
+
+// Create a test store
+export const createTestStore = (preloadedState?: any) => {
+  return configureStore({
+    reducer: {
+      auth: authReducer,
+      elevage: elevageReducer,
+      animal: animalReducer,
+      user: userReducer,
+      language: languageReducer,
+      apiHealth: apiHealthReducer,
+    },
+    preloadedState,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: ['persist/PERSIST'],
+        },
+      }),
+  });
+};
+
 // Custom render function that includes providers
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+  const testStore = createTestStore({
+    auth: {
+      user: mockAuthenticatedUser,
+      isAuthenticated: true,
+      loading: false,
+      error: null
+    },
+    language: {
+      currentLanguage: 'fr'
+    }
+  });
+
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <Provider store={testStore}>
+      <LanguageProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </LanguageProvider>
+    </Provider>
   );
 };
 
@@ -22,6 +77,24 @@ const customRender = (
 
 export * from '@testing-library/react';
 export { customRender as render };
+
+// Async rendering helper to reduce act() warnings
+export const renderAsync = async (
+  ui: React.ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) => {
+  let result;
+  await act(async () => {
+    result = customRender(ui, options);
+  });
+
+  // Wait for any pending updates
+  await waitFor(() => {
+    // This gives components time to finish loading
+  });
+
+  return result;
+};
 
 // Create a valid JWT token for testing
 const createMockJWT = (payload: any) => {
@@ -48,14 +121,6 @@ export const mockSessionStorage = () => {
     },
     writable: true
   });
-};
-
-// Mock authenticated user
-export const mockAuthenticatedUser = {
-  id: 1,
-  nom: 'Test User',
-  email: 'test@example.com',
-  role: 2
 };
 
 // Mock admin user
@@ -102,6 +167,24 @@ export const mockElevages = [
   }
 ];
 
+// Mock pending users data
+export const mockPendingUsers = [
+  {
+    id: 1,
+    nom: 'Jean Dupont',
+    email: 'jean@test.com',
+    statut: 'en_attente',
+    created_at: '2025-01-01T10:00:00Z'
+  },
+  {
+    id: 2,
+    nom: 'Marie Martin',
+    email: 'marie@test.com',
+    statut: 'en_attente',
+    created_at: '2025-01-02T10:00:00Z'
+  }
+];
+
 // Mock fetch responses
 export const setupFetchMock = (responses: Record<string, any> = {}) => {
   const defaultResponses = {
@@ -114,24 +197,38 @@ export const setupFetchMock = (responses: Record<string, any> = {}) => {
     ],
     '/types-animaux': [
       { id: 1, nom: 'Bovin', description: 'Bovins' }
-    ]
+    ],
+    '/simple-admin/pending-users': mockPendingUsers,
+    '/simple-admin/validate-user': { message: 'Utilisateur validé' },
+    '/simple-admin/reject-user': { message: 'Utilisateur rejeté' },
+    '/simple-admin/users': [],
+    '/backup': [],
+    '/transfer-requests': []
   };
 
   const allResponses = { ...defaultResponses, ...responses };
 
   (global.fetch as any).mockImplementation((url: string, options?: any) => {
+    // Handle specific cases first
     for (const [endpoint, response] of Object.entries(allResponses)) {
       if (url.includes(endpoint)) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve(response)
+          status: 200,
+          json: () => Promise.resolve(response),
+          text: () => Promise.resolve(JSON.stringify(response)),
+          headers: new Headers({ 'content-type': 'application/json' })
         });
       }
     }
 
+    // Default successful empty response for any unmatched endpoint
     return Promise.resolve({
-      ok: false,
-      json: () => Promise.resolve({ message: 'Not found' })
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve([]),
+      text: () => Promise.resolve('[]'),
+      headers: new Headers({ 'content-type': 'application/json' })
     });
   });
 };

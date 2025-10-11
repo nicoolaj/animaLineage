@@ -1,8 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '../../test-utils';
 import userEvent from '@testing-library/user-event';
-import { AuthProvider } from '../../contexts/AuthContext';
 import AdminPanel from '../AdminPanel';
 
 // Mock fetch globally
@@ -55,11 +54,7 @@ const mockRaces = [
   { id: 2, nom: 'Limousine', type_animal_id: 1 }
 ];
 
-const renderWithAuth = (component: React.ReactElement) => {
-  return render(
-    <AuthProvider>{component}</AuthProvider>
-  );
-};
+// Using enhanced render from test-utils
 
 describe('AdminPanel Component', () => {
   beforeEach(() => {
@@ -122,7 +117,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('renders admin panel title', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Panel d'administration/i)).toBeInTheDocument();
@@ -130,7 +125,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('displays users management section', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Gestion des utilisateurs/i)).toBeInTheDocument();
@@ -138,7 +133,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('shows list of users', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText('Admin User')).toBeInTheDocument();
@@ -148,7 +143,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('displays user email addresses', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText('admin@example.com')).toBeInTheDocument();
@@ -158,7 +153,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('shows user roles', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Administrateur/i)).toBeInTheDocument();
@@ -167,7 +162,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('displays user status', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/valide/i)).toBeInTheDocument();
@@ -177,7 +172,7 @@ describe('AdminPanel Component', () => {
 
   it('allows changing user roles', async () => {
     const user = userEvent.setup();
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText('Regular User')).toBeInTheDocument();
@@ -205,7 +200,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('shows types animaux management section', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Gestion des types d'animaux/i)).toBeInTheDocument();
@@ -213,7 +208,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('displays list of animal types', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText('Bovins')).toBeInTheDocument();
@@ -222,7 +217,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('shows races management section', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Gestion des races/i)).toBeInTheDocument();
@@ -230,7 +225,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('displays list of races', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText('Holstein')).toBeInTheDocument();
@@ -240,7 +235,7 @@ describe('AdminPanel Component', () => {
 
   it('allows adding new animal type', async () => {
     const user = userEvent.setup();
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Gestion des types d'animaux/i)).toBeInTheDocument();
@@ -254,7 +249,7 @@ describe('AdminPanel Component', () => {
 
   it('allows adding new race', async () => {
     const user = userEvent.setup();
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Gestion des races/i)).toBeInTheDocument();
@@ -267,7 +262,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('handles loading state', () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
     expect(screen.getByText(/Chargement/i)).toBeInTheDocument();
   });
 
@@ -285,7 +280,7 @@ describe('AdminPanel Component', () => {
       });
     });
 
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Accès non autorisé/i)).toBeInTheDocument();
@@ -293,7 +288,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('shows statistics section', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Statistiques/i)).toBeInTheDocument();
@@ -301,7 +296,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('displays user count statistics', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Nombre d'utilisateurs/i)).toBeInTheDocument();
@@ -310,7 +305,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('shows pending users count', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Utilisateurs en attente/i)).toBeInTheDocument();
@@ -343,7 +338,7 @@ describe('AdminPanel Component', () => {
       return Promise.resolve({ ok: false });
     });
 
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText('Regular User')).toBeInTheDocument();
@@ -367,7 +362,7 @@ describe('AdminPanel Component', () => {
   });
 
   it('shows backup management section', async () => {
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Sauvegarde/i)).toBeInTheDocument();
@@ -393,7 +388,7 @@ describe('AdminPanel Component', () => {
       return Promise.resolve({ ok: false });
     });
 
-    renderWithAuth(<AdminPanel />);
+    render(<AdminPanel />);
 
     await waitFor(() => {
       expect(screen.getByText(/Sauvegarde/i)).toBeInTheDocument();
