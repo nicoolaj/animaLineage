@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config/api';
+import DescendanceListView from './DescendanceListView';
+import ConcentricGraphView from './ConcentricGraphView';
 
 interface Animal {
     id: number;
@@ -43,6 +45,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [treeData, setTreeData] = useState<FamilyTreeNode | null>(null);
+    const [descendantsData, setDescendantsData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [maxLevels, setMaxLevels] = useState(3);
@@ -51,16 +54,38 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
     const [hoveredNode, setHoveredNode] = useState<NodeLayout | null>(null);
+    const [viewMode, setViewMode] = useState<'tree' | 'list' | 'concentric'>('tree');
 
     useEffect(() => {
         fetchFamilyTree();
-    }, [animalId, maxLevels]);
+        if (viewMode === 'list' || viewMode === 'concentric') {
+            fetchDescendants();
+        }
+    }, [animalId, maxLevels, viewMode]);
 
     useEffect(() => {
         if (treeData) {
             drawTree();
         }
     }, [treeData, scale, offset, hoveredNode]);
+
+    // Gestionnaire d'événement wheel avec preventDefault approprié
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || viewMode !== 'tree') return;
+
+        const handleWheelEvent = (e: WheelEvent) => {
+            e.preventDefault();
+            const scaleChange = e.deltaY > 0 ? 0.9 : 1.1;
+            setScale(prev => Math.max(0.3, Math.min(2, prev * scaleChange)));
+        };
+
+        canvas.addEventListener('wheel', handleWheelEvent, { passive: false });
+
+        return () => {
+            canvas.removeEventListener('wheel', handleWheelEvent);
+        };
+    }, [viewMode]);
 
     const fetchFamilyTree = async () => {
         try {
@@ -84,6 +109,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
             }
 
             const data = await response.json();
+            console.log('Données généalogie reçues:', data);
             setTreeData(data);
 
         } catch (error: any) {
@@ -93,9 +119,149 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         }
     };
 
+    const fetchDescendants = async () => {
+        try {
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+                throw new Error('Token d\'authentification manquant');
+            }
+
+            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/descendants`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erreur lors du chargement des descendants');
+            }
+
+            const data = await response.json();
+            console.log('Données descendants reçues:', data);
+            setDescendantsData(data);
+
+        } catch (error: any) {
+            console.error('Erreur lors du chargement des descendants:', error.message);
+            // Ne pas bloquer l'interface si les descendants ne se chargent pas
+        }
+    };
+
     const formatDate = (dateString?: string) => {
         if (!dateString) return '';
         return new Date(dateString).toLocaleDateString('fr-FR');
+    };
+
+    // Fonction pour transformer les données descendants en format FamilyTreeNode
+    const transformDescendantsData = (descendantsData: any, rootAnimal: Animal): FamilyTreeNode | null => {
+        if (!descendantsData || !rootAnimal) return null;
+
+        console.log('Transform descendants data:', descendantsData);
+
+        const descendants = descendantsData.descendants || descendantsData || [];
+        console.log('📊 Descendants array:', descendants);
+        console.log('📊 Structure détaillée des descendants:', descendants.map(d => ({
+            id: d.id,
+            identifiant: d.identifiant_officiel,
+            pere_id: d.pere_id,
+            mere_id: d.mere_id,
+            nom: d.nom
+        })));
+
+        // Utiliser un Set pour éviter les doublons
+        const processedAnimals = new Set<number>();
+
+        const buildTreeFromDescendants = (animal: Animal, availableDescendants: any[], level: number = 0): FamilyTreeNode => {
+            // Marquer cet animal comme traité
+            processedAnimals.add(animal.id);
+
+            // Trouver les enfants directs de cet animal qui n'ont pas encore été traités
+            const children = availableDescendants.filter(desc => {
+                const isDirectChild = desc.pere_id === animal.id || desc.mere_id === animal.id;
+                const notProcessed = !processedAnimals.has(desc.id);
+                return isDirectChild && notProcessed;
+            });
+
+            console.log(`🔍 Animal ${animal.identifiant_officiel} (id: ${animal.id}) niveau ${level}:`);
+            console.log(`  - Enfants trouvés: ${children.length}`, children.map(c => `${c.identifiant_officiel} (id: ${c.id})`));
+            console.log(`  - Animaux déjà traités: ${processedAnimals.size}`, Array.from(processedAnimals));
+
+            const enfants = children.map(child =>
+                buildTreeFromDescendants(child, availableDescendants, level + 1)
+            );
+
+            return {
+                animal,
+                enfants: enfants.length > 0 ? enfants : undefined,
+                level
+            };
+        };
+
+        // Approche alternative : construire l'arbre niveau par niveau
+        const buildTreeLevelByLevel = () => {
+            const tree: FamilyTreeNode = {
+                animal: rootAnimal,
+                level: 0
+            };
+
+            const buildLevel = (parentNodes: FamilyTreeNode[], currentLevel: number): FamilyTreeNode[] => {
+                if (parentNodes.length === 0 || currentLevel > 10) return []; // Limite de sécurité
+
+                const nextLevelNodes: FamilyTreeNode[] = [];
+
+                parentNodes.forEach(parentNode => {
+                    const parentId = parentNode.animal.id;
+
+                    // Trouver tous les enfants de ce parent
+                    const children = descendants.filter(desc =>
+                        !processedAnimals.has(desc.id) &&
+                        (desc.pere_id === parentId || desc.mere_id === parentId)
+                    );
+
+                    if (children.length > 0) {
+                        console.log(`📋 Niveau ${currentLevel} - Parent ${parentNode.animal.identifiant_officiel}: ${children.length} enfants trouvés`);
+
+                        const enfants = children.map(child => {
+                            processedAnimals.add(child.id);
+                            return {
+                                animal: child,
+                                level: currentLevel
+                            } as FamilyTreeNode;
+                        });
+
+                        parentNode.enfants = enfants;
+                        nextLevelNodes.push(...enfants);
+                    }
+                });
+
+                if (nextLevelNodes.length > 0) {
+                    buildLevel(nextLevelNodes, currentLevel + 1);
+                }
+
+                return nextLevelNodes;
+            };
+
+            // Marquer l'animal racine comme traité
+            processedAnimals.add(rootAnimal.id);
+
+            // Construire niveau par niveau
+            buildLevel([tree], 1);
+
+            return tree;
+        };
+
+        const result = buildTreeLevelByLevel();
+
+        // Log final pour vérifier la structure
+        const countDescendants = (node: FamilyTreeNode): number => {
+            if (!node.enfants) return 0;
+            return node.enfants.length + node.enfants.reduce((sum, child) => sum + countDescendants(child), 0);
+        };
+
+        console.log(`🌳 Arbre construit - Total descendants: ${countDescendants(result)}`);
+
+        return result;
     };
 
     const calculateTreeLayout = (node: FamilyTreeNode): NodeLayout[] => {
@@ -531,12 +697,6 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
         setIsDragging(false);
     };
 
-    const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
-        e.preventDefault();
-        const scaleChange = e.deltaY > 0 ? 0.9 : 1.1;
-        setScale(prev => Math.max(0.3, Math.min(2, prev * scaleChange)));
-    };
-
     const resetView = () => {
         setScale(1);
         setOffset({ x: 0, y: 0 });
@@ -551,6 +711,19 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                         🌳 Arbre Généalogique
                     </h2>
                     <div className="flex items-center gap-4">
+                        {/* Sélecteur de vue */}
+                        <div className="flex items-center gap-2">
+                            <label className="text-sm text-gray-700">Vue:</label>
+                            <select
+                                value={viewMode}
+                                onChange={(e) => setViewMode(e.target.value as 'tree' | 'list' | 'concentric')}
+                                className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="tree">🌳 Arbre classique</option>
+                                <option value="list">📋 Liste descendance</option>
+                                <option value="concentric">⭕ Vue concentrique</option>
+                            </select>
+                        </div>
                         <div className="flex items-center gap-2">
                             <label className="text-sm text-gray-700">Générations:</label>
                             <select
@@ -564,12 +737,14 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                                 <option value={5}>5</option>
                             </select>
                         </div>
-                        <button
-                            onClick={resetView}
-                            className="text-gray-700 hover:text-gray-900 text-sm px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-                        >
-                            Centrer
-                        </button>
+                        {viewMode === 'tree' && (
+                            <button
+                                onClick={resetView}
+                                className="text-gray-700 hover:text-gray-900 text-sm px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                            >
+                                Centrer
+                            </button>
+                        )}
                         <button
                             onClick={onClose}
                             className="text-gray-700 hover:text-gray-900 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-sm"
@@ -579,7 +754,7 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                     </div>
                 </div>
 
-                {/* Contenu Canvas */}
+                {/* Contenu */}
                 <div
                     ref={containerRef}
                     className="relative h-[calc(90vh-140px)]"
@@ -599,15 +774,70 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                     )}
 
                     {treeData && !loading && (
-                        <canvas
-                            ref={canvasRef}
-                            className="w-full h-full cursor-move"
-                            onMouseMove={handleMouseMove}
-                            onMouseDown={handleMouseDown}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseUp}
-                            onWheel={handleWheel}
-                        />
+                        <>
+                            {viewMode === 'tree' && (
+                                <canvas
+                                    ref={canvasRef}
+                                    className="w-full h-full cursor-move"
+                                    onMouseMove={handleMouseMove}
+                                    onMouseDown={handleMouseDown}
+                                    onMouseUp={handleMouseUp}
+                                    onMouseLeave={handleMouseUp}
+                                />
+                            )}
+                            {viewMode === 'list' && (
+                                <div className="w-full h-full overflow-y-auto">
+                                    {descendantsData && treeData ? (
+                                        (() => {
+                                            const transformedData = transformDescendantsData(descendantsData, treeData.animal);
+                                            return transformedData ? (
+                                                <DescendanceListView treeData={transformedData} />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-64 text-gray-500">
+                                                    <div className="text-center">
+                                                        <div className="text-4xl mb-4">📊</div>
+                                                        <p>Aucune descendance trouvée ou erreur de structure des données.</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()
+                                    ) : (
+                                        <div className="flex items-center justify-center h-64 text-gray-500">
+                                            <div className="text-center">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                                                <p>Chargement des descendants...</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            {viewMode === 'concentric' && (
+                                <div className="w-full h-full">
+                                    {descendantsData && treeData ? (
+                                        (() => {
+                                            const transformedData = transformDescendantsData(descendantsData, treeData.animal);
+                                            return transformedData ? (
+                                                <ConcentricGraphView treeData={transformedData} />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-64 text-gray-500">
+                                                    <div className="text-center">
+                                                        <div className="text-4xl mb-4">⭕</div>
+                                                        <p>Aucune descendance trouvée ou erreur de structure des données.</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()
+                                    ) : (
+                                        <div className="flex items-center justify-center h-64 text-gray-500">
+                                            <div className="text-center">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                                                <p>Chargement des descendants...</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {!treeData && !loading && !error && (
@@ -644,7 +874,9 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                             </div>
                         </div>
                         <div className="text-xs text-gray-500">
-                            🖱️ Cliquez-glissez pour déplacer • 🔍 Molette pour zoomer
+                            {viewMode === 'tree' && '🖱️ Cliquez-glissez pour déplacer • 🔍 Molette pour zoomer'}
+                            {viewMode === 'list' && '📋 Descendance organisée par génération'}
+                            {viewMode === 'concentric' && '⭕ Vue radiale • Cliquez-glissez et zoomez • Survolez pour détails'}
                         </div>
                     </div>
                 </div>
