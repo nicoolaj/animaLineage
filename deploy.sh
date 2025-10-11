@@ -57,9 +57,15 @@ composer install --no-dev --optimize-autoloader
 cd ../..
 
 # Génération JWT_SECRET si n'existe pas déjà
-echo "🔑 Génération d'une nouvelle clé JWT..."
-NEW_SECRET=$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 45)
-sed -i.bak "s/^JWT_SECRET=.*/JWT_SECRET=$NEW_SECRET/" $DEPLOY_DIR/api/.env
+if [ -f JWT ] ; then
+  echo "🔑 Copie de la clé JWT..."
+  NEW_SECRET=`cat JWT`
+  sed -i.bak "s/^JWT_SECRET=.*/JWT_SECRET=$NEW_SECRET/" $DEPLOY_DIR/api/.env
+else
+  echo "🔑 Génération d'une nouvelle clé JWT..."
+  NEW_SECRET=$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 45)
+  sed -i.bak "s/^JWT_SECRET=.*/JWT_SECRET=$NEW_SECRET/" $DEPLOY_DIR/api/.env
+fi
 
 # Génération www/.htaccess
 
