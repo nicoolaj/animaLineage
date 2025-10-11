@@ -184,7 +184,7 @@ describe('LandingPage Component', () => {
   it('displays feature icons', () => {
     renderWithAuth(<LandingPage />);
     expect(screen.getByText('🌳')).toBeInTheDocument(); // Genealogy icon
-    expect(screen.getByText('🐄')).toBeInTheDocument(); // Animal icon
+    expect(screen.getByText('🦕')).toBeInTheDocument(); // Animal icon
     expect(screen.getByText('📊')).toBeInTheDocument(); // Statistics icon
   });
 

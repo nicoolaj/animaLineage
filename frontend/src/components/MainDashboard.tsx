@@ -114,7 +114,7 @@ const MainDashboard: React.FC = () => {
     {
       id: 'animals',
       label: ui.animals,
-      icon: '🐄',
+      icon: '🦕',
       requiredRole: 2 // Admin et modérateurs
     },
     {

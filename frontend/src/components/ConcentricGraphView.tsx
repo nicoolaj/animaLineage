@@ -73,15 +73,38 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
                     const isDescendant = (pereId && knownDescendants.has(pereId)) ||
                                        (mereId && knownDescendants.has(mereId));
 
+                    // Debug pour Theodore et ses enfants
+                    if (animalId === obj.animal.id) {
+                        console.log(`🔍 Examen de ${obj.animal.identifiant_officiel}:`, {
+                            animalId,
+                            pereId,
+                            mereId,
+                            centralAnimalId,
+                            pereEstCentral: pereId === centralAnimalId,
+                            mereEstCentrale: mereId === centralAnimalId,
+                            pereInKnown: pereId && knownDescendants.has(pereId),
+                            mereInKnown: mereId && knownDescendants.has(mereId),
+                            knownDescendants: Array.from(knownDescendants),
+                            isDescendant
+                        });
+                    }
+
                     if (isDescendant && !processedAnimals.has(animalId)) {
-                        const generation = Math.abs(obj.level);
+                        // Calculer la vraie génération : si l'un des parents est l'animal central, c'est génération 1
+                        let realGeneration = Math.abs(obj.level);
+                        if (pereId === centralAnimalId || mereId === centralAnimalId) {
+                            realGeneration = 1; // Enfant direct
+                        }
+
                         descendants.push({
                             animal: obj.animal,
-                            generation: generation
+                            generation: realGeneration
                         });
                         knownDescendants.add(animalId); // Ajouter cet animal aux descendants connus
                         processedAnimals.add(animalId); // Marquer comme traité pour éviter les doublons
-                        console.log(`✅ Vrai descendant: ${obj.animal.identifiant_officiel} (génération ${generation})`);
+                        console.log(`✅ Vrai descendant: ${obj.animal.identifiant_officiel} (génération ${realGeneration}, level original: ${Math.abs(obj.level)}) - Parents: père=${pereId}, mère=${mereId}`);
+                    } else if (obj.level < 0) {
+                        console.log(`❌ Ignoré: ${obj.animal.identifiant_officiel} (génération ${Math.abs(obj.level)}) - Parents: père=${pereId}, mère=${mereId} - isDescendant=${isDescendant}, alreadyProcessed=${processedAnimals.has(animalId)}`);
                     }
                 }
 
@@ -99,6 +122,7 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
             };
 
             console.log(`📊 Analyse du JSON pour extraire les VRAIS descendants de l'animal ${centralAnimalId}...`);
+            console.log(`🎯 Animal central ajouté aux knownDescendants:`, centralAnimalId);
 
             // Faire plusieurs passes pour s'assurer qu'on trouve tous les descendants
             let previousCount = -1;

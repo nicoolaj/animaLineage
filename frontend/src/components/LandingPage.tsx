@@ -115,7 +115,7 @@ const LandingPage: React.FC = () => {
             </div>
             <div className="lg:order-first">
               <div className="bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl p-8 text-center">
-                <div className="text-6xl mb-4">🐄</div>
+                <div className="text-6xl mb-4">🦕</div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">Gestion de Troupeau</h3>
                 <p className="text-gray-700">
                   Suivez la santé, les performances et la généalogie de chaque animal
@@ -340,7 +340,7 @@ const LandingPage: React.FC = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <div className="text-3xl mb-3">🐄</div>
+              <div className="text-3xl mb-3">🦕</div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Bovins Laitiers</h3>
               <p className="text-gray-700 text-sm mb-3">
                 Holstein, Montbéliarde, Normande : races optimisées pour la production laitière.

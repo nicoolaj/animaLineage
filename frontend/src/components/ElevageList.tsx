@@ -172,7 +172,7 @@ const ElevageList: React.FC<ElevageListProps> = ({ onNewElevage, onEditElevage, 
                       onClick={() => onViewAnimaux?.(elevage.id)}
                       title="Gestion des animaux 🦕 et utilisateurs"
                     >
-                      🐄
+                      🦕
                     </button>
                     {canEdit(elevage) && (
                       <>

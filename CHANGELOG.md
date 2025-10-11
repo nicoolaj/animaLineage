@@ -260,7 +260,7 @@ public function getAnimaux($user_id, $user_role) {
 - **Correction UserController** : Migration de `$this->user->database` vers `$this->database`
 - **Authentification cohérente** : Migration localStorage → sessionStorage partout
 
-### 🐄 Fonctionnalités Métier
+### 🦕 Fonctionnalités Métier
 
 #### Gestion Intelligente des Parents
 - **Validation par espèce** : Sélection des parents limitée à la même espèce (type d'animal)
