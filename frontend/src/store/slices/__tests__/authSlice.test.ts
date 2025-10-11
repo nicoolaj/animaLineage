@@ -16,15 +16,15 @@ import authReducer, {
 import { ERROR_CODES } from '../../../utils/errorCodes';
 
 // Mock fetch globally
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock sessionStorage
 const mockSessionStorage = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn()
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn()
 };
 Object.defineProperty(window, 'sessionStorage', {
   value: mockSessionStorage
@@ -32,7 +32,7 @@ Object.defineProperty(window, 'sessionStorage', {
 
 describe('authSlice', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetch.mockClear();
   });
   const initialState = {

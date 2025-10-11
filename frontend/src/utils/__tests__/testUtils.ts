@@ -159,34 +159,20 @@ export const TestErrorBoundary = ({ children }: { children: React.ReactNode }) =
   return <>{children}</>;
 };
 
-// Custom matchers for common assertions
-export const customMatchers = {
-  toBeValidEmail: (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return {
-      pass: emailRegex.test(email),
-      message: () => `Expected ${email} to be a valid email address`
-    };
-  },
+// Validation utilities
+export const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
 
-  toHaveValidFormStructure: (container: HTMLElement) => {
-    const form = container.querySelector('form');
-    const labels = container.querySelectorAll('label');
-    const inputs = container.querySelectorAll('input, select, textarea');
+export const validateFormStructure = (container: HTMLElement): boolean => {
+  const form = container.querySelector('form');
+  const labels = container.querySelectorAll('label');
+  const inputs = container.querySelectorAll('input, select, textarea');
+  const hasSubmitButton = container.querySelector('button[type="submit"]') ||
+                         container.querySelector('input[type="submit"]');
 
-    const hasForm = !!form;
-    const hasLabels = labels.length > 0;
-    const hasInputs = inputs.length > 0;
-    const hasSubmitButton = container.querySelector('button[type="submit"]') ||
-                           container.querySelector('input[type="submit"]');
-
-    const isValid = hasForm && hasLabels && hasInputs && hasSubmitButton;
-
-    return {
-      pass: isValid,
-      message: () => `Expected form to have proper structure. Found: form=${hasForm}, labels=${hasLabels}, inputs=${hasInputs}, submit=${!!hasSubmitButton}`
-    };
-  }
+  return !!(form && labels.length > 0 && inputs.length > 0 && hasSubmitButton);
 };
 
 // Performance testing helpers
@@ -235,7 +221,8 @@ export default {
   waitForLoadingToFinish,
   fillForm,
   TestErrorBoundary,
-  customMatchers,
+  validateEmail,
+  validateFormStructure,
   measureRenderTime,
   checkKeyboardNavigation,
   simulateNetworkError,

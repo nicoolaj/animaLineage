@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import { performance } from 'perf_hooks';
 
 // Import components for performance testing
@@ -11,16 +12,16 @@ import DescendanceListView from '../DescendanceListView';
 import ConcentricGraphView from '../ConcentricGraphView';
 
 // Mock fetch globally
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock sessionStorage
 Object.defineProperty(window, 'sessionStorage', {
   value: {
-    getItem: jest.fn(() => 'mock-token'),
-    setItem: jest.fn(),
-    removeItem: jest.fn(),
-    clear: jest.fn()
+    getItem: vi.fn(() => 'mock-token'),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn()
   }
 });
 
@@ -62,7 +63,7 @@ const generateLargeElevageDataset = (count: number) => {
 
 describe('Performance Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('AnimalList Performance', () => {

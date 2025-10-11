@@ -71,7 +71,7 @@
     "test:utils": "vitest run src/utils/__tests__",
     "test:watch:coverage": "vitest --watch --coverage",
     "test:debug": "vitest --inspect-brk --no-coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "echo 'Install @vitest/ui for UI mode'"
   },
   "browserslist": {
     "production": [

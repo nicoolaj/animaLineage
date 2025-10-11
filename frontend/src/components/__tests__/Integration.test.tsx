@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Import components for integration testing
 import MainDashboard from '../MainDashboard';
@@ -19,28 +20,28 @@ const mockAuthContext = {
     role_name: 'Admin'
   },
   isAuthenticated: true,
-  login: jest.fn(),
-  logout: jest.fn(),
-  register: jest.fn(),
+  login: vi.fn(),
+  logout: vi.fn(),
+  register: vi.fn(),
   loading: false,
   error: null
 };
 
-jest.mock('../../contexts/AuthContext', () => ({
+vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => mockAuthContext
 }));
 
 // Mock fetch globally
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock sessionStorage
 Object.defineProperty(window, 'sessionStorage', {
   value: {
-    getItem: jest.fn(() => 'mock-token'),
-    setItem: jest.fn(),
-    removeItem: jest.fn(),
-    clear: jest.fn()
+    getItem: vi.fn(() => 'mock-token'),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn()
   }
 });
 
@@ -85,7 +86,7 @@ const mockTreeData = {
 
 describe('Integration Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([])
@@ -129,7 +130,7 @@ describe('Integration Tests', () => {
         json: () => Promise.resolve(mockElevages)
       });
 
-      const mockOnViewAnimaux = jest.fn();
+      const mockOnViewAnimaux = vi.fn();
       render(<ElevageList onViewAnimaux={mockOnViewAnimaux} />);
 
       await waitFor(() => {
@@ -198,7 +199,7 @@ describe('Integration Tests', () => {
         json: () => Promise.resolve(mockTreeData)
       });
 
-      render(<FamilyTree animalId={1} onClose={jest.fn()} />);
+      render(<FamilyTree animalId={1} onClose={vi.fn()} />);
 
       await waitFor(() => {
         expect(screen.getByText(/arbre généalogique/i)).toBeInTheDocument();
@@ -211,7 +212,7 @@ describe('Integration Tests', () => {
         json: () => Promise.resolve(mockTreeData)
       });
 
-      render(<FamilyTree animalId={1} onClose={jest.fn()} />);
+      render(<FamilyTree animalId={1} onClose={vi.fn()} />);
 
       await waitFor(() => {
         const viewSelector = screen.getByRole('combobox');

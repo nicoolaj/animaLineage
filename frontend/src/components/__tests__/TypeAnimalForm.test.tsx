@@ -1,26 +1,27 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import TypeAnimalForm from '../TypeAnimalForm';
 
 // Mock the API
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock sessionStorage
 const mockSessionStorage = {
-  getItem: jest.fn(() => 'mock-token'),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn()
+  getItem: vi.fn(() => 'mock-token'),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn()
 };
 Object.defineProperty(window, 'sessionStorage', {
   value: mockSessionStorage
 });
 
 const mockProps = {
-  onClose: jest.fn(),
-  onSave: jest.fn()
+  onClose: vi.fn(),
+  onSave: vi.fn()
 };
 
 const mockTypeAnimal = {
@@ -31,7 +32,7 @@ const mockTypeAnimal = {
 
 describe('TypeAnimalForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ message: 'Success' })

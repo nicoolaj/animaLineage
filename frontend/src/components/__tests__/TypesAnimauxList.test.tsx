@@ -1,18 +1,19 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import TypesAnimauxList from '../TypesAnimauxList';
 
 // Mock the API
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock sessionStorage
 const mockSessionStorage = {
-  getItem: jest.fn(() => 'mock-token'),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn()
+  getItem: vi.fn(() => 'mock-token'),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn()
 };
 Object.defineProperty(window, 'sessionStorage', {
   value: mockSessionStorage
@@ -40,7 +41,7 @@ const mockTypesAnimaux = [
 
 describe('TypesAnimauxList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockTypesAnimaux)
@@ -131,7 +132,7 @@ describe('TypesAnimauxList', () => {
   });
 
   it('handles delete type confirmation', async () => {
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ message: 'Deleted' })
@@ -150,7 +151,7 @@ describe('TypesAnimauxList', () => {
   });
 
   it('handles delete race confirmation', async () => {
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ message: 'Deleted' })

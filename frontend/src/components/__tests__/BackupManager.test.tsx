@@ -1,36 +1,37 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import BackupManager from '../BackupManager';
 
 // Mock the API
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock sessionStorage
 const mockSessionStorage = {
-  getItem: jest.fn(() => 'mock-token'),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn()
+  getItem: vi.fn(() => 'mock-token'),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn()
 };
 Object.defineProperty(window, 'sessionStorage', {
   value: mockSessionStorage
 });
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
-global.URL.createObjectURL = jest.fn(() => 'mock-blob-url');
-global.URL.revokeObjectURL = jest.fn();
+global.URL.createObjectURL = vi.fn(() => 'mock-blob-url');
+global.URL.revokeObjectURL = vi.fn();
 
 // Mock the download functionality
-const mockClick = jest.fn();
+const mockClick = vi.fn();
 const mockAnchor = {
   click: mockClick,
   href: '',
   download: '',
   style: { display: '' }
 };
-jest.spyOn(document, 'createElement').mockImplementation((tagName) => {
+vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
   if (tagName === 'a') {
     return mockAnchor as any;
   }
@@ -56,7 +57,7 @@ const mockBackups = [
 
 describe('BackupManager', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockBackups)
@@ -187,7 +188,7 @@ describe('BackupManager', () => {
   });
 
   it('handles deleting a backup with confirmation', async () => {
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ message: 'Backup deleted' })
@@ -216,7 +217,7 @@ describe('BackupManager', () => {
   });
 
   it('does not delete when confirmation is cancelled', async () => {
-    window.confirm = jest.fn(() => false);
+    window.confirm = vi.fn(() => false);
 
     render(<BackupManager />);
 
@@ -288,7 +289,7 @@ describe('BackupManager', () => {
   });
 
   it('refreshes backup list after deleting backup', async () => {
-    window.confirm = jest.fn(() => true);
+    window.confirm = vi.fn(() => true);
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ message: 'Deleted' })

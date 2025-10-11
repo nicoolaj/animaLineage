@@ -49,11 +49,7 @@ export default defineConfig({
     teardownTimeout: 10000,
 
     // Reporter configuration
-    reporter: ['default', 'json', 'html'],
-    outputFile: {
-      json: './test-results/test-results.json',
-      html: './test-results/test-results.html'
-    },
+    reporter: ['default'],
 
     // Watch configuration
     watch: {

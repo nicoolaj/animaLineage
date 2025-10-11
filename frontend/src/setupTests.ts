@@ -30,7 +30,7 @@ afterAll(() => {
 // Configurer l'environnement de test
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -43,7 +43,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock HTMLCanvasElement
-HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
   fillRect: vi.fn(),
   clearRect: vi.fn(),
   getImageData: vi.fn(() => ({
@@ -72,10 +72,10 @@ HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
   clip: vi.fn(),
   strokeRect: vi.fn(),
   strokeText: vi.fn(),
-});
+}));
 
 // Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
+global.ResizeObserver = vi.fn(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
@@ -107,31 +107,21 @@ Object.defineProperty(window, 'sessionStorage', {
 beforeEach(() => {
   vi.clearAllMocks();
 
-  localStorageMock.getItem.mockClear();
-  localStorageMock.setItem.mockClear();
-  localStorageMock.removeItem.mockClear();
-  localStorageMock.clear.mockClear();
-
-  sessionStorageMock.getItem.mockClear();
-  sessionStorageMock.setItem.mockClear();
-  sessionStorageMock.removeItem.mockClear();
-  sessionStorageMock.clear.mockClear();
-
   // Default sessionStorage behavior
-  sessionStorageMock.getItem.mockImplementation((key: string) => {
+  sessionStorageMock.getItem = vi.fn((key: string) => {
     if (key === 'token') return 'mock-token';
     if (key === 'user') return JSON.stringify({ id: 1, nom: 'Test User', role: 2 });
     return null;
   });
 
   // Default localStorage behavior
-  localStorageMock.getItem.mockImplementation((key: string) => {
+  localStorageMock.getItem = vi.fn((key: string) => {
     if (key === 'language') return 'fr';
     return null;
   });
 
   // Default fetch behavior
-  (global.fetch as any).mockImplementation((url: string) => {
+  global.fetch = vi.fn((url: string) => {
     if (url.includes('/auth/me')) {
       return Promise.resolve({
         ok: true,

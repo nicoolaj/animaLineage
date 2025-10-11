@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import ConcentricGraphView from '../ConcentricGraphView';
 
 // Mock data for testing
@@ -38,12 +39,12 @@ const mockTreeData = {
 
 // Mock HTMLCanvasElement
 const mockCanvas = {
-  getContext: jest.fn(() => ({
-    clearRect: jest.fn(),
-    save: jest.fn(),
-    restore: jest.fn(),
-    translate: jest.fn(),
-    scale: jest.fn(),
+  getContext: vi.fn(() => ({
+    clearRect: vi.fn(),
+    save: vi.fn(),
+    restore: vi.fn(),
+    translate: vi.fn(),
+    scale: vi.fn(),
     strokeStyle: '',
     fillStyle: '',
     lineWidth: 0,
@@ -52,24 +53,24 @@ const mockCanvas = {
     textBaseline: '',
     shadowColor: '',
     shadowBlur: 0,
-    beginPath: jest.fn(),
-    arc: jest.fn(),
-    fill: jest.fn(),
-    stroke: jest.fn(),
-    clip: jest.fn(),
-    closePath: jest.fn(),
-    moveTo: jest.fn(),
-    lineTo: jest.fn(),
-    fillText: jest.fn(),
-    fillRect: jest.fn(),
-    strokeRect: jest.fn(),
-    rotate: jest.fn()
+    beginPath: vi.fn(),
+    arc: vi.fn(),
+    fill: vi.fn(),
+    stroke: vi.fn(),
+    clip: vi.fn(),
+    closePath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    fillText: vi.fn(),
+    fillRect: vi.fn(),
+    strokeRect: vi.fn(),
+    rotate: vi.fn()
   })),
   width: 800,
   height: 600,
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-  getBoundingClientRect: jest.fn(() => ({
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  getBoundingClientRect: vi.fn(() => ({
     left: 0,
     top: 0,
     width: 800,
@@ -78,10 +79,10 @@ const mockCanvas = {
 };
 
 // Mock ResizeObserver
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+global.ResizeObserver = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }));
 
 beforeEach(() => {
