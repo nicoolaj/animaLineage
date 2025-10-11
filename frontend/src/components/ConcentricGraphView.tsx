@@ -114,7 +114,7 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
             generation: 0
         });
 
-        // Organiser les descendants par génération
+        // Organiser les descendants par génération et construire la hiérarchie
         const descendantsByGeneration = allDescendants.reduce((acc, descendant) => {
             const gen = descendant.level;
             if (!acc[gen]) acc[gen] = [];
@@ -122,36 +122,99 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
             return acc;
         }, {} as Record<number, FamilyTreeNode[]>);
 
-        // Positionner chaque génération en cercles concentriques
-        Object.entries(descendantsByGeneration)
-            .sort(([a], [b]) => Number(a) - Number(b))
-            .forEach(([generation, descendants]) => {
-                const gen = Number(generation);
-                if (gen >= maxGenerations) return;
+        // Fonction pour trouver le parent d'un descendant dans la génération précédente
+        const findParent = (descendant: FamilyTreeNode, rawDescendants: Array<{animal: any, generation: number}>) => {
+            const parentGeneration = descendant.level - 1;
+            if (parentGeneration === 0) return null; // Parent est l'animal central
 
-                const currentRadius = centerRadius + (gen * ringThickness);
-                const anglePerDescendant = (2 * Math.PI) / descendants.length;
+            // Chercher dans les données brutes qui est le parent
+            return rawDescendants.find(parent =>
+                parent.generation === parentGeneration &&
+                (descendant.animal.pere_id === parent.animal.id || descendant.animal.mere_id === parent.animal.id)
+            );
+        };
 
-                descendants.forEach((descendant, index) => {
-                    const angle = index * anglePerDescendant;
-                    const x = Math.cos(angle) * currentRadius;
-                    const y = Math.sin(angle) * currentRadius;
+        // Créer les secteurs hiérarchiques
+        let currentAngle = 0;
 
-                    const angleStart = angle - anglePerDescendant / 2;
-                    const angleEnd = angle + anglePerDescendant / 2;
+        // Niveau 1 : Diviser le cercle complet entre les enfants directs
+        const niveau1 = descendantsByGeneration[1] || [];
+        const anglePerEnfant = (2 * Math.PI) / niveau1.length;
 
-                    positions.push({
-                        node: descendant,
-                        x,
-                        y,
-                        angle,
-                        radius: currentRadius,
-                        angleStart,
-                        angleEnd,
-                        generation: gen
-                    });
-                });
+        niveau1.forEach((enfant, index) => {
+            const secteurStart = index * anglePerEnfant;
+            const secteurEnd = (index + 1) * anglePerEnfant;
+            const secteurMilieu = (secteurStart + secteurEnd) / 2;
+
+            // Position du niveau 1
+            const radius1 = centerRadius + ringThickness;
+            positions.push({
+                node: enfant,
+                x: 0, // On utilisera les angles pour dessiner les secteurs
+                y: 0,
+                angle: secteurMilieu,
+                radius: radius1,
+                angleStart: secteurStart,
+                angleEnd: secteurEnd,
+                generation: 1
             });
+
+            // Niveau 2+ : Subdiviser le secteur parent
+            for (let gen = 2; gen <= maxGenerations && descendantsByGeneration[gen]; gen++) {
+                const descendantsThisGen = descendantsByGeneration[gen].filter(desc => {
+                    // Vérifier si ce descendant appartient à la lignée de cet enfant niveau 1
+                    return isDescendantOf(desc, enfant, rawDescendants);
+                });
+
+                if (descendantsThisGen.length > 0) {
+                    const sousAngleParDescendant = (secteurEnd - secteurStart) / descendantsThisGen.length;
+
+                    descendantsThisGen.forEach((descendant, subIndex) => {
+                        const sousStart = secteurStart + (subIndex * sousAngleParDescendant);
+                        const sousEnd = secteurStart + ((subIndex + 1) * sousAngleParDescendant);
+                        const sousMilieu = (sousStart + sousEnd) / 2;
+
+                        const radiusGen = centerRadius + (gen * ringThickness);
+
+                        positions.push({
+                            node: descendant,
+                            x: 0,
+                            y: 0,
+                            angle: sousMilieu,
+                            radius: radiusGen,
+                            angleStart: sousStart,
+                            angleEnd: sousEnd,
+                            generation: gen
+                        });
+                    });
+                }
+            }
+        });
+
+        // Fonction helper pour vérifier si un descendant appartient à une lignée
+        function isDescendantOf(descendant: FamilyTreeNode, ancestor: FamilyTreeNode, allDescendants: Array<{animal: any, generation: number}>): boolean {
+            if (descendant.level <= ancestor.level) return false;
+
+            let currentDesc = descendant;
+
+            // Remonter la lignée jusqu'à trouver l'ancêtre ou atteindre le niveau 1
+            while (currentDesc.level > 1) {
+                const parent = allDescendants.find(d =>
+                    d.generation === currentDesc.level - 1 &&
+                    (currentDesc.animal.pere_id === d.animal.id || currentDesc.animal.mere_id === d.animal.id)
+                );
+
+                if (!parent) break;
+
+                if (parent.animal.id === ancestor.animal.id) {
+                    return true;
+                }
+
+                currentDesc = {animal: parent.animal, level: parent.generation, enfants: undefined};
+            }
+
+            return false;
+        }
 
         console.log(`Vue concentrique - Positions calculées: ${positions.length} (${positions.length - 1} descendants + 1 racine)`);
         return positions;
@@ -296,10 +359,9 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
     };
 
     const drawConcentricNode = (ctx: CanvasRenderingContext2D, pos: PositionedNode, isHovered: boolean) => {
-        const { node, x, y, generation } = pos;
+        const { node, generation } = pos;
         const { animal } = node;
 
-        const radius = generation === 0 ? 40 : Math.max(20, 30 - generation * 2);
         const quality = getQualityFromAnimal(animal);
         const qualityColor = getQualityColor(quality);
 
@@ -309,63 +371,115 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
             ctx.shadowBlur = 15;
         }
 
-        // Dessiner le secteur de lignée (pour les générations > 0)
-        if (generation > 0) {
-            const lineageColor = getLineageColor(generation, 0);
-            ctx.fillStyle = lineageColor + '20'; // Transparent
+        if (generation === 0) {
+            // Animal central : dessiner comme un disque plein
+            const radius = 50;
+            ctx.fillStyle = qualityColor;
             ctx.beginPath();
-            ctx.arc(0, 0, pos.radius + 10, pos.angleStart, pos.angleEnd);
-            ctx.lineTo(0, 0);
+            ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Bordure selon le sexe
+            ctx.strokeStyle = animal.sexe === 'M' ? '#3b82f6' : '#ec4899';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Texte central
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            let displayText = animal.identifiant_officiel;
+            if (displayText.length > 10) {
+                displayText = displayText.substring(0, 8) + '...';
+            }
+            ctx.fillText(displayText, 0, -5);
+
+            if (animal.nom) {
+                ctx.font = '10px sans-serif';
+                ctx.fillText(`"${animal.nom}"`, 0, 8);
+            }
+
+            ctx.font = '18px sans-serif';
+            ctx.fillText(animal.sexe === 'M' ? '♂' : '♀', 0, 25);
+
+        } else {
+            // Descendants : dessiner comme des secteurs de camembert
+            const innerRadius = generation === 1 ? 60 : 60 + ((generation - 1) * 80);
+            const outerRadius = innerRadius + 80;
+
+            // Couleur du secteur
+            const sectorColor = qualityColor;
+            ctx.fillStyle = sectorColor;
+
+            // Dessiner le secteur
+            ctx.beginPath();
+            ctx.arc(0, 0, innerRadius, pos.angleStart, pos.angleEnd);
+            ctx.arc(0, 0, outerRadius, pos.angleEnd, pos.angleStart, true);
             ctx.closePath();
             ctx.fill();
-        }
 
-        // Cercle principal
-        ctx.fillStyle = qualityColor;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2 * Math.PI);
-        ctx.fill();
-
-        // Bordure selon le sexe
-        ctx.strokeStyle = animal.sexe === 'M' ? '#3b82f6' : '#ec4899';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        // Hachurage pour les décédés
-        if (animal.statut === 'mort') {
-            ctx.save();
-            ctx.clip();
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            // Bordure du secteur
+            ctx.strokeStyle = animal.sexe === 'M' ? '#3b82f6' : '#ec4899';
             ctx.lineWidth = 2;
-            for (let i = -radius; i <= radius; i += 6) {
-                ctx.beginPath();
-                ctx.moveTo(x + i - radius, y - radius);
-                ctx.lineTo(x + i + radius, y + radius);
-                ctx.stroke();
+            ctx.stroke();
+
+            // Hachurage pour les décédés
+            if (animal.statut === 'mort') {
+                ctx.save();
+                ctx.clip();
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.lineWidth = 1;
+
+                // Dessiner des lignes diagonales dans le secteur
+                const step = 8;
+                for (let r = innerRadius; r <= outerRadius; r += step) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, r, pos.angleStart, pos.angleEnd);
+                    ctx.stroke();
+                }
+
+                ctx.restore();
             }
+
+            // Texte dans le secteur
+            const textRadius = (innerRadius + outerRadius) / 2;
+            const textAngle = (pos.angleStart + pos.angleEnd) / 2;
+            const textX = Math.cos(textAngle) * textRadius;
+            const textY = Math.sin(textAngle) * textRadius;
+
+            ctx.save();
+            ctx.translate(textX, textY);
+            ctx.rotate(textAngle);
+
+            // Ajuster l'orientation du texte pour qu'il soit lisible
+            if (textAngle > Math.PI / 2 && textAngle < 3 * Math.PI / 2) {
+                ctx.rotate(Math.PI);
+            }
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.max(8, 14 - generation * 2)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Identifiant
+            let displayText = animal.identifiant_officiel;
+            if (displayText.length > 12) {
+                displayText = displayText.substring(0, 10) + '...';
+            }
+            ctx.fillText(displayText, 0, -8);
+
+            // Sexe
+            ctx.font = `${Math.max(12, 16 - generation * 2)}px sans-serif`;
+            ctx.fillText(animal.sexe === 'M' ? '♂' : '♀', 0, 8);
+
             ctx.restore();
         }
 
         // Reset shadow
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
-
-        // Texte
-        ctx.fillStyle = '#ffffff';
-        ctx.font = `bold ${Math.max(8, 12 - generation)}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        // Identifiant (tronqué si nécessaire)
-        let displayText = animal.identifiant_officiel;
-        if (displayText.length > 8) {
-            displayText = displayText.substring(0, 6) + '...';
-        }
-        ctx.fillText(displayText, x, y - 4);
-
-        // Sexe
-        ctx.font = `${Math.max(12, 16 - generation)}px sans-serif`;
-        ctx.fillText(animal.sexe === 'M' ? '♂' : '♀', x, y + 8);
     };
 
     const drawLegend = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
@@ -432,11 +546,35 @@ const ConcentricGraphView: React.FC<ConcentricGraphViewProps> = ({ treeData }) =
             const mousePos = getMousePos(e);
 
             const hovered = positions.find(pos => {
-                const distance = Math.sqrt(
-                    Math.pow(mousePos.x - pos.x, 2) + Math.pow(mousePos.y - pos.y, 2)
-                );
-                const radius = pos.generation === 0 ? 40 : Math.max(20, 30 - pos.generation * 2);
-                return distance <= radius;
+                if (pos.generation === 0) {
+                    // Pour l'animal central : vérifier si on est dans le cercle
+                    const distance = Math.sqrt(Math.pow(mousePos.x, 2) + Math.pow(mousePos.y, 2));
+                    return distance <= 50;
+                } else {
+                    // Pour les secteurs : vérifier si on est dans le secteur
+                    const mouseDistance = Math.sqrt(Math.pow(mousePos.x, 2) + Math.pow(mousePos.y, 2));
+                    const mouseAngle = Math.atan2(mousePos.y, mousePos.x);
+
+                    // Normaliser l'angle entre 0 et 2π
+                    const normalizedMouseAngle = mouseAngle < 0 ? mouseAngle + 2 * Math.PI : mouseAngle;
+
+                    const innerRadius = pos.generation === 1 ? 60 : 60 + ((pos.generation - 1) * 80);
+                    const outerRadius = innerRadius + 80;
+
+                    // Vérifier si on est dans la bonne tranche de distance
+                    const inRadiusRange = mouseDistance >= innerRadius && mouseDistance <= outerRadius;
+
+                    // Vérifier si on est dans le bon secteur angulaire
+                    let inAngleRange = false;
+                    if (pos.angleStart <= pos.angleEnd) {
+                        inAngleRange = normalizedMouseAngle >= pos.angleStart && normalizedMouseAngle <= pos.angleEnd;
+                    } else {
+                        // Cas où le secteur traverse le 0
+                        inAngleRange = normalizedMouseAngle >= pos.angleStart || normalizedMouseAngle <= pos.angleEnd;
+                    }
+
+                    return inRadiusRange && inAngleRange;
+                }
             });
 
             setHoveredNode(hovered || null);
