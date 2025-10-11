@@ -101,6 +101,9 @@ chmod -R 644 $DEPLOY_DIR/api/.env*
 chmod 755 $DEPLOY_DIR/api/database
 chmod 644 $DEPLOY_DIR/api/database/*.db 2>/dev/null || true
 
+echo "🧹 Nettoyage du dossier DB"
+rm $DEPLOY_DIR/api/database/*
+
 echo "📋 Audit des modules externes"
 echo "1. Backend "
 cd backend ; composer audit ; cd ..

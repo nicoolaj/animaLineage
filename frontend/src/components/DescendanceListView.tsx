@@ -53,22 +53,37 @@ const DescendanceListView: React.FC<DescendanceListViewProps> = ({ treeData }) =
     }, []);
 
     const collectDescendants = (node: FamilyTreeNode): FamilyTreeNode[] => {
-        // Fonction simple pour extraire tous les descendants du JSON (même logique que ConcentricGraphView)
-        const extractDescendants = (jsonData: any): Array<{animal: any, generation: number}> => {
+        // Fonction pour extraire SEULEMENT les vrais descendants de l'animal central
+        const extractTrueDescendants = (jsonData: any, centralAnimalId: number): Array<{animal: any, generation: number}> => {
             const descendants: Array<{animal: any, generation: number}> = [];
+            const knownDescendants = new Set<number>();
+            const processedAnimals = new Set<number>(); // Pour éviter les doublons dans descendants
+            knownDescendants.add(centralAnimalId); // L'animal central est l'ancêtre
 
             // Fonction récursive pour parcourir tout le JSON
             const traverse = (obj: any) => {
                 if (!obj || typeof obj !== 'object') return;
 
-                // Si c'est un objet avec animal et level négatif, c'est un descendant
+                // Si c'est un objet avec animal et level négatif
                 if (obj.animal && obj.level && obj.level < 0) {
-                    const generation = Math.abs(obj.level);
-                    descendants.push({
-                        animal: obj.animal,
-                        generation: generation
-                    });
-                    console.log(`📋 Descendant trouvé: ${obj.animal.identifiant_officiel} (génération ${generation})`);
+                    const animalId = obj.animal.id;
+                    const pereId = obj.animal.pere_id;
+                    const mereId = obj.animal.mere_id;
+
+                    // Vérifier si cet animal a un parent qui est déjà dans nos descendants connus
+                    const isDescendant = (pereId && knownDescendants.has(pereId)) ||
+                                       (mereId && knownDescendants.has(mereId));
+
+                    if (isDescendant && !processedAnimals.has(animalId)) {
+                        const generation = Math.abs(obj.level);
+                        descendants.push({
+                            animal: obj.animal,
+                            generation: generation
+                        });
+                        knownDescendants.add(animalId); // Ajouter cet animal aux descendants connus
+                        processedAnimals.add(animalId); // Marquer comme traité pour éviter les doublons
+                        console.log(`📋 Vrai descendant: ${obj.animal.identifiant_officiel} (génération ${generation})`);
+                    }
                 }
 
                 // Parcourir récursivement toutes les propriétés
@@ -84,12 +99,24 @@ const DescendanceListView: React.FC<DescendanceListViewProps> = ({ treeData }) =
                 }
             };
 
-            traverse(jsonData);
+            // Faire plusieurs passes pour s'assurer qu'on trouve tous les descendants
+            let previousCount = -1;
+            let currentCount = 0;
+            let passCount = 0;
+
+            while (currentCount !== previousCount && passCount < 10) { // Limite de sécurité
+                previousCount = currentCount;
+                traverse(jsonData);
+                currentCount = descendants.length;
+                passCount++;
+                console.log(`📋 Passe ${passCount}: ${currentCount} descendants trouvés`);
+            }
+
             return descendants;
         };
 
-        // Extraire tous les descendants du JSON
-        const rawDescendants = extractDescendants(node);
+        // Extraire SEULEMENT les vrais descendants du JSON
+        const rawDescendants = extractTrueDescendants(node, node.animal.id);
 
         // Convertir au format FamilyTreeNode
         const allDescendants = rawDescendants.map(desc => ({
