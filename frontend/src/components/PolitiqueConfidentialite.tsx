@@ -17,7 +17,7 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                     </button>
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Politique de Confidentialité</h1>
                     <p className="text-gray-400">Information sur le traitement de vos données personnelles</p>
-                    <p className="text-sm text-gray-500 mt-2">Date de dernière mise à jour : 5 octobre 2025</p>
+                    <p className="text-sm text-gray-500 mt-2">Date de dernière mise à jour : 11 octobre 2025</p>
                 </div>
 
                 <div className="bg-white rounded-lg p-6 sm:p-8 space-y-8 shadow-sm border border-gray-200">
@@ -30,7 +30,6 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                         <div className="text-gray-300 space-y-2">
                             <p>Le responsable de la collecte et du traitement de vos données personnelles est :</p>
                             <p><strong>Nicolas Jalibert</strong></p>
-                            <p><strong>Contact :</strong> [Votre adresse e-mail de contact]</p>
                         </div>
                     </section>
 
@@ -91,17 +90,15 @@ const PolitiqueConfidentialite: React.FC<PolitiqueConfidentialiteProps> = ({ onR
                                 <li><strong>Droit à l'effacement ("droit à l'oubli") :</strong> Vous pouvez demander la suppression de votre compte et de toutes les données associées.</li>
                                 <li><strong>Droit à la limitation du traitement :</strong> Vous pouvez demander à ce que l'utilisation de vos données soit suspendue temporairement.</li>
                             </ul>
-                            <p className="font-medium">Pour exercer ces droits, vous pouvez nous contacter à l'adresse e-mail mentionnée dans la section 1.</p>
+                            <p className="font-medium">Pour exercer ces droits, vous pouvez nous contacter avec la personne qui vous a invité à vous inscrire sur ce site.</p>
                         </div>
                     </section>
 
                     <section>
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">8. Cookies 🍪</h2>
                         <div className="text-gray-300 space-y-2">
-                            <p>Notre site peut utiliser des cookies strictement nécessaires à son bon fonctionnement (par exemple, pour maintenir votre session connectée). Nous n'utilisons pas de cookies de suivi publicitaire.</p>
-                            <div className="bg-yellow-900 border border-yellow-700 rounded p-3 text-yellow-200 text-sm mt-3">
-                                <p><strong>Note :</strong> Si vous utilisez des outils d'analyse d'audience comme Google Analytics, vous devez le mentionner ici et expliquer comment les utilisateurs peuvent s'y opposer.</p>
-                            </div>
+                            <p>Notre site peut utiliser des cookies strictement nécessaires à son bon fonctionnement (par exemple, pour maintenir votre session connectée).</p>
+                            <p>Notre site peut utiliser des cookies nécessaires à au fonctionnement de ses partenaires publicitaires (par exemple, régie publicitaire google).</p>
                         </div>
                     </section>
 

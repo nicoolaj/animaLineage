@@ -25,10 +25,6 @@ const MentionsLegales: React.FC<MentionsLegalesProps> = ({ onRetour }) => {
                         <div className="text-gray-300 space-y-2">
                             <p>Ce site est édité par <strong>Nicolas Jalibert</strong>.</p>
                             <p><strong>Responsable de la publication :</strong> Nicolas Jalibert</p>
-                            <p><strong>Contact :</strong> [Ajoutez votre adresse e-mail de contact ici]</p>
-                            <div className="bg-yellow-900 border border-yellow-700 rounded p-3 text-yellow-200 text-sm mt-3">
-                                <p><strong>Note :</strong> Il est recommandé d'ajouter également une adresse postale et un numéro de téléphone.</p>
-                            </div>
                         </div>
                     </section>
 
@@ -54,9 +50,6 @@ const MentionsLegales: React.FC<MentionsLegalesProps> = ({ onRetour }) => {
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">4. Données Personnelles</h2>
                         <div className="text-gray-300 space-y-2">
                             <p>Ce site peut être amené à collecter des données personnelles. Pour plus d'informations sur la manière dont vos données sont collectées et traitées, veuillez consulter notre <strong>Politique de Confidentialité</strong>.</p>
-                            <div className="bg-blue-900 border border-blue-700 rounded p-3 text-blue-200 text-sm mt-3">
-                                <p><strong>Note :</strong> Si votre site collecte des données personnelles (via un formulaire de contact, des cookies, une newsletter, etc.), vous devez impérativement créer une page de "Politique de Confidentialité" expliquant en détail l'utilisation de ces données, conformément au RGPD (Règlement Général sur la Protection des Données).</p>
-                            </div>
                         </div>
                     </section>
 
