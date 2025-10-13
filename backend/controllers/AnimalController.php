@@ -300,7 +300,7 @@ class AnimalController {
 
             // Vérifier les droits de modification
             $this->animal->id = $id;
-            if (!$this->animal->canEdit($user_id, $user_role)) {
+            if (!$this->animal->canEditLegacy($user_id, $user_role)) {
                 http_response_code(403);
                 echo json_encode(['message' => 'Accès non autorisé']);
                 return;
@@ -384,7 +384,7 @@ class AnimalController {
 
             // Vérifier les droits
             $this->animal->id = $id;
-            if (!$this->animal->canEdit($user_id, $user_role)) {
+            if (!$this->animal->canEditLegacy($user_id, $user_role)) {
                 http_response_code(403);
                 echo json_encode(['message' => 'Accès non autorisé']);
                 return;
@@ -426,7 +426,7 @@ class AnimalController {
 
             // Vérifier les droits
             $this->animal->id = $id;
-            if (!$this->animal->canEdit($user_id, $user_role)) {
+            if (!$this->animal->canEditLegacy($user_id, $user_role)) {
                 http_response_code(403);
                 echo json_encode(['message' => 'Accès non autorisé']);
                 return;
@@ -597,6 +597,262 @@ class AnimalController {
             ]);
 
         } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Récupérer les photos d'un animal
+     */
+    public function getPhotos($animal_id, $user_id, $user_role) {
+        try {
+            // Log pour debug
+            error_log("getPhotos called with animal_id=$animal_id, user_id=$user_id, user_role=$user_role");
+
+            // Vérifier si l'utilisateur peut voir cet animal
+            if (!$this->animal->canView($animal_id, $user_id, $user_role)) {
+                error_log("Access denied for user $user_id to animal $animal_id");
+                http_response_code(403);
+                echo json_encode(['message' => 'Accès non autorisé à cet animal']);
+                return;
+            }
+
+            $photos = $this->animal->getPhotos($animal_id);
+            error_log("Found " . count($photos) . " photos for animal $animal_id");
+
+            // Ajouter l'URL de prévisualisation pour chaque photo
+            foreach ($photos as &$photo) {
+                $photo['preview_url'] = "api/animaux/{$animal_id}/photos/{$photo['id']}/preview";
+            }
+
+            http_response_code(200);
+            echo json_encode($photos);
+
+        } catch (Exception $e) {
+            error_log("Error in getPhotos: " . $e->getMessage() . " - " . $e->getTraceAsString());
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Uploader des photos pour un animal
+     */
+    public function uploadPhotos($animal_id, $user_id, $user_role) {
+        try {
+            // Vérifier si l'utilisateur peut modifier cet animal
+            if (!$this->animal->canEdit($animal_id, $user_id, $user_role)) {
+                http_response_code(403);
+                echo json_encode(['message' => 'Accès non autorisé pour modifier cet animal']);
+                return;
+            }
+
+            // Vérifier qu'il y a des fichiers uploadés
+            if (!isset($_FILES['photos']) || empty($_FILES['photos']['tmp_name'][0])) {
+                http_response_code(400);
+                echo json_encode(['message' => 'Aucune photo reçue']);
+                return;
+            }
+
+            $uploaded_photos = [];
+            $errors = [];
+
+            // Traiter chaque fichier
+            for ($i = 0; $i < count($_FILES['photos']['tmp_name']); $i++) {
+                if ($_FILES['photos']['error'][$i] !== UPLOAD_ERR_OK) {
+                    $errors[] = "Erreur lors de l'upload de {$_FILES['photos']['name'][$i]}";
+                    continue;
+                }
+
+                $photo_data = [
+                    'tmp_name' => $_FILES['photos']['tmp_name'][$i],
+                    'original_name' => $_FILES['photos']['name'][$i],
+                    'file_size' => $_FILES['photos']['size'][$i],
+                    'mime_type' => $_FILES['photos']['type'][$i]
+                ];
+
+                try {
+                    $photo_id = $this->animal->addPhoto($animal_id, $photo_data);
+                    $uploaded_photos[] = ['id' => $photo_id, 'name' => $photo_data['original_name']];
+                } catch (Exception $e) {
+                    $errors[] = "Erreur pour {$photo_data['original_name']}: " . $e->getMessage();
+                }
+            }
+
+            // Réponse avec les résultats
+            $response = [
+                'uploaded' => $uploaded_photos,
+                'uploaded_count' => count($uploaded_photos)
+            ];
+
+            if (!empty($errors)) {
+                $response['errors'] = $errors;
+            }
+
+            http_response_code(201);
+            echo json_encode($response);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Supprimer une photo d'un animal
+     */
+    public function deletePhoto($animal_id, $photo_id, $user_id, $user_role) {
+        try {
+            // Vérifier si l'utilisateur peut modifier cet animal
+            if (!$this->animal->canEdit($animal_id, $user_id, $user_role)) {
+                http_response_code(403);
+                echo json_encode(['message' => 'Accès non autorisé pour modifier cet animal']);
+                return;
+            }
+
+            if ($this->animal->deletePhoto($animal_id, $photo_id)) {
+                http_response_code(200);
+                echo json_encode(['message' => 'Photo supprimée avec succès']);
+            } else {
+                http_response_code(404);
+                echo json_encode(['message' => 'Photo non trouvée']);
+            }
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Définir une photo comme photo principale
+     */
+    public function setMainPhoto($animal_id, $photo_id, $user_id, $user_role) {
+        try {
+            // Vérifier si l'utilisateur peut modifier cet animal
+            if (!$this->animal->canEdit($animal_id, $user_id, $user_role)) {
+                http_response_code(403);
+                echo json_encode(['message' => 'Accès non autorisé pour modifier cet animal']);
+                return;
+            }
+
+            if ($this->animal->setMainPhoto($animal_id, $photo_id)) {
+                http_response_code(200);
+                echo json_encode(['message' => 'Photo principale définie avec succès']);
+            } else {
+                http_response_code(404);
+                echo json_encode(['message' => 'Photo non trouvée']);
+            }
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Récupérer l'image d'une photo pour prévisualisation
+     */
+    public function getPhotoPreview($animal_id, $photo_id, $user_id, $user_role) {
+        try {
+            error_log("getPhotoPreview called: animal_id=$animal_id, photo_id=$photo_id, user_id=$user_id");
+
+            // Vérifier si l'utilisateur peut voir cet animal
+            if (!$this->animal->canView($animal_id, $user_id, $user_role)) {
+                error_log("Access denied for getPhotoPreview");
+                http_response_code(403);
+                echo json_encode(['message' => 'Accès non autorisé à cet animal']);
+                return;
+            }
+
+            $photo = $this->animal->getPhotoData($animal_id, $photo_id);
+            error_log("Photo data retrieved: " . ($photo ? "found" : "not found"));
+
+            if (!$photo) {
+                error_log("Photo not found: animal_id=$animal_id, photo_id=$photo_id");
+                http_response_code(404);
+                echo json_encode(['message' => 'Photo non trouvée']);
+                return;
+            }
+
+            // Nettoyer les buffers de sortie pour éviter la corruption d'image
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+
+            // Envoyer les headers appropriés pour l'image
+            header('Content-Type: ' . $photo['mime_type']);
+            header('Content-Length: ' . $photo['file_size']);
+            header('Cache-Control: public, max-age=3600');
+
+            // Headers CORS pour les images
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Methods: GET');
+
+            error_log("Sending image: " . strlen($photo['photo_data']) . " bytes");
+
+            // Envoyer les données binaires de l'image
+            echo $photo['photo_data'];
+            exit(); // Important pour éviter tout output supplémentaire
+
+        } catch (Exception $e) {
+            error_log("Error in getPhotoPreview: " . $e->getMessage() . " - " . $e->getTraceAsString());
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Récupérer l'image d'une photo pour prévisualisation - Accès public
+     */
+    public function getPhotoPreviewPublic($animal_id, $photo_id) {
+        try {
+            error_log("getPhotoPreviewPublic called: animal_id=$animal_id, photo_id=$photo_id");
+
+            $photo = $this->animal->getPhotoData($animal_id, $photo_id);
+            error_log("Photo data retrieved: " . ($photo ? "found" : "not found"));
+
+            if (!$photo) {
+                error_log("Photo not found: animal_id=$animal_id, photo_id=$photo_id");
+                http_response_code(404);
+
+                // Nettoyer les buffers avant de renvoyer du JSON
+                if (ob_get_level()) {
+                    ob_end_clean();
+                }
+                echo json_encode(['message' => 'Photo non trouvée']);
+                return;
+            }
+
+            // Nettoyer les buffers de sortie pour éviter la corruption d'image
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+
+            // Envoyer les headers appropriés pour l'image
+            header('Content-Type: ' . $photo['mime_type']);
+            header('Content-Length: ' . $photo['file_size']);
+            header('Cache-Control: public, max-age=3600');
+
+            // Headers CORS pour les images
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Methods: GET');
+
+            error_log("Sending image: " . strlen($photo['photo_data']) . " bytes");
+
+            // Envoyer les données binaires de l'image
+            echo $photo['photo_data'];
+            exit(); // Important pour éviter tout output supplémentaire
+
+        } catch (Exception $e) {
+            error_log("Error in getPhotoPreviewPublic: " . $e->getMessage() . " - " . $e->getTraceAsString());
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
             http_response_code(500);
             echo json_encode(['message' => 'Erreur serveur: ' . $e->getMessage()]);
         }

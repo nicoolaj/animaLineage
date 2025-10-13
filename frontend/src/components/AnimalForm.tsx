@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import TransferRequestDialog from './TransferRequestDialog';
+import PhotoUpload from './PhotoUpload';
 import { API_BASE_URL } from '../config/api';
 
 interface Race {
@@ -61,6 +62,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
     const [checkingAnimal, setCheckingAnimal] = useState(false);
     const [existingAnimal, setExistingAnimal] = useState<any>(null);
     const [showTransferDialog, setShowTransferDialog] = useState(false);
+    const [existingPhotos, setExistingPhotos] = useState<any[]>([]);
+    const [newPhotos, setNewPhotos] = useState<any[]>([]);
 
     const loadRaces = useCallback(async () => {
         try {
@@ -115,6 +118,30 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             setElevagesLoaded(true);
         }
     }, []);
+
+    const loadExistingPhotos = useCallback(async () => {
+        if (!animal?.id) return;
+
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) return;
+
+            const response = await fetch(`${API_BASE_URL}api/animaux/${animal.id}/photos`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const photos = await response.json();
+                setExistingPhotos(photos);
+            } else {
+                console.error('Erreur lors du chargement des photos:', response.status);
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des photos:', error);
+        }
+    }, [animal?.id]);
 
     const loadPotentialParents = useCallback(async () => {
         try {
@@ -191,6 +218,11 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             loadPotentialParents();
         }
     }, [formData.race_id, races.length]);
+
+    // Charger les photos existantes si on édite un animal
+    useEffect(() => {
+        loadExistingPhotos();
+    }, [loadExistingPhotos]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -278,6 +310,41 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
         }
     };
 
+    const handlePhotosChange = (photos: any[]) => {
+        setNewPhotos(photos);
+    };
+
+    const uploadPhotos = async (animalId: number) => {
+        if (newPhotos.length === 0) return;
+
+        const formData = new FormData();
+        newPhotos.forEach((photo, index) => {
+            formData.append(`photos[${index}]`, photo.file);
+        });
+
+        try {
+            const token = sessionStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/photos`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erreur lors de l\'upload des photos');
+            }
+
+            const result = await response.json();
+            console.log('Photos uploadées:', result);
+        } catch (error) {
+            console.error('Erreur lors de l\'upload des photos:', error);
+            throw error;
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -301,7 +368,46 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                 throw new Error('Un animal vivant doit être associé à un élevage');
             }
 
+            // Sauvegarder les photos pour après la soumission
+            const photosToUpload = [...newPhotos];
+
+            // Appeler la fonction de soumission du parent
             onSubmit(formData);
+
+            // Si on édite un animal existant et qu'il y a des nouvelles photos à uploader
+            if (animal?.id && photosToUpload.length > 0) {
+                try {
+                    const formData = new FormData();
+                    photosToUpload.forEach((photo, index) => {
+                        formData.append(`photos[${index}]`, photo.file);
+                    });
+
+                    const token = sessionStorage.getItem('token');
+                    const uploadResponse = await fetch(`${API_BASE_URL}api/animaux/${animal.id}/photos`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    if (uploadResponse.ok) {
+                        // Vider les nouvelles photos après upload réussi
+                        setNewPhotos([]);
+
+                        // Recharger les photos existantes
+                        await loadExistingPhotos();
+
+                        console.log('Photos uploadées avec succès');
+                    } else {
+                        const errorData = await uploadResponse.json();
+                        throw new Error(errorData.message || 'Erreur lors de l\'upload');
+                    }
+                } catch (photoError: any) {
+                    console.error('Erreur lors de l\'upload des photos:', photoError);
+                    setError('Animal sauvegardé, mais erreur lors de l\'upload des photos: ' + photoError.message);
+                }
+            }
         } catch (error: any) {
             setError(error.message);
         } finally {
@@ -564,6 +670,16 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                         className="w-full px-3 py-2 sm:py-2.5 border border-gray-200 rounded-md bg-white text-gray-900 text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-vertical placeholder-gray-500"
                     />
                 </div>
+
+                {/* Section photos */}
+                <PhotoUpload
+                    animalId={animal?.id}
+                    existingPhotos={existingPhotos}
+                    onPhotosChange={handlePhotosChange}
+                    maxPhotos={10}
+                    maxSizePerPhoto={5}
+                    className="mb-5"
+                />
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-gray-200">
                     <button

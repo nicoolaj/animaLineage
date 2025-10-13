@@ -421,6 +421,26 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
             }
         }
     } elseif (isset($path_parts[1]) && $path_parts[1] === 'animaux') {
+        if (isset($path_parts[2])) {
+            $animal_id = $path_parts[2];
+
+            // Accès public pour les images de prévisualisation uniquement
+            if (isset($path_parts[3]) && $path_parts[3] === 'photos' &&
+                isset($path_parts[4]) && isset($path_parts[5]) && $path_parts[5] === 'preview') {
+
+                $photo_id = $path_parts[4];
+                if ($request_method === 'GET') {
+                    error_log("Public access to photo preview: animal_id=$animal_id, photo_id=$photo_id");
+                    // Accès public : pas de vérification d'authentification pour les images
+                    $animalController->getPhotoPreviewPublic($animal_id, $photo_id);
+                } else {
+                    http_response_code(405);
+                    echo json_encode(['message' => 'Method not allowed']);
+                }
+                return;
+            }
+        }
+
         // Routes pour les animaux - nécessitent une authentification
         $currentUser = $authMiddleware->getCurrentUser();
         if (!$currentUser) {
@@ -469,6 +489,53 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                         } else {
                             http_response_code(405);
                             echo json_encode(['message' => 'Method not allowed']);
+                        }
+                        break;
+                    case 'photos':
+                        // Routes pour les photos d'un animal
+                        if (isset($path_parts[4])) {
+                            // Routes pour une photo spécifique: /api/animaux/{id}/photos/{photo_id}
+                            $photo_id = $path_parts[4];
+                            if (isset($path_parts[5]) && $path_parts[5] === 'main') {
+                                // PATCH /api/animaux/{id}/photos/{photo_id}/main
+                                if ($request_method === 'PATCH') {
+                                    $animalController->setMainPhoto($animal_id, $photo_id, $user_id, $user_role);
+                                } else {
+                                    http_response_code(405);
+                                    echo json_encode(['message' => 'Method not allowed']);
+                                }
+                            } elseif (isset($path_parts[5]) && $path_parts[5] === 'preview') {
+                                // GET /api/animaux/{id}/photos/{photo_id}/preview
+                                if ($request_method === 'GET') {
+                                    error_log("Routing to getPhotoPreview: animal_id=$animal_id, photo_id=$photo_id");
+                                    $animalController->getPhotoPreview($animal_id, $photo_id, $user_id, $user_role);
+                                } else {
+                                    http_response_code(405);
+                                    echo json_encode(['message' => 'Method not allowed']);
+                                }
+                            } else {
+                                // DELETE /api/animaux/{id}/photos/{photo_id}
+                                if ($request_method === 'DELETE') {
+                                    $animalController->deletePhoto($animal_id, $photo_id, $user_id, $user_role);
+                                } else {
+                                    http_response_code(405);
+                                    echo json_encode(['message' => 'Method not allowed']);
+                                }
+                            }
+                        } else {
+                            // Routes générales pour les photos: /api/animaux/{id}/photos
+                            switch ($request_method) {
+                                case 'GET':
+                                    $animalController->getPhotos($animal_id, $user_id, $user_role);
+                                    break;
+                                case 'POST':
+                                    $animalController->uploadPhotos($animal_id, $user_id, $user_role);
+                                    break;
+                                default:
+                                    http_response_code(405);
+                                    echo json_encode(['message' => 'Method not allowed']);
+                                    break;
+                            }
                         }
                         break;
                     default:

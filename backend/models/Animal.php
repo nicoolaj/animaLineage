@@ -322,8 +322,52 @@ class Animal {
         return $stats;
     }
 
-    // Vérifier si l'utilisateur peut modifier cet animal
-    public function canEdit($user_id, $user_role) {
+    // Vérifier si l'utilisateur peut voir un animal
+    public function canView($animal_id, $user_id, $user_role) {
+        // Les admins peuvent tout voir
+        if ($user_role == 1) {
+            return true;
+        }
+
+        // Charger les données de l'animal
+        $animal_data = $this->getById($animal_id);
+        if (!$animal_data) {
+            return false;
+        }
+
+        // Pour l'instant, tous les utilisateurs connectés peuvent voir les animaux
+        // (à adapter selon les règles métier)
+        return true;
+    }
+
+    // Vérifier si l'utilisateur peut modifier un animal
+    public function canEdit($animal_id, $user_id, $user_role) {
+        // Les admins peuvent tout modifier
+        if ($user_role == 1) {
+            return true;
+        }
+
+        // Charger les données de l'animal
+        $animal_data = $this->getById($animal_id);
+        if (!$animal_data) {
+            return false;
+        }
+
+        // Vérifier si l'utilisateur est propriétaire de l'élevage
+        if ($animal_data['elevage_id']) {
+            $query = "SELECT user_id FROM elevages WHERE id = :elevage_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':elevage_id', $animal_data['elevage_id']);
+            $stmt->execute();
+            $elevage = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $elevage && $elevage['user_id'] == $user_id;
+        }
+
+        return false;
+    }
+
+    // Version legacy pour compatibilité
+    public function canEditLegacy($user_id, $user_role) {
         // Les admins peuvent tout modifier
         if ($user_role == 1) {
             return true;
@@ -448,6 +492,200 @@ class Animal {
         $stmt->bindParam(':animal_id', $animalId);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer toutes les photos d'un animal
+     */
+    public function getPhotos($animal_id) {
+        $query = "SELECT id, original_name, file_size, mime_type, width, height, is_main, created_at, updated_at
+                  FROM animal_photos
+                  WHERE animal_id = :animal_id
+                  ORDER BY is_main DESC, created_at ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':animal_id', $animal_id);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer les données binaires d'une photo
+     */
+    public function getPhotoData($animal_id, $photo_id) {
+        $query = "SELECT photo_data, mime_type, file_size
+                  FROM animal_photos
+                  WHERE id = :photo_id AND animal_id = :animal_id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':photo_id', $photo_id);
+        $stmt->bindParam(':animal_id', $animal_id);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Ajouter une photo à un animal
+     */
+    public function addPhoto($animal_id, $photo_data) {
+        // Valider le fichier image
+        $this->validateImageFile($photo_data);
+
+        // Lire les données binaires du fichier
+        $binary_data = file_get_contents($photo_data['tmp_name']);
+        if ($binary_data === false) {
+            throw new Exception("Impossible de lire le fichier image");
+        }
+
+        // Obtenir les dimensions de l'image
+        $image_info = getimagesize($photo_data['tmp_name']);
+        $width = $image_info ? $image_info[0] : null;
+        $height = $image_info ? $image_info[1] : null;
+
+        // Vérifier s'il s'agit de la première photo (sera automatiquement principale)
+        $count_query = "SELECT COUNT(*) as count FROM animal_photos WHERE animal_id = :animal_id";
+        $count_stmt = $this->conn->prepare($count_query);
+        $count_stmt->bindParam(':animal_id', $animal_id);
+        $count_stmt->execute();
+        $count_result = $count_stmt->fetch(PDO::FETCH_ASSOC);
+        $is_main = $count_result['count'] == 0 ? 1 : 0;
+
+        // Insérer la photo en base
+        $query = "INSERT INTO animal_photos
+                  (animal_id, original_name, file_size, mime_type, width, height, photo_data, is_main)
+                  VALUES (:animal_id, :original_name, :file_size, :mime_type, :width, :height, :photo_data, :is_main)";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':animal_id', $animal_id);
+        $stmt->bindParam(':original_name', $photo_data['original_name']);
+        $stmt->bindParam(':file_size', $photo_data['file_size']);
+        $stmt->bindParam(':mime_type', $photo_data['mime_type']);
+        $stmt->bindParam(':width', $width);
+        $stmt->bindParam(':height', $height);
+        $stmt->bindParam(':photo_data', $binary_data, PDO::PARAM_LOB);
+        $stmt->bindParam(':is_main', $is_main);
+
+        if (!$stmt->execute()) {
+            throw new Exception("Erreur lors de l'enregistrement de la photo");
+        }
+
+        return $this->conn->lastInsertId();
+    }
+
+    /**
+     * Supprimer une photo d'un animal
+     */
+    public function deletePhoto($animal_id, $photo_id) {
+        // Vérifier que la photo existe et appartient à cet animal
+        $check_query = "SELECT is_main FROM animal_photos WHERE id = :photo_id AND animal_id = :animal_id";
+        $check_stmt = $this->conn->prepare($check_query);
+        $check_stmt->bindParam(':photo_id', $photo_id);
+        $check_stmt->bindParam(':animal_id', $animal_id);
+        $check_stmt->execute();
+        $photo = $check_stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$photo) {
+            return false;
+        }
+
+        $was_main = $photo['is_main'];
+
+        // Supprimer la photo
+        $delete_query = "DELETE FROM animal_photos WHERE id = :photo_id AND animal_id = :animal_id";
+        $delete_stmt = $this->conn->prepare($delete_query);
+        $delete_stmt->bindParam(':photo_id', $photo_id);
+        $delete_stmt->bindParam(':animal_id', $animal_id);
+        $success = $delete_stmt->execute();
+
+        // Si c'était la photo principale, définir une autre photo comme principale
+        if ($success && $was_main) {
+            $this->assignNewMainPhoto($animal_id);
+        }
+
+        return $success;
+    }
+
+    /**
+     * Définir une photo comme photo principale
+     */
+    public function setMainPhoto($animal_id, $photo_id) {
+        // Vérifier que la photo existe et appartient à cet animal
+        $check_query = "SELECT id FROM animal_photos WHERE id = :photo_id AND animal_id = :animal_id";
+        $check_stmt = $this->conn->prepare($check_query);
+        $check_stmt->bindParam(':photo_id', $photo_id);
+        $check_stmt->bindParam(':animal_id', $animal_id);
+        $check_stmt->execute();
+
+        if (!$check_stmt->fetch()) {
+            return false;
+        }
+
+        // Retirer le statut principal de toutes les autres photos
+        $reset_query = "UPDATE animal_photos SET is_main = 0 WHERE animal_id = :animal_id";
+        $reset_stmt = $this->conn->prepare($reset_query);
+        $reset_stmt->bindParam(':animal_id', $animal_id);
+        $reset_stmt->execute();
+
+        // Définir cette photo comme principale
+        $main_query = "UPDATE animal_photos SET is_main = 1 WHERE id = :photo_id AND animal_id = :animal_id";
+        $main_stmt = $this->conn->prepare($main_query);
+        $main_stmt->bindParam(':photo_id', $photo_id);
+        $main_stmt->bindParam(':animal_id', $animal_id);
+
+        return $main_stmt->execute();
+    }
+
+    /**
+     * Valider un fichier image
+     */
+    private function validateImageFile($photo_data) {
+        // Vérifier la taille du fichier (limite à 5MB)
+        $max_size = 5 * 1024 * 1024; // 5MB
+        if ($photo_data['file_size'] > $max_size) {
+            throw new Exception("Fichier trop volumineux. Limite: 5MB");
+        }
+
+        // Vérifier le type MIME
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!in_array($photo_data['mime_type'], $allowed_types)) {
+            throw new Exception("Type de fichier non autorisé. Types acceptés: JPEG, PNG, GIF, WebP");
+        }
+
+        // Vérifier que le fichier est vraiment une image
+        $image_info = getimagesize($photo_data['tmp_name']);
+        if ($image_info === false) {
+            throw new Exception("Le fichier n'est pas une image valide");
+        }
+
+        return true;
+    }
+
+    /**
+     * Assigner une nouvelle photo principale quand l'actuelle est supprimée
+     */
+    private function assignNewMainPhoto($animal_id) {
+        // Approche compatible SQLite : d'abord trouver l'ID, puis mettre à jour
+        $select_query = "SELECT id FROM animal_photos
+                         WHERE animal_id = :animal_id
+                         ORDER BY created_at ASC
+                         LIMIT 1";
+
+        $select_stmt = $this->conn->prepare($select_query);
+        $select_stmt->bindParam(':animal_id', $animal_id);
+        $select_stmt->execute();
+        $first_photo = $select_stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($first_photo) {
+            $update_query = "UPDATE animal_photos
+                            SET is_main = 1
+                            WHERE id = :photo_id";
+
+            $update_stmt = $this->conn->prepare($update_query);
+            $update_stmt->bindParam(':photo_id', $first_photo['id']);
+            $update_stmt->execute();
+        }
     }
 }
 ?>
