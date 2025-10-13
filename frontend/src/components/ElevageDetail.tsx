@@ -55,10 +55,8 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
     const [animaux, setAnimaux] = useState<Animal[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [currentView, setCurrentView] = useState<'list' | 'form' | 'descendants' | 'users' | 'statistics'>('list');
+    const [currentView, setCurrentView] = useState<'list' | 'form' | 'users' | 'statistics'>('list');
     const [editingAnimal, setEditingAnimal] = useState<Animal | undefined>();
-    const [descendants, setDescendants] = useState<Animal[]>([]);
-    const [selectedAnimalForDescendants, setSelectedAnimalForDescendants] = useState<string>('');
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [filter, setFilter] = useState({
         statut: '',
@@ -314,37 +312,6 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
             } catch (error: any) {
                 alert('Erreur lors de la mise à jour: ' + error.message);
             }
-        }
-    };
-
-    const handleViewDescendants = async (animalId: number) => {
-        try {
-            setLoading(true);
-            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/descendants`, {
-                headers: getAuthHeaders()
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erreur lors du chargement des descendants');
-            }
-
-            const data = await response.json();
-            setDescendants(data);
-
-            // Récupérer l'identifiant de l'animal parent
-            const animal = animaux.find(a => a.id === animalId);
-            if (animal) {
-                setSelectedAnimalForDescendants(animal.identifiant_officiel + (animal.nom ? ` (${animal.nom})` : ''));
-            }
-
-            setCurrentView('descendants');
-            setError('');
-
-        } catch (error: any) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -871,14 +838,6 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                 </td>
                                                 <td className="block sm:table-cell text-left px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 no-label">
                                                     <div className="flex flex-wrap gap-1 sm:gap-0.5">
-                                                        <button
-                                                            onClick={() => handleViewDescendants(animal.id)}
-                                                            className="bg-gray-100 border border-gray-200 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-gray-100 transition-colors duration-150 text-gray-900"
-                                                            title="Voir descendants"
-                                                        >
-                                                            🌳
-                                                        </button>
-
                                                         {canEditElevage() && (
                                                             <>
                                                                 <button
@@ -894,7 +853,7 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                                                                     className="bg-gray-100 border border-gray-200 cursor-pointer p-1.5 sm:p-1 mx-0.5 text-base rounded hover:bg-purple-100 transition-colors duration-150 text-gray-900"
                                                                     title="Arbre généalogique"
                                                                 >
-                                                                    🧬
+                                                                    🌳
                                                                 </button>
 
                                                                 {animal.statut === 'vivant' && (
@@ -925,60 +884,6 @@ const ElevageDetail: React.FC<ElevageDetailProps> = ({ elevageId, onBack }) => {
                             </div>
                         )}
                     </>
-                )}
-
-                {currentView === 'descendants' && (
-                    <div id="elevage-descendants-view" className="descendants-view">
-                        <div id="elevage-descendants-header" className="descendants-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                            <h3 id="elevage-descendants-title" className="text-lg sm:text-xl font-semibold text-gray-900">
-                                Descendants de {selectedAnimalForDescendants}
-                            </h3>
-                            <button id="elevage-descendants-back-btn" onClick={() => setCurrentView('list')} className="back-btn">
-                                ← Retour à la liste
-                            </button>
-                        </div>
-
-                        {descendants.length === 0 ? (
-                            <div id="elevagedetail-no-descendants-6" className="no-descendants text-center py-8 text-gray-700">
-                                Cet animal n'a pas de descendants connus.
-                            </div>
-                        ) : (
-                            <div id="elevagedetail-descendants-table-container-7" className="table-responsive">
-                                <table className="table-mobile w-full border-collapse bg-white rounded-lg shadow-card">
-                                    <thead className="hidden sm:table-header-group">
-                                        <tr>
-                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Identifiant</th>
-                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Nom</th>
-                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Sexe</th>
-                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Race</th>
-                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Naissance</th>
-                                            <th className="bg-gray-50 px-3 py-2.5 text-left text-gray-700 font-bold">Statut</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="block sm:table-row-group">
-                                        {descendants.map(descendant => (
-                                            <tr key={descendant.id} className={`block sm:table-row border-b border-gray-200 mb-4 sm:mb-0 bg-gray-50 sm:bg-white rounded-lg sm:rounded-none p-4 sm:p-0 text-gray-900 hover:bg-gray-100 transition-colors ${descendant.statut === 'mort' ? 'opacity-75' : ''}`}>
-                                                <td data-label="Identifiant" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200 font-mono font-bold">{descendant.identifiant_officiel}</td>
-                                                <td data-label="Nom" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{descendant.nom || '-'}</td>
-                                                <td data-label="Sexe" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">
-                                                    <span className="sexe-badge text-lg">
-                                                        {descendant.sexe === 'M' ? '♂️' : '♀️'}
-                                                    </span>
-                                                </td>
-                                                <td data-label="Race" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{descendant.race_nom}</td>
-                                                <td data-label="Naissance" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">{formatDate(descendant.date_naissance)}</td>
-                                                <td data-label="Statut" className="block sm:table-cell text-left sm:text-center px-0 sm:px-3 py-1 sm:py-2.5 border-0 sm:border-gray-200">
-                                                    <span className={`status-badge px-2 py-1 rounded-full text-xs font-bold ${descendant.statut === 'vivant' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
-                                                        {descendant.statut === 'vivant' ? '✅' : '💀'}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
                 )}
 
                 {currentView === 'statistics' && (

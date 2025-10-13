@@ -118,51 +118,6 @@ const AnimalDashboard: React.FC = () => {
         setSelectedAnimalForTree(animalId);
     };
 
-    const handleViewDescendants = async (animalId: number) => {
-        try {
-            setLoading(true);
-            const token = sessionStorage.getItem('token');
-
-            if (!token) {
-                throw new Error('Token d\'authentification manquant');
-            }
-
-            const response = await fetch(`${API_BASE_URL}api/animaux/${animalId}/descendants`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erreur lors du chargement des descendants');
-            }
-
-            const data = await response.json();
-            setDescendants(data);
-
-            // Récupérer l'identifiant de l'animal parent pour l'affichage
-            const animalResponse = await fetch(`${API_BASE_URL}api/animaux/${animalId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (animalResponse.ok) {
-                const animalData = await animalResponse.json();
-                setSelectedAnimalForDescendants(animalData.identifiant_officiel + (animalData.nom ? ` (${animalData.nom})` : ''));
-            }
-
-            setCurrentView('descendants');
-            setError('');
-
-        } catch (error: any) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const formatDate = (dateString?: string) => {
         if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('fr-FR');
@@ -206,7 +161,6 @@ const AnimalDashboard: React.FC = () => {
                 <AnimalList
                     onEdit={handleEditAnimal}
                     onDelete={handleDeleteAnimal}
-                    onViewDescendants={handleViewDescendants}
                     onMarkDead={handleMarkDead}
                     onViewFamilyTree={handleViewFamilyTree}
                     refreshTrigger={refreshTrigger}
