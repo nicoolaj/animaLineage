@@ -33,7 +33,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
   existingPhotos = [],
   onPhotosChange,
   maxPhotos = 10,
-  maxSizePerPhoto = 5, // 5MB par défaut
+  maxSizePerPhoto = 10, // 10MB par défaut (sera optimisée à 1000x1000px)
   className = ''
 }) => {
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
@@ -233,7 +233,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 </label>
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                PNG, JPG, GIF jusqu'à {formatFileSize(maxSizePerPhoto * 1024 * 1024)}
+                PNG, JPG, GIF, WebP jusqu'à {formatFileSize(maxSizePerPhoto * 1024 * 1024)}<br/>
+                <span className="text-blue-500">Optimisation automatique (redimensionnement + compression)</span>
               </p>
             </div>
           </div>

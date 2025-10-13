@@ -677,7 +677,7 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                     existingPhotos={existingPhotos}
                     onPhotosChange={handlePhotosChange}
                     maxPhotos={10}
-                    maxSizePerPhoto={5}
+                    maxSizePerPhoto={10}
                     className="mb-5"
                 />
 

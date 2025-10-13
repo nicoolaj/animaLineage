@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+require_once __DIR__ . '/../utils/ImageOptimizer.php';
 class Animal {
     private $conn;
     private $database;
@@ -533,45 +534,51 @@ class Animal {
         // Valider le fichier image
         $this->validateImageFile($photo_data);
 
-        // Lire les données binaires du fichier
-        $binary_data = file_get_contents($photo_data['tmp_name']);
-        if ($binary_data === false) {
-            throw new Exception("Impossible de lire le fichier image");
+        try {
+            // Initialiser l'optimiseur d'images (1000x1000px max, qualité 85%)
+            $optimizer = new ImageOptimizer(1000, 1000, 85);
+
+            // Optimiser l'image
+            $optimized = $optimizer->optimizeFromPath($photo_data['tmp_name'], $photo_data['mime_type']);
+
+            error_log("Image optimisée: {$photo_data['original_name']} - " .
+                     "Taille originale: {$photo_data['file_size']} bytes, " .
+                     "Taille optimisée: {$optimized['file_size']} bytes, " .
+                     "Dimensions: {$optimized['original_width']}x{$optimized['original_height']} -> {$optimized['width']}x{$optimized['height']}");
+
+            // Vérifier s'il s'agit de la première photo (sera automatiquement principale)
+            $count_query = "SELECT COUNT(*) as count FROM animal_photos WHERE animal_id = :animal_id";
+            $count_stmt = $this->conn->prepare($count_query);
+            $count_stmt->bindParam(':animal_id', $animal_id);
+            $count_stmt->execute();
+            $count_result = $count_stmt->fetch(PDO::FETCH_ASSOC);
+            $is_main = $count_result['count'] == 0 ? 1 : 0;
+
+            // Insérer la photo optimisée en base
+            $query = "INSERT INTO animal_photos
+                      (animal_id, original_name, file_size, mime_type, width, height, photo_data, is_main)
+                      VALUES (:animal_id, :original_name, :file_size, :mime_type, :width, :height, :photo_data, :is_main)";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':animal_id', $animal_id);
+            $stmt->bindParam(':original_name', $photo_data['original_name']);
+            $stmt->bindParam(':file_size', $optimized['file_size']); // Utiliser la taille optimisée
+            $stmt->bindParam(':mime_type', $photo_data['mime_type']);
+            $stmt->bindParam(':width', $optimized['width']); // Utiliser les dimensions optimisées
+            $stmt->bindParam(':height', $optimized['height']);
+            $stmt->bindParam(':photo_data', $optimized['data'], PDO::PARAM_LOB); // Utiliser les données optimisées
+            $stmt->bindParam(':is_main', $is_main);
+
+            if (!$stmt->execute()) {
+                throw new Exception("Erreur lors de l'enregistrement de la photo");
+            }
+
+            return $this->conn->lastInsertId();
+
+        } catch (Exception $e) {
+            error_log("Erreur lors de l'optimisation de l'image {$photo_data['original_name']}: " . $e->getMessage());
+            throw new Exception("Erreur lors du traitement de l'image: " . $e->getMessage());
         }
-
-        // Obtenir les dimensions de l'image
-        $image_info = getimagesize($photo_data['tmp_name']);
-        $width = $image_info ? $image_info[0] : null;
-        $height = $image_info ? $image_info[1] : null;
-
-        // Vérifier s'il s'agit de la première photo (sera automatiquement principale)
-        $count_query = "SELECT COUNT(*) as count FROM animal_photos WHERE animal_id = :animal_id";
-        $count_stmt = $this->conn->prepare($count_query);
-        $count_stmt->bindParam(':animal_id', $animal_id);
-        $count_stmt->execute();
-        $count_result = $count_stmt->fetch(PDO::FETCH_ASSOC);
-        $is_main = $count_result['count'] == 0 ? 1 : 0;
-
-        // Insérer la photo en base
-        $query = "INSERT INTO animal_photos
-                  (animal_id, original_name, file_size, mime_type, width, height, photo_data, is_main)
-                  VALUES (:animal_id, :original_name, :file_size, :mime_type, :width, :height, :photo_data, :is_main)";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':animal_id', $animal_id);
-        $stmt->bindParam(':original_name', $photo_data['original_name']);
-        $stmt->bindParam(':file_size', $photo_data['file_size']);
-        $stmt->bindParam(':mime_type', $photo_data['mime_type']);
-        $stmt->bindParam(':width', $width);
-        $stmt->bindParam(':height', $height);
-        $stmt->bindParam(':photo_data', $binary_data, PDO::PARAM_LOB);
-        $stmt->bindParam(':is_main', $is_main);
-
-        if (!$stmt->execute()) {
-            throw new Exception("Erreur lors de l'enregistrement de la photo");
-        }
-
-        return $this->conn->lastInsertId();
     }
 
     /**
@@ -641,15 +648,14 @@ class Animal {
      * Valider un fichier image
      */
     private function validateImageFile($photo_data) {
-        // Vérifier la taille du fichier (limite à 5MB)
-        $max_size = 5 * 1024 * 1024; // 5MB
+        // Vérifier la taille du fichier (limite à 10MB avant optimisation)
+        $max_size = 10 * 1024 * 1024; // 10MB (plus généreux car l'image sera optimisée)
         if ($photo_data['file_size'] > $max_size) {
-            throw new Exception("Fichier trop volumineux. Limite: 5MB");
+            throw new Exception("Fichier trop volumineux. Limite: 10MB");
         }
 
-        // Vérifier le type MIME
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (!in_array($photo_data['mime_type'], $allowed_types)) {
+        // Vérifier le type MIME avec l'optimiseur
+        if (!ImageOptimizer::isSupportedMimeType($photo_data['mime_type'])) {
             throw new Exception("Type de fichier non autorisé. Types acceptés: JPEG, PNG, GIF, WebP");
         }
 
