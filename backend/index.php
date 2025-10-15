@@ -681,6 +681,7 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                         break;
                     case 'health-log':
                         // Routes pour le logbook de santé
+                        error_log("Health-log route reached: animal_id=$animal_id, method=$request_method");
                         require_once 'controllers/HealthLogController.php';
                         $healthLogController = new HealthLogController();
 

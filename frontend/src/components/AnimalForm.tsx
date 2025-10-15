@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import TransferRequestDialog from './TransferRequestDialog';
 import PhotoUpload from './PhotoUpload';
-import HealthLogbook from './HealthLogbook';
 import { API_BASE_URL } from '../config/api';
+
+// Dynamic import du HealthLogbook pour forcer le rechargement
+const HealthLogbook = lazy(() => import('./HealthLogbook'));
 
 interface Race {
     id: number;
@@ -709,10 +711,19 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
 
                 {/* Logbook de santé - visible seulement en mode édition */}
                 {animal?.id && (
-                    <HealthLogbook
-                        animalId={animal.id}
-                        className="mb-6"
-                    />
+                    <Suspense fallback={
+                        <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <div className="animate-pulse">
+                                <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                    }>
+                        <HealthLogbook
+                            animalId={animal.id}
+                            className="mb-6"
+                        />
+                    </Suspense>
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-gray-200">

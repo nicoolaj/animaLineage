@@ -88,8 +88,11 @@ class HealthLogController {
      */
     public function createHealthEvent($animal_id, $user_id, $user_role) {
         try {
+            error_log("createHealthEvent called for animal_id=$animal_id, user_id=$user_id, user_role=$user_role");
+
             // Vérifier les permissions d'écriture (Admin ou Modérateur uniquement)
             if (!$this->canWriteHealthLog($animal_id, $user_id, $user_role)) {
+                error_log("Permission denied for createHealthEvent: user_id=$user_id, user_role=$user_role");
                 http_response_code(403);
                 echo json_encode(['message' => 'Seuls les administrateurs et modérateurs peuvent créer des événements de santé']);
                 return;

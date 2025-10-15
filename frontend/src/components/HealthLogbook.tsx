@@ -85,6 +85,7 @@ const HealthLogbook: React.FC<HealthLogbookProps> = ({
   ];
 
   useEffect(() => {
+    console.log('🔥 HealthLogbook V2 chargé ! Fix preventDefault complet');
     loadUserPermissions();
     loadHealthLog();
   }, [animalId]);
@@ -136,6 +137,7 @@ const HealthLogbook: React.FC<HealthLogbookProps> = ({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('🚀 handleSubmit appelé !');
     e.preventDefault();
     setSubmitting(true);
     setError('');
@@ -148,6 +150,8 @@ const HealthLogbook: React.FC<HealthLogbookProps> = ({
 
       const method = editingEvent ? 'PUT' : 'POST';
 
+      console.log('HealthLogbook - Soumission:', { url, method, formData, token: token ? 'présent' : 'absent' });
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -157,12 +161,16 @@ const HealthLogbook: React.FC<HealthLogbookProps> = ({
         body: JSON.stringify(formData)
       });
 
+      console.log('HealthLogbook - Réponse serveur:', response.status, response.statusText);
+
       if (response.ok) {
+        console.log('HealthLogbook - Sauvegarde réussie');
         await loadHealthLog();
         resetForm();
         setShowForm(false);
       } else {
         const errorData = await response.json();
+        console.log('HealthLogbook - Erreur serveur:', errorData);
         setError(errorData.message || 'Erreur lors de la sauvegarde');
       }
     } catch (error) {
@@ -387,8 +395,14 @@ const HealthLogbook: React.FC<HealthLogbookProps> = ({
 
             <div className="flex gap-3 pt-2">
               <button
-                type="submit"
+                type="button"
                 disabled={submitting}
+                onClick={(e) => {
+                  console.log('🔴 Bouton cliqué !');
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit(e as any);
+                }}
                 className="btn-primary px-4 py-2 disabled:opacity-50"
               >
                 {submitting ? 'Enregistrement...' : (editingEvent ? 'Modifier' : 'Ajouter')}
