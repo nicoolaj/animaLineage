@@ -20,20 +20,21 @@ if ! command -v npm &> /dev/null
 then
     if ! command -v nvm &> /dev/null
     then
-        echo "Erreur : la commande 'npm' n'a pas été trouvée. Avez-vous pensez à "nvm i" ?" >&2
+        echo "Erreur : la commande 'npm' n'a pas été trouvée. Avez-vous pensé à \"nvm i\" ?" >&2
     else
         echo "Erreur : la commande 'npm' n'a pas été trouvée. Veuillez l'installer et/ou vous assurer qu'elle est dans votre PATH." >&2
     fi
     exit 1
 fi
 cd $FRONTEND_DIR
+npm ci
 npm run build
 cd ..
 
 # Préparation de la structure de déploiement
 echo "📂 Préparation de la structure de déploiement..."
 
-# Copie du frontend build vers le dossier racine (Vite utilise 'dist' au lieu de 'build')
+# Copie du frontend build vers le dossier racine (Vite utilise 'dist')
 cp -r $FRONTEND_DIR/build/* $DEPLOY_DIR/
 
 # Copie du backend vers le sous-dossier api

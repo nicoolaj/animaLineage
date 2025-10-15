@@ -43,6 +43,8 @@ require_once 'controllers/ElevageController.php';
 require_once 'controllers/AnimalController.php';
 require_once 'controllers/TransferRequestController.php';
 require_once 'controllers/ConfigController.php';
+require_once 'controllers/HealthLogController.php';
+require_once 'controllers/UserPermissionController.php';
 require_once 'middleware/AuthMiddleware.php';
 
 $database = new Database();
@@ -57,6 +59,7 @@ $elevageController = new ElevageController($database);
 $animalController = new AnimalController($db, $database);
 $transferRequestController = new TransferRequestController($db, $database);
 $configController = new ConfigController();
+$userPermissionController = new UserPermissionController();
 $authMiddleware = new AuthMiddleware($database);
 
 $request_method = $_SERVER['REQUEST_METHOD'];
@@ -74,6 +77,92 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                 'timestamp' => date('c'),
                 'server' => $_SERVER['SERVER_NAME'] ?? 'unknown'
             ]);
+        } else {
+            http_response_code(405);
+            echo json_encode(['message' => 'Method not allowed']);
+        }
+    } elseif (isset($path_parts[1]) && $path_parts[1] === 'debug-token') {
+        // Endpoint de debug temporaire
+        if ($request_method === 'GET') {
+            $authHeader = null;
+            if (function_exists('getallheaders')) {
+                $headers = getallheaders();
+                foreach ($headers as $key => $value) {
+                    if (strtolower($key) === 'authorization') {
+                        $authHeader = $value;
+                        break;
+                    }
+                }
+            }
+            if (!$authHeader && isset($_SERVER['HTTP_AUTHORIZATION'])) {
+                $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+            }
+
+            $token = null;
+            if ($authHeader && preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+                $token = $matches[1];
+            }
+
+            $result = [
+                'has_auth_header' => !empty($authHeader),
+                'auth_header_preview' => $authHeader ? substr($authHeader, 0, 50) . '...' : null,
+                'has_token' => !empty($token),
+                'token_preview' => $token ? substr($token, 0, 50) . '...' : null,
+                'jwt_secret_length' => strlen($_ENV['JWT_SECRET'] ?? 'default-secret'),
+                'timestamp' => date('c')
+            ];
+
+            // Test de décodage JWT
+            if ($token) {
+                try {
+                    require_once __DIR__ . '/vendor/autoload.php';
+
+                    $secret = $_ENV['JWT_SECRET'] ?? 'default-secret';
+                    $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key($secret, 'HS256'));
+                    $result['jwt_decode_success'] = true;
+                    $result['jwt_user_data'] = $decoded->user ?? null;
+                } catch (Exception $e) {
+                    $result['jwt_decode_success'] = false;
+                    $result['jwt_decode_error'] = $e->getMessage();
+                }
+            }
+
+            echo json_encode($result);
+        } else {
+            http_response_code(405);
+            echo json_encode(['message' => 'Method not allowed']);
+        }
+    } elseif (isset($path_parts[1]) && $path_parts[1] === 'test-controller') {
+        // Test si le contrôleur peut être chargé
+        if ($request_method === 'GET') {
+            try {
+                // Tester le chargement du UserPermissionController
+                $controllerPath = __DIR__ . '/controllers/UserPermissionController.php';
+                $result = [
+                    'controller_file_exists' => file_exists($controllerPath),
+                    'controller_readable' => is_readable($controllerPath),
+                    'controller_path' => $controllerPath
+                ];
+
+                if (file_exists($controllerPath)) {
+                    require_once $controllerPath;
+                    $result['controller_loaded'] = class_exists('UserPermissionController');
+
+                    if (class_exists('UserPermissionController')) {
+                        $testController = new UserPermissionController();
+                        $result['controller_instantiated'] = true;
+                    }
+                }
+
+                echo json_encode($result);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'error' => true,
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]);
+            }
         } else {
             http_response_code(405);
             echo json_encode(['message' => 'Method not allowed']);
@@ -126,6 +215,60 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
         } else {
             http_response_code(404);
             echo json_encode(['message' => 'Auth endpoint not specified']);
+        }
+    } elseif (isset($path_parts[1]) && $path_parts[1] === 'permissions') {
+        // Routes pour les permissions sécurisées
+        try {
+            $currentUser = $authMiddleware->getCurrentUser();
+            if (!$currentUser) {
+                error_log("Authentication failed for permissions endpoint");
+                http_response_code(401);
+                echo json_encode(['message' => 'Authentification requise']);
+                return;
+            }
+        } catch (Exception $e) {
+            error_log("Exception in permissions authentication: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['message' => 'Erreur d\'authentification: ' . $e->getMessage()]);
+            return;
+        }
+
+        $user_id = $currentUser['id'];
+        $user_role = $currentUser['role'];
+
+        if (isset($path_parts[2])) {
+            switch ($path_parts[2]) {
+                case 'user':
+                    if ($request_method === 'GET') {
+                        $userPermissionController->getUserPermissions($user_id, $user_role);
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['message' => 'Method not allowed']);
+                    }
+                    break;
+                case 'animal':
+                    if (isset($path_parts[3]) && isset($_GET['action'])) {
+                        $animal_id = $path_parts[3];
+                        $action = $_GET['action'];
+                        if ($request_method === 'GET') {
+                            $userPermissionController->checkAnimalPermissions($animal_id, $user_id, $user_role, $action);
+                        } else {
+                            http_response_code(405);
+                            echo json_encode(['message' => 'Method not allowed']);
+                        }
+                    } else {
+                        http_response_code(400);
+                        echo json_encode(['message' => 'Animal ID et action requis']);
+                    }
+                    break;
+                default:
+                    http_response_code(404);
+                    echo json_encode(['message' => 'Permission endpoint not found']);
+                    break;
+            }
+        } else {
+            http_response_code(404);
+            echo json_encode(['message' => 'Permission endpoint not specified']);
         }
     } elseif (isset($path_parts[1]) && $path_parts[1] === 'config') {
         if (isset($path_parts[2])) {
@@ -430,7 +573,6 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
 
                 $photo_id = $path_parts[4];
                 if ($request_method === 'GET') {
-                    error_log("Public access to photo preview: animal_id=$animal_id, photo_id=$photo_id");
                     // Accès public : pas de vérification d'authentification pour les images
                     $animalController->getPhotoPreviewPublic($animal_id, $photo_id);
                 } else {
@@ -507,7 +649,6 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                             } elseif (isset($path_parts[5]) && $path_parts[5] === 'preview') {
                                 // GET /api/animaux/{id}/photos/{photo_id}/preview
                                 if ($request_method === 'GET') {
-                                    error_log("Routing to getPhotoPreview: animal_id=$animal_id, photo_id=$photo_id");
                                     $animalController->getPhotoPreview($animal_id, $photo_id, $user_id, $user_role);
                                 } else {
                                     http_response_code(405);
@@ -530,6 +671,42 @@ if (isset($path_parts[0]) && $path_parts[0] === 'api') {
                                     break;
                                 case 'POST':
                                     $animalController->uploadPhotos($animal_id, $user_id, $user_role);
+                                    break;
+                                default:
+                                    http_response_code(405);
+                                    echo json_encode(['message' => 'Method not allowed']);
+                                    break;
+                            }
+                        }
+                        break;
+                    case 'health-log':
+                        // Routes pour le logbook de santé
+                        require_once 'controllers/HealthLogController.php';
+                        $healthLogController = new HealthLogController();
+
+                        if (isset($path_parts[4])) {
+                            // Routes pour un événement spécifique: /api/animaux/{id}/health-log/{event_id}
+                            $event_id = $path_parts[4];
+                            switch ($request_method) {
+                                case 'PUT':
+                                    $healthLogController->updateHealthEvent($event_id, $user_id, $user_role);
+                                    break;
+                                case 'DELETE':
+                                    $healthLogController->deleteHealthEvent($event_id, $user_id, $user_role);
+                                    break;
+                                default:
+                                    http_response_code(405);
+                                    echo json_encode(['message' => 'Method not allowed']);
+                                    break;
+                            }
+                        } else {
+                            // Routes pour la collection d'événements: /api/animaux/{id}/health-log
+                            switch ($request_method) {
+                                case 'GET':
+                                    $healthLogController->getHealthLog($animal_id, $user_id, $user_role);
+                                    break;
+                                case 'POST':
+                                    $healthLogController->createHealthEvent($animal_id, $user_id, $user_role);
                                     break;
                                 default:
                                     http_response_code(405);

@@ -607,8 +607,6 @@ class AnimalController {
      */
     public function getPhotos($animal_id, $user_id, $user_role) {
         try {
-            // Log pour debug
-            error_log("getPhotos called with animal_id=$animal_id, user_id=$user_id, user_role=$user_role");
 
             // Vérifier si l'utilisateur peut voir cet animal
             if (!$this->animal->canView($animal_id, $user_id, $user_role)) {
@@ -619,7 +617,6 @@ class AnimalController {
             }
 
             $photos = $this->animal->getPhotos($animal_id);
-            error_log("Found " . count($photos) . " photos for animal $animal_id");
 
             // Ajouter l'URL de prévisualisation pour chaque photo
             foreach ($photos as &$photo) {

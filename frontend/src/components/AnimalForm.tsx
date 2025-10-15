@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import TransferRequestDialog from './TransferRequestDialog';
 import PhotoUpload from './PhotoUpload';
+import HealthLogbook from './HealthLogbook';
 import { API_BASE_URL } from '../config/api';
 
 interface Race {
@@ -211,6 +212,31 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
             loadElevages();
         }
     }, [elevagesLoaded]);
+
+    // Récupérer le rôle utilisateur au chargement
+    useEffect(() => {
+        // Essayer d'abord 'user', puis 'userData' en fallback
+        let userData = sessionStorage.getItem('user');
+        if (!userData) {
+            userData = sessionStorage.getItem('userData');
+        }
+
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                console.log('AnimalForm - Données utilisateur récupérées:', user);
+                console.log('AnimalForm - Rôle spécifique:', user.role, typeof user.role);
+
+                // Plus besoin de stocker le rôle localement car le HealthLogbook utilise JWT
+                const roleNumber = parseInt(user.role) || 3;
+                console.log('AnimalForm - Rôle final assigné:', roleNumber);
+            } catch (error) {
+                console.error('Erreur lors du parsing des données utilisateur:', error);
+            }
+        } else {
+            console.log('AnimalForm - Aucune donnée utilisateur trouvée dans sessionStorage');
+        }
+    }, []);
 
     // Recharger les parents potentiels quand la race change
     useEffect(() => {
@@ -680,6 +706,14 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                     maxSizePerPhoto={10}
                     className="mb-5"
                 />
+
+                {/* Logbook de santé - visible seulement en mode édition */}
+                {animal?.id && (
+                    <HealthLogbook
+                        animalId={animal.id}
+                        className="mb-6"
+                    />
+                )}
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-gray-200">
                     <button
