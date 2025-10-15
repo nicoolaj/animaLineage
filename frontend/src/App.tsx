@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import './App.css';
 import { useDispatch } from 'react-redux';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { initializeLanguage } from './store/slices/languageSlice';
 import { useApiHealthWithRedux } from './hooks/useApiHealthWithRedux';
-import LandingPage from './components/LandingPage';
-import MainDashboard from './components/MainDashboard';
-import PendingAccountDashboard from './components/PendingAccountDashboard';
-import MaintenanceMessage from './components/MaintenanceMessage';
+import LoadingFallback from './components/LoadingFallback';
+
+// Lazy loading des composants principaux pour optimiser le temps de chargement initial
+const LandingPage = lazy(() => import('./components/LandingPage'));
+const MainDashboard = lazy(() => import('./components/MainDashboard'));
+const PendingAccountDashboard = lazy(() => import('./components/PendingAccountDashboard'));
+const MaintenanceMessage = lazy(() => import('./components/MaintenanceMessage'));
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -38,11 +41,13 @@ const AppContent: React.FC = () => {
   // Afficher le message de maintenance si l'API n'est pas disponible
   if (!apiHealth.isHealthy && apiHealth.error) {
     return (
-      <MaintenanceMessage
-        error={apiHealth.error}
-        onRetry={apiHealth.recheckHealth}
-        isRetrying={apiHealth.isChecking}
-      />
+      <Suspense fallback={<LoadingFallback />}>
+        <MaintenanceMessage
+          error={apiHealth.error}
+          onRetry={apiHealth.recheckHealth}
+          isRetrying={apiHealth.isChecking}
+        />
+      </Suspense>
     );
   }
 
@@ -58,16 +63,28 @@ const AppContent: React.FC = () => {
 
   const renderContent = () => {
     if (!isAuthenticated) {
-      return <LandingPage />;
+      return (
+        <Suspense fallback={<LoadingFallback />}>
+          <LandingPage />
+        </Suspense>
+      );
     }
 
     // Si l'utilisateur est connecté mais son compte est en attente (status = 0)
     if (user?.status === 0) {
-      return <PendingAccountDashboard />;
+      return (
+        <Suspense fallback={<LoadingFallback />}>
+          <PendingAccountDashboard />
+        </Suspense>
+      );
     }
 
     // Si l'utilisateur est connecté et validé (status = 1) ou rejeté (status = 2)
-    return <MainDashboard />;
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <MainDashboard />
+      </Suspense>
+    );
   };
 
   return (

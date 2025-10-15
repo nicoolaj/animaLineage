@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
-import TransferRequestDialog from './TransferRequestDialog';
-import PhotoUpload from './PhotoUpload';
 import { API_BASE_URL } from '../config/api';
 
-// Dynamic import du HealthLogbook pour forcer le rechargement
+// Dynamic imports pour optimiser le chargement
 const HealthLogbook = lazy(() => import('./HealthLogbook'));
+const PhotoUpload = lazy(() => import('./PhotoUpload'));
+const TransferRequestDialog = lazy(() => import('./TransferRequestDialog'));
 
 interface Race {
     id: number;
@@ -700,14 +700,27 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
                 </div>
 
                 {/* Section photos */}
-                <PhotoUpload
-                    animalId={animal?.id}
-                    existingPhotos={existingPhotos}
-                    onPhotosChange={handlePhotosChange}
-                    maxPhotos={10}
-                    maxSizePerPhoto={10}
-                    className="mb-5"
-                />
+                <Suspense fallback={
+                    <div className="mb-5 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div className="animate-pulse">
+                            <div className="h-4 bg-gray-300 rounded w-1/3 mb-3"></div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="aspect-square bg-gray-200 rounded"></div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                }>
+                    <PhotoUpload
+                        animalId={animal?.id}
+                        existingPhotos={existingPhotos}
+                        onPhotosChange={handlePhotosChange}
+                        maxPhotos={10}
+                        maxSizePerPhoto={10}
+                        className="mb-5"
+                    />
+                </Suspense>
 
                 {/* Logbook de santé - visible seulement en mode édition */}
                 {animal?.id && (
@@ -749,11 +762,23 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ animal, onSubmit, onCancel, ele
 
             {/* Dialogue de demande de transfert */}
             {showTransferDialog && existingAnimal && (
-                <TransferRequestDialog
-                    animal={existingAnimal}
-                    onClose={() => setShowTransferDialog(false)}
-                    onSubmit={handleTransferRequest}
-                />
+                <Suspense fallback={
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                            <div className="animate-pulse">
+                                <div className="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
+                                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                            </div>
+                        </div>
+                    </div>
+                }>
+                    <TransferRequestDialog
+                        animal={existingAnimal}
+                        onClose={() => setShowTransferDialog(false)}
+                        onSubmit={handleTransferRequest}
+                    />
+                </Suspense>
             )}
         </div>
     );

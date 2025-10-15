@@ -1,23 +1,26 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, lazy, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../hooks/useTranslation';
-import AdminPanel, { AdminPanelRef } from './AdminPanel';
-import PendingUsers, { PendingUsersRef } from './PendingUsers';
-import ElevageList from './ElevageList';
-import ElevageForm from './ElevageForm';
-import ElevageDetail from './ElevageDetail';
-import TypesAnimauxList from './TypesAnimauxList';
-import TypeAnimalForm from './TypeAnimalForm';
-import RacesList from './RacesList';
-import RaceForm from './RaceForm';
-import AnimalDashboard from './AnimalDashboard';
-import TransferRequestManager from './TransferRequestManager';
-import CompatibilityTester from './CompatibilityTester';
 import LanguageSelector from './LanguageSelector';
 import Footer from './Footer';
-import MentionsLegales from './MentionsLegales';
-import PolitiqueConfidentialite from './PolitiqueConfidentialite';
-import BackupManager from './BackupManager';
+import LoadingFallback from './LoadingFallback';
+
+// Lazy loading des composants lourds pour optimiser les performances
+const AdminPanel = lazy(() => import('./AdminPanel').then(module => ({ default: module.default })));
+const PendingUsers = lazy(() => import('./PendingUsers').then(module => ({ default: module.default })));
+const ElevageList = lazy(() => import('./ElevageList'));
+const ElevageForm = lazy(() => import('./ElevageForm'));
+const ElevageDetail = lazy(() => import('./ElevageDetail'));
+const TypesAnimauxList = lazy(() => import('./TypesAnimauxList'));
+const TypeAnimalForm = lazy(() => import('./TypeAnimalForm'));
+const RacesList = lazy(() => import('./RacesList'));
+const RaceForm = lazy(() => import('./RaceForm'));
+const AnimalDashboard = lazy(() => import('./AnimalDashboard'));
+const TransferRequestManager = lazy(() => import('./TransferRequestManager'));
+const CompatibilityTester = lazy(() => import('./CompatibilityTester'));
+const MentionsLegales = lazy(() => import('./MentionsLegales'));
+const PolitiqueConfidentialite = lazy(() => import('./PolitiqueConfidentialite'));
+const BackupManager = lazy(() => import('./BackupManager'));
 
 type TabType = 'elevages' | 'animals' | 'users' | 'types-races' | 'transfer-requests' | 'compatibility-tester' | 'elevage-form' | 'elevage-detail' | 'type-form' | 'race-form' | 'mentions-legales' | 'politique-confidentialite';
 
@@ -38,8 +41,8 @@ const MainDashboard: React.FC = () => {
   const [raceFormMode, setRaceFormMode] = useState<{ mode: 'create' | 'edit'; id?: string }>({ mode: 'create' });
   const [typesRacesSubTab, setTypesRacesSubTab] = useState<'types' | 'races'>('types');
 
-  const adminPanelRef = useRef<AdminPanelRef>(null);
-  const pendingUsersRef = useRef<PendingUsersRef>(null);
+  const adminPanelRef = useRef<any>(null);
+  const pendingUsersRef = useRef<any>(null);
 
   const handleLogout = () => {
     logout();
@@ -150,35 +153,63 @@ const MainDashboard: React.FC = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'elevages':
-        return <ElevageList onNewElevage={handleNewElevage} onEditElevage={handleEditElevage} onViewAnimaux={handleViewAnimaux} />;
+        return (
+          <Suspense fallback={<LoadingFallback type="grid" />}>
+            <ElevageList onNewElevage={handleNewElevage} onEditElevage={handleEditElevage} onViewAnimaux={handleViewAnimaux} />
+          </Suspense>
+        );
 
       case 'animals':
-        return <AnimalDashboard />;
+        return (
+          <Suspense fallback={<LoadingFallback type="grid" />}>
+            <AnimalDashboard />
+          </Suspense>
+        );
 
       case 'transfer-requests':
-        return <TransferRequestManager />;
+        return (
+          <Suspense fallback={<LoadingFallback type="grid" />}>
+            <TransferRequestManager />
+          </Suspense>
+        );
 
       case 'compatibility-tester':
-        return <CompatibilityTester />;
+        return (
+          <Suspense fallback={<LoadingFallback type="form" />}>
+            <CompatibilityTester />
+          </Suspense>
+        );
       case 'mentions-legales':
-        return <MentionsLegales onRetour={() => setActiveTab('elevages')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <MentionsLegales onRetour={() => setActiveTab('elevages')} />
+          </Suspense>
+        );
       case 'politique-confidentialite':
-        return <PolitiqueConfidentialite onRetour={() => setActiveTab('elevages')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <PolitiqueConfidentialite onRetour={() => setActiveTab('elevages')} />
+          </Suspense>
+        );
 
       case 'elevage-detail':
         return selectedElevageId ? (
-          <ElevageDetail elevageId={selectedElevageId} onBack={handleBackToElevages} />
+          <Suspense fallback={<LoadingFallback type="grid" />}>
+            <ElevageDetail elevageId={selectedElevageId} onBack={handleBackToElevages} />
+          </Suspense>
         ) : (
           <div>Élevage non sélectionné</div>
         );
 
       case 'elevage-form':
         return (
-          <ElevageForm
-            elevageId={elevageFormMode.mode === 'edit' ? elevageFormMode.id : undefined}
-            onSave={handleElevageFormClose}
-            onCancel={handleElevageFormClose}
-          />
+          <Suspense fallback={<LoadingFallback type="form" />}>
+            <ElevageForm
+              elevageId={elevageFormMode.mode === 'edit' ? elevageFormMode.id : undefined}
+              onSave={handleElevageFormClose}
+              onCancel={handleElevageFormClose}
+            />
+          </Suspense>
         );
 
       case 'types-races':
@@ -200,9 +231,13 @@ const MainDashboard: React.FC = () => {
             </div>
             <div id="maindashboard-sub-tab-content-3" className="sub-tab-content">
               {typesRacesSubTab === 'types' ? (
-                <TypesAnimauxList onNewType={handleNewType} onEditType={handleEditType} />
+                <Suspense fallback={<LoadingFallback type="grid" />}>
+                  <TypesAnimauxList onNewType={handleNewType} onEditType={handleEditType} />
+                </Suspense>
               ) : (
-                <RacesList onNewRace={handleNewRace} onEditRace={handleEditRace} />
+                <Suspense fallback={<LoadingFallback type="grid" />}>
+                  <RacesList onNewRace={handleNewRace} onEditRace={handleEditRace} />
+                </Suspense>
               )}
             </div>
           </div>
@@ -210,20 +245,24 @@ const MainDashboard: React.FC = () => {
 
       case 'type-form':
         return (
-          <TypeAnimalForm
-            typeId={typeFormMode.mode === 'edit' ? typeFormMode.id : undefined}
-            onSave={handleTypeFormClose}
-            onCancel={handleTypeFormClose}
-          />
+          <Suspense fallback={<LoadingFallback type="form" />}>
+            <TypeAnimalForm
+              typeId={typeFormMode.mode === 'edit' ? typeFormMode.id : undefined}
+              onSave={handleTypeFormClose}
+              onCancel={handleTypeFormClose}
+            />
+          </Suspense>
         );
 
       case 'race-form':
         return (
-          <RaceForm
-            raceId={raceFormMode.mode === 'edit' ? raceFormMode.id : undefined}
-            onSave={handleRaceFormClose}
-            onCancel={handleRaceFormClose}
-          />
+          <Suspense fallback={<LoadingFallback type="form" />}>
+            <RaceForm
+              raceId={raceFormMode.mode === 'edit' ? raceFormMode.id : undefined}
+              onSave={handleRaceFormClose}
+              onCancel={handleRaceFormClose}
+            />
+          </Suspense>
         );
 
       case 'users':
@@ -254,8 +293,12 @@ const MainDashboard: React.FC = () => {
                 </div>
                 <div className="card-content p-4 sm:p-6">
                   <div className="space-y-6">
-                    <PendingUsers ref={pendingUsersRef} onUserValidated={handleUserValidated} />
-                    <AdminPanel ref={adminPanelRef} onUserDeleted={handleUserDeleted} />
+                    <Suspense fallback={<LoadingFallback type="form" />}>
+                      <PendingUsers ref={pendingUsersRef} onUserValidated={handleUserValidated} />
+                    </Suspense>
+                    <Suspense fallback={<LoadingFallback type="form" />}>
+                      <AdminPanel ref={adminPanelRef} onUserDeleted={handleUserDeleted} />
+                    </Suspense>
                   </div>
                 </div>
               </div>
@@ -269,7 +312,9 @@ const MainDashboard: React.FC = () => {
                   <p className="text-gray-700 mt-2 text-sm sm:text-base">Création et gestion des sauvegardes de la base de données.</p>
                 </div>
                 <div className="card-content p-4 sm:p-6">
-                  <BackupManager />
+                  <Suspense fallback={<LoadingFallback type="form" />}>
+                    <BackupManager />
+                  </Suspense>
                 </div>
               </div>
             </div>

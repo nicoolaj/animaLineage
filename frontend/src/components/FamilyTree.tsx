@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { API_BASE_URL } from '../config/api';
-import DescendanceListView from './DescendanceListView';
-import ConcentricGraphView from './ConcentricGraphView';
+import LoadingFallback from './LoadingFallback';
+
+// Lazy loading des composants lourds de l'arbre généalogique
+const DescendanceListView = lazy(() => import('./DescendanceListView'));
+const ConcentricGraphView = lazy(() => import('./ConcentricGraphView'));
 
 interface Animal {
     id: number;
@@ -644,12 +647,16 @@ const FamilyTree: React.FC<FamilyTreeProps> = ({ animalId, onClose }) => {
                             )}
                             {viewMode === 'list' && (
                                 <div className="w-full h-full overflow-y-auto">
-                                    <DescendanceListView treeData={treeData} />
+                                    <Suspense fallback={<LoadingFallback />}>
+                                        <DescendanceListView treeData={treeData} />
+                                    </Suspense>
                                 </div>
                             )}
                             {viewMode === 'concentric' && (
                                 <div className="w-full h-full">
-                                    <ConcentricGraphView treeData={treeData} />
+                                    <Suspense fallback={<LoadingFallback />}>
+                                        <ConcentricGraphView treeData={treeData} />
+                                    </Suspense>
                                 </div>
                             )}
                         </>

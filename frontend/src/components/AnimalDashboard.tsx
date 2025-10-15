@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import AnimalForm from './AnimalForm';
 import AnimalList from './AnimalList';
-import FamilyTree from './FamilyTree';
+import LoadingFallback from './LoadingFallback';
 import { API_BASE_URL } from '../config/api';
+
+// Lazy loading pour l'arbre généalogique (composant lourd)
+const FamilyTree = lazy(() => import('./FamilyTree'));
 
 interface Animal {
     id: number;
@@ -235,10 +238,12 @@ const AnimalDashboard: React.FC = () => {
 
             {/* Arbre généalogique modal */}
             {selectedAnimalForTree && (
-                <FamilyTree
-                    animalId={selectedAnimalForTree}
-                    onClose={() => setSelectedAnimalForTree(null)}
-                />
+                <Suspense fallback={<LoadingFallback type="modal" />}>
+                    <FamilyTree
+                        animalId={selectedAnimalForTree}
+                        onClose={() => setSelectedAnimalForTree(null)}
+                    />
+                </Suspense>
             )}
 
         </div>
