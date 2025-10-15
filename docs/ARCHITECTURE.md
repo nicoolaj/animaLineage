@@ -1,189 +1,360 @@
-# Architecture du Système
+# Architecture du Système - AnimaLineage
 
 ## Vue d'ensemble
 
-L'application Mouton2 est une application web full-stack suivant une architecture en 3 tiers pour la gestion d'élevages. Elle sépare clairement la présentation (React), la logique métier (PHP) et la persistance des données (SQLite/MySQL/PostgreSQL).
+AnimaLineage est une application web full-stack moderne suivant une architecture en 3 tiers pour la gestion d'élevages. Elle sépare clairement la présentation (React + TypeScript), la logique métier (PHP 8.4) et la persistance des données (SQLite/MySQL/PostgreSQL).
 
 ## Architecture générale
 
 ```
 ┌─────────────────┐    HTTP/REST    ┌─────────────────┐    PDO    ┌─────────────────┐
 │   Frontend      │◄────────────────│    Backend      │◄──────────│   Base de       │
-│   (React)       │                 │    (PHP)        │           │   données       │
-│   Port 3002     │                 │    Port 3001    │           │   SQLite/MySQL  │
+│   React + TS    │                 │    PHP 8.4      │           │   données       │
+│   Port 5173     │                 │    Port 3001    │           │   Multi-SGBD    │
 └─────────────────┘                 └─────────────────┘           └─────────────────┘
 ```
 
-## Frontend (React/TypeScript)
+## Frontend (React 19 + TypeScript)
 
 ### Structure des composants
 
 ```
-src/
-├── components/          # Composants UI réutilisables
-│   ├── Auth.tsx        # Authentification
-│   ├── Dashboard.tsx   # Tableau de bord principal
-│   ├── AdminPanel.tsx  # Interface d'administration
-│   ├── ElevageForm.tsx # Formulaire d'élevage
-│   ├── AnimalForm.tsx  # Formulaire d'animal
-│   └── ...
-├── contexts/           # Gestion d'état global
-│   └── AuthContext.tsx # Contexte d'authentification
-├── utils/              # Fonctions utilitaires
-│   └── auth.ts         # Utilitaires d'authentification
-└── App.tsx             # Composant racine
+frontend/src/
+├── components/              # Composants UI réutilisables
+│   ├── Auth.tsx            # Authentification utilisateur
+│   ├── Dashboard.tsx       # Tableau de bord principal
+│   ├── AdminPanel.tsx      # Interface d'administration
+│   ├── ElevageDetail.tsx   # Détail et gestion d'élevage
+│   ├── AnimalForm.tsx      # Formulaire d'animal avec photos
+│   ├── AnimalList.tsx      # Liste et filtrage d'animaux
+│   ├── HealthLogbook.tsx   # Logbook de santé (nouveau)
+│   ├── PhotoUpload.tsx     # Upload et gestion des photos
+│   └── TransferRequestDialog.tsx # Gestion des transferts
+├── store/                  # Gestion d'état Redux Toolkit
+│   ├── slices/            # Redux slices par domaine
+│   │   ├── authSlice.ts   # Authentification
+│   │   ├── elevageSlice.ts # Gestion des élevages
+│   │   └── animalSlice.ts # Gestion des animaux
+│   └── store.ts           # Configuration du store
+├── utils/                  # Fonctions utilitaires
+│   ├── auth.ts            # Utilitaires d'authentification
+│   └── validation.ts      # Validation côté client
+├── config/                # Configuration
+│   ├── api.ts             # Configuration API
+│   └── i18n.ts            # Internationalisation
+└── App.tsx                # Composant racine avec routing
 ```
 
+### Technologies Frontend
+
+- **React 19** avec hooks modernes et Concurrent Features
+- **TypeScript** strict pour la sécurité du typage
+- **Redux Toolkit** pour la gestion d'état globale
+- **Tailwind CSS** pour le design responsive et moderne
+- **Vite** comme bundler rapide avec HMR
+- **i18next** pour l'internationalisation (FR/EN)
+- **Vitest** pour les tests unitaires
+- **Cypress** pour les tests E2E
+
 ### Gestion d'état
-- **React Context API** pour l'état global (authentification)
-- **State local** pour l'état des composants
-- **Props drilling** évité grâce aux contextes
+
+- **Redux Toolkit** pour l'état global complexe
+- **React Query** pour la mise en cache des données API (à implémenter)
+- **State local** pour l'état des composants simples
+- **Context API** pour les données partagées légers
 
 ### Communication API
-- **Fetch API** pour les appels HTTP
-- **JSON** comme format d'échange
-- **Gestion d'erreurs** centralisée
 
-## Backend (PHP)
+- **Fetch API** natif pour les appels HTTP
+- **JSON** comme format d'échange standardisé
+- **Gestion d'erreurs** centralisée avec intercepteurs
+- **Tokens JWT** dans les headers Authorization
 
-### Architecture MVC
+## Backend (PHP 8.4)
+
+### Architecture MVC Moderne
 
 ```
 backend/
-├── controllers/        # Contrôleurs (logique de traitement)
-│   ├── UserController.php
-│   ├── ElevageController.php
-│   └── AdminController.php
-├── models/            # Modèles (entités métier)
-│   ├── User.php
-│   ├── Elevage.php
-│   ├── Animal.php
-│   └── Race.php
-├── middleware/        # Middleware (authentification)
-│   └── AuthMiddleware.php
-├── config/           # Configuration
-│   ├── database.php  # Configuration BDD
-│   └── env.php       # Variables d'environnement
-└── index.php         # Point d'entrée et routeur
+├── controllers/            # Contrôleurs (logique de traitement)
+│   ├── AuthController.php         # Authentification JWT
+│   ├── UserController.php         # Gestion des utilisateurs
+│   ├── ElevageController.php      # Gestion des élevages
+│   ├── AnimalController.php       # Gestion des animaux
+│   ├── HealthLogController.php    # Logbook de santé (nouveau)
+│   ├── TransferRequestController.php # Transferts d'animaux
+│   └── AdminController.php        # Administration système
+├── models/                # Modèles (entités métier)
+│   ├── User.php           # Utilisateur avec rôles
+│   ├── Elevage.php        # Élevage et permissions
+│   ├── Animal.php         # Animal avec généalogie
+│   ├── HealthLog.php      # Événements de santé (nouveau)
+│   ├── Race.php           # Races d'animaux
+│   ├── TypeAnimal.php     # Types (Ovin, Bovin, etc.)
+│   └── TransferRequest.php # Demandes de transfert
+├── middleware/            # Middleware (authentification)
+│   └── AuthMiddleware.php # Validation JWT et permissions
+├── config/               # Configuration système
+│   ├── database.php      # Abstraction multi-SGBD
+│   ├── config.php        # Variables d'environnement
+│   └── env.php           # Chargement .env
+├── migrations/           # Scripts de migration BDD
+│   ├── create_users.sql
+│   ├── create_animaux.sql
+│   └── create_health_log.sql # Migration logbook (nouveau)
+├── database/            # Base SQLite de développement
+│   └── animalignage.db
+└── index.php            # Point d'entrée et routeur REST
 ```
 
-### Couche de données
+### Fonctionnalités Backend
 
-#### Modèles
-Chaque modèle hérite d'une classe de base et implémente :
-- **CRUD operations** (Create, Read, Update, Delete)
-- **Validation des données**
-- **Relations entre entités**
+#### Authentification & Autorisation
+- **JWT (JSON Web Tokens)** pour l'authentification stateless
+- **Rôles utilisateur** : Admin (1), Modérateur (2), Utilisateur (3)
+- **Middleware de sécurité** sur tous les endpoints protégés
+- **Validation des permissions** par ressource
 
-#### Base de données
-- **Abstraction PDO** pour la portabilité multi-SGBD
-- **Migrations automatiques** pour la gestion du schéma
-- **Configuration environnementale** (dev/prod)
+#### Gestion des Données
+- **Architecture Repository Pattern** pour l'accès aux données
+- **PDO avec prepared statements** pour la sécurité SQL
+- **Support multi-SGBD** : SQLite (dev), MySQL/PostgreSQL (prod)
+- **Migrations automatiques** au premier démarrage
 
-### API REST
+#### Nouveau : Logbook de Santé
+- **Événements médicaux** : Vaccinations, traitements, consultations
+- **Niveaux de sévérité** : Info, Warning, Critical
+- **Permissions** : Lecture tous, écriture Admin/Modérateur
+- **Pagination** et filtrage des événements
 
-| Endpoint | Méthode | Description |
-|----------|---------|-------------|
-| `/api/users` | GET | Liste des utilisateurs |
-| `/api/users` | POST | Création d'utilisateur |
-| `/api/elevages` | GET | Liste des élevages |
-| `/api/elevages` | POST | Création d'élevage |
-| `/api/animals` | GET | Liste des animaux |
-| `/api/animals` | POST | Ajout d'animal |
-| `/api/races` | GET | Liste des races |
+### API REST Complète
+
+| Endpoint | Méthode | Description | Permissions |
+|----------|---------|-------------|-------------|
+| `/api/auth/login` | POST | Connexion utilisateur | Public |
+| `/api/auth/register` | POST | Inscription | Public |
+| `/api/users` | GET/POST/PUT/DELETE | Gestion utilisateurs | Admin |
+| `/api/elevages` | GET/POST/PUT | Gestion élevages | Propriétaire+ |
+| `/api/animaux` | GET/POST/PUT | Gestion animaux | Membre élevage+ |
+| `/api/animaux/{id}/photos` | POST/DELETE | Upload photos | Membre élevage+ |
+| `/api/animaux/{id}/health-log` | GET/POST/PUT/DELETE | Logbook santé | Lecture: Tous, Écriture: Admin/Mod |
+| `/api/races` | GET/POST | Races d'animaux | Lecture: Tous, Écriture: Admin |
+| `/api/types-animaux` | GET/POST | Types d'animaux | Lecture: Tous, Écriture: Admin |
+
+## Base de Données
+
+### Schéma Principal
+
+```sql
+-- Utilisateurs avec rôles
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    username VARCHAR(50) UNIQUE,
+    email VARCHAR(100) UNIQUE,
+    password_hash VARCHAR(255),
+    role INTEGER DEFAULT 3, -- 1=Admin, 2=Modérateur, 3=Utilisateur
+    status VARCHAR(20) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Élevages
+CREATE TABLE elevages (
+    id INTEGER PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    adresse TEXT,
+    user_id INTEGER, -- Propriétaire
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Animaux avec généalogie
+CREATE TABLE animaux (
+    id INTEGER PRIMARY KEY,
+    identifiant_officiel VARCHAR(50) UNIQUE,
+    nom VARCHAR(100),
+    sexe VARCHAR(1) CHECK (sexe IN ('M', 'F')),
+    pere_id INTEGER,
+    mere_id INTEGER,
+    race_id INTEGER,
+    elevage_id INTEGER,
+    date_naissance DATE,
+    statut VARCHAR(10) DEFAULT 'vivant',
+    FOREIGN KEY (pere_id) REFERENCES animaux(id),
+    FOREIGN KEY (mere_id) REFERENCES animaux(id),
+    FOREIGN KEY (race_id) REFERENCES races(id),
+    FOREIGN KEY (elevage_id) REFERENCES elevages(id)
+);
+
+-- Nouveau : Logbook de santé
+CREATE TABLE health_log (
+    id INTEGER PRIMARY KEY,
+    animal_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    event_type VARCHAR(50) NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    severity VARCHAR(10) DEFAULT 'info' CHECK (severity IN ('info', 'warning', 'critical')),
+    event_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (animal_id) REFERENCES animaux(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+```
+
+### Configuration Multi-SGBD
+
+```php
+// Configuration automatique selon l'environnement
+class Database {
+    public function getConnection() {
+        $driver = Config::get('DB_DRIVER', 'sqlite');
+
+        switch ($driver) {
+            case 'sqlite':
+                return new PDO("sqlite:" . __DIR__ . '/../database/animalignage.db');
+            case 'mysql':
+                return new PDO("mysql:host={$host};dbname={$db}", $user, $pass);
+            case 'pgsql':
+                return new PDO("pgsql:host={$host};dbname={$db}", $user, $pass);
+        }
+    }
+}
+```
 
 ## Sécurité
 
 ### Authentification
-- **JWT (JSON Web Tokens)** pour l'authentification stateless
-- **Middleware d'autorisation** sur les endpoints protégés
-- **Validation des tokens** à chaque requête
+- **JWT avec expiration** (24h par défaut)
+- **Refresh tokens** pour le renouvellement
+- **Validation des tokens** à chaque requête API
+- **Logout côté serveur** avec blacklist des tokens
 
 ### Autorisation
-- **Rôles utilisateur** : admin, éleveur, compte en attente
-- **Contrôle d'accès** basé sur les rôles (RBAC)
-- **Isolation des données** par utilisateur
+- **RBAC (Role-Based Access Control)**
+- **Permissions granulaires** par ressource
+- **Isolation des données** par élevage
+- **Validation des propriétaires** pour les opérations sensibles
 
-### Validation
-- **Validation côté client** (React forms)
-- **Validation côté serveur** (modèles PHP)
-- **Échappement des données** (PDO prepared statements)
+### Protection des Données
+- **Prepared statements PDO** contre l'injection SQL
+- **Validation et échappement** des entrées utilisateur
+- **HTTPS obligatoire** en production
+- **Headers de sécurité** (CORS, CSP, etc.)
 
-## Flux de données
+## Flux de Données
 
-### Authentification
+### Authentification Complète
 ```
-1. Utilisateur → Login Form (React)
-2. Form → API /auth/login (PHP)
-3. API → Validation credentials (Model)
-4. Model → Database query (PDO)
-5. API → JWT token generation
-6. React → Token storage (localStorage)
-7. React → Auth context update
-```
-
-### Opérations CRUD
-```
-1. Composant React → API call (fetch)
-2. Middleware → JWT validation
-3. Controller → Business logic
-4. Model → Database operations
-5. Response → JSON data
-6. React → State update
-7. UI → Re-render
+1. Utilisateur → Formulaire Login (React)
+2. Form → POST /api/auth/login (validation côté client)
+3. Backend → Validation credentials (Model User)
+4. Database → Vérification hash password
+5. Backend → Génération JWT + refresh token
+6. Frontend → Stockage tokens (localStorage sécurisé)
+7. Redux → Mise à jour state auth global
+8. Interface → Redirection tableau de bord
 ```
 
-## Gestion des erreurs
+### Opérations CRUD avec Permissions
+```
+1. Composant React → Appel API avec JWT header
+2. AuthMiddleware → Validation token + extraction user
+3. Controller → Vérification permissions spécifiques
+4. Model → Requête database avec filtres sécurité
+5. Database → Exécution requête avec prepared statements
+6. Response → Données JSON formatées
+7. Frontend → Mise à jour Redux store
+8. UI → Re-render automatique des composants
+```
+
+### Nouveau : Workflow Logbook de Santé
+```
+1. Vétérinaire/Admin → Création événement santé
+2. HealthLogController → Validation permissions (Admin/Mod uniquement)
+3. HealthLog Model → Insertion avec validation métier
+4. Database → Sauvegarde avec relations (animal, user)
+5. Frontend → Mise à jour temps réel du logbook
+6. Notifications → Alerte si événement critique
+```
+
+## Performance et Optimisation
 
 ### Frontend
-- **Try-catch** pour les appels API
-- **États de loading** et d'erreur
-- **Messages utilisateur** informatifs
+- **Code splitting** avec React.lazy pour les gros composants
+- **Memoization** React.memo pour éviter les re-renders
+- **Virtual scrolling** pour les listes d'animaux longues
+- **Image lazy loading** pour les photos d'animaux
+- **Bundle optimization** avec Vite et tree-shaking
 
 ### Backend
-- **Exceptions PHP** capturées
-- **Codes de statut HTTP** appropriés
-- **Messages d'erreur** standardisés
-- **Logging** des erreurs serveur
+- **Requêtes SQL optimisées** avec index appropriés
+- **Pagination** systématique sur les listes
+- **Cache des métadonnées** (races, types) en mémoire
+- **Compression gzip** des réponses JSON
+- **Connection pooling** pour les bases de données
 
-## Performance
+### Base de Données
+```sql
+-- Index pour performance
+CREATE INDEX idx_animaux_elevage ON animaux(elevage_id);
+CREATE INDEX idx_health_log_animal ON health_log(animal_id);
+CREATE INDEX idx_health_log_date ON health_log(event_date DESC);
+CREATE INDEX idx_animaux_parents ON animaux(pere_id, mere_id);
+```
 
-### Frontend
-- **Code splitting** via React.lazy (à implémenter)
-- **Memoization** des composants (React.memo)
-- **Optimisation des re-renders**
+## Déploiement et Environnements
 
-### Backend
-- **Requêtes SQL optimisées**
-- **Index de base de données**
-- **Cache d'authentification JWT**
+### Développement
+- **SQLite** : Base de données fichier locale
+- **Vite dev server** : Hot reload instantané
+- **PHP built-in server** : Pas de configuration Apache
+- **Ports** : Frontend 5173, Backend 3001
 
-## Déploiement
-
-### Environnements
-- **Développement** : SQLite, ports 3001/3002
-- **Production** : MySQL/PostgreSQL, serveur web
+### Production
+- **MySQL/PostgreSQL** : Base de données robuste
+- **Apache/Nginx** : Serveur web optimisé
+- **HTTPS** : Certificat SSL obligatoire
+- **Monitoring** : Logs et métriques de performance
 
 ### CI/CD GitHub Actions
-- **Tests automatiques** sur push/PR (master/develop)
-- **Pipeline complet** : PHP + React + E2E + Performance
-- **Rapports de couverture** Codecov intégrés
-- **Tests nocturnes** quotidiens programmés
-
-### Configuration
-- **Variables d'environnement** (fichiers .env)
-- **Build de production** (npm run build)
-- **Migrations automatiques** au démarrage
-- **Workflow GitHub Actions** (`.github/workflows/comprehensive-testing.yml`)
+```yaml
+# Pipeline automatisé complet
+name: Tests Complets
+on: [push, pull_request]
+jobs:
+  frontend-tests:    # Tests React + TypeScript
+  backend-tests:     # Tests PHP + PHPUnit
+  e2e-tests:         # Tests Cypress multi-navigateurs
+  security-audit:    # Audit npm/composer
+  performance-tests: # Lighthouse CI
+```
 
 ## Évolutivité
 
-### Horizontal
-- **API stateless** (JWT)
-- **Séparation frontend/backend**
-- **Base de données relationnelle**
+### Horizontale
+- **API stateless** avec JWT (pas de sessions serveur)
+- **Frontend SPA** déployable sur CDN
+- **Base de données** avec réplication possible
+- **Microservices** : Séparation possible par domaine métier
 
-### Vertical
-- **Architecture modulaire**
-- **Interfaces standardisées**
-- **Configuration flexible**
+### Verticale
+- **Architecture modulaire** avec interfaces claires
+- **Dependency injection** pour les services
+- **Configuration flexible** via variables d'environnement
+- **Tests automatisés** pour la non-régression
+
+## Monitoring et Observabilité
+
+### Logs
+- **Frontend** : Erreurs JavaScript avec source maps
+- **Backend** : Logs PHP structurés par niveau
+- **Database** : Requêtes lentes et erreurs de contraintes
+- **Performance** : Métriques Core Web Vitals
+
+### Métriques Clés
+- **Temps de réponse API** : < 200ms pour 95% des requêtes
+- **Taille des bundles** : < 500KB frontend initial
+- **Coverage tests** : > 80% pour le code métier
+- **Lighthouse Score** : > 90 pour Performance et Accessibilité
+
+Cette architecture moderne garantit une application robuste, sécurisée et évolutive pour la gestion professionnelle d'élevages.

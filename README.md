@@ -1,390 +1,288 @@
 # AnimaLineage - Application de Gestion d'Élevage
 
-Application web full-stack moderne pour la gestion professionnelle d'élevages avec interface React/TypeScript et API PHP robuste.
+> Application web moderne pour la gestion professionnelle d'élevages avec interface React/TypeScript et API PHP robuste.
 
-## 🆕 Dernières mises à jour
+## 🚀 Aperçu du Projet
 
-### v2.1.1 (2025-09-21) - Patch Critique
-- 🐛 **Filtrage animaux corrigé** - Les admins voient maintenant uniquement les animaux de l'élevage consulté
+AnimaLineage est une solution complète de gestion d'élevage qui permet de :
+- **Gérer les animaux** avec généalogie complète et suivi sanitaire
+- **Organiser les élevages** avec gestion des membres et permissions
+- **Suivre la santé** avec logbook médical détaillé
+- **Gérer les transferts** d'animaux entre élevages
+- **Administrer** les utilisateurs et données de référence
 
-### v2.1.0 (2025-09-21) - Fonctionnalités majeures
-- ✅ **Migration Tailwind CSS** - Interface moderne avec thème sombre unifié
-- ✅ **Sélection intelligente des parents** - Limitée à la même espèce (Ovin, Bovin, etc.)
-- ✅ **Gestion des transferts d'animaux** - Système complet de demandes
-- ✅ **Contrôles d'accès renforcés** - Types & Races réservés aux administrateurs
-- ✅ **Logo intégré** - Interface professionelle avec branding
-- ✅ **Infrastructure multilingue** - Préparation i18n avec React
+## 📋 Table des Matières
 
-📖 [Voir le changelog complet](./CHANGELOG.md)
+- [🔧 Installation Rapide](#-installation-rapide)
+- [🏗️ Architecture](#️-architecture)
+- [✨ Fonctionnalités](#-fonctionnalités)
+- [🛠️ Technologies](#️-technologies)
+- [📚 API REST](#-api-rest)
+- [🚀 Déploiement](#-déploiement)
+- [🧪 Tests](#-tests)
+- [📖 Documentation](#-documentation)
 
-## Architecture du Projet
+## 🔧 Installation Rapide
+
+### Prérequis
+- **Node.js** 18+ (voir `.nvmrc`)
+- **PHP** 8.4+ avec extensions : PDO SQLite, JSON, OpenSSL, mbstring
+- **Composer** pour les dépendances PHP
+
+### Démarrage en 3 étapes
+
+```bash
+# 1. Backend (Terminal 1)
+cd backend
+composer install
+php -S 0.0.0.0:3001 index.php
+
+# 2. Frontend (Terminal 2)
+cd frontend
+npm install
+npm run dev
+
+# 3. Accès
+# Frontend: http://localhost:5173
+# API: http://localhost:3001
+```
+
+> ⚠️ **Important** : Utilisez `0.0.0.0:3001` pour éviter les erreurs CORS
+
+## 🏗️ Architecture
 
 ```
 AnimaLineage/
-├── frontend/           # Application React TypeScript (port 3002)
+├── 🎨 frontend/           # React + TypeScript + Vite
 │   ├── src/
-│   │   ├── components/     # Composants React modulaires
-│   │   ├── contexts/       # Gestion d'état (AuthContext)
-│   │   └── utils/          # Fonctions utilitaires
-│   └── package.json        # Dépendances Node.js
-├── backend/            # API REST PHP (port 3001)
-│   ├── controllers/    # Contrôleurs MVC
-│   ├── models/         # Modèles de données
-│   ├── middleware/     # Authentification JWT
-│   ├── config/         # Configuration système
-│   ├── migrations/     # Migrations BDD
-│   └── database/       # Base SQLite (dev)
-├── docs/               # Documentation complète
-│   ├── ARCHITECTURE.md # Architecture système
-│   └── CONVENTIONS.md  # Conventions de code
-└── scripts/            # Scripts utilitaires
+│   │   ├── components/    # Composants React modulaires
+│   │   ├── store/         # Redux Toolkit (gestion d'état)
+│   │   ├── utils/         # Fonctions utilitaires
+│   │   └── config/        # Configuration (API, i18n)
+│   ├── public/            # Assets statiques
+│   └── package.json       # Dépendances Node.js
+├── 🔧 backend/            # API REST PHP
+│   ├── controllers/       # Logique métier (MVC)
+│   ├── models/           # Entités et accès données
+│   ├── middleware/       # Authentification JWT
+│   ├── config/          # Configuration base de données
+│   ├── migrations/      # Scripts SQL
+│   └── database/        # Base SQLite (dev)
+├── 📁 deploy/            # Build de production
+├── 📚 docs/              # Documentation détaillée
+└── 🚀 deploy.sh          # Script de déploiement automatisé
 ```
 
-## Prérequis Techniques
+## ✨ Fonctionnalités
 
-### Environnement de Développement
-- **Node.js** v18+ (voir .nvmrc pour la version recommandée)
-- **PHP** v8.4+ avec extensions :
-  - PDO SQLite (développement)
-  - PDO MySQL/PostgreSQL (production)
-  - JSON
-  - OpenSSL (pour JWT)
-  - mbstring
-- **Composer** pour les dépendances PHP
+### 🔐 Gestion des Utilisateurs
+- **Authentification JWT** sécurisée
+- **Rôles** : Administrateur, Modérateur, Utilisateur
+- **Comptes en attente** avec validation administrative
 
-### Environnement de Production
-- **Serveur web** : Apache/Nginx avec support PHP
-- **Base de données** : MySQL/MariaDB ou PostgreSQL
-- **HTTPS** obligatoire pour la sécurité JWT
+### 🐄 Gestion d'Élevage
+- **CRUD complet** pour élevages et animaux
+- **Généalogie** avec arbres père/mère
+- **Races et types** d'animaux configurables
+- **Upload de photos** pour les animaux
 
-## Setup Instructions
+### 📋 Logbook de Santé
+- **Événements médicaux** : Vaccinations, traitements, consultations
+- **Niveaux de sévérité** : Info, Attention, Critique
+- **Historique complet** avec auteur et dates
+- **Permissions** : Lecture pour tous, écriture Admin/Modérateur
 
-### Database Setup
+### 🔄 Transferts d'Animaux
+- **Demandes de transfert** entre élevages
+- **Workflow de validation** par les administrateurs
+- **Suivi des états** : En attente, Accepté, Refusé
 
-The application uses **SQLite by default in development mode** and supports MySQL/MariaDB or PostgreSQL for production.
+### 🌍 Internationalisation
+- **Support multilingue** : Français, Anglais
+- **Interface adaptable** selon la langue du navigateur
+- **Messages d'erreur** traduits
 
-#### Development (SQLite - Default)
-No setup required! The SQLite database file will be created automatically in `backend/database/webapp.db`
+## 🛠️ Technologies
 
-#### Production (MySQL/MariaDB)
-1. Create a MySQL database named `webapp_db`
-2. Copy `backend/.env.prod.example` to `backend/.env`
-3. Update the MySQL configuration in `.env`:
-   ```env
-   APP_ENV=production
-   DB_DRIVER=mysql
-   DB_HOST=localhost
-   DB_NAME=webapp_db
-   DB_USER=your_username
-   DB_PASS=your_password
-   ```
+### Frontend
+- **React 19** avec hooks modernes
+- **TypeScript** pour la sécurité du typage
+- **Redux Toolkit** pour la gestion d'état
+- **Tailwind CSS** pour le design responsive
+- **Vite** comme bundler moderne
+- **i18next** pour l'internationalisation
 
-#### Production (PostgreSQL)
-1. Create a PostgreSQL database named `webapp_db`
-2. Copy `backend/.env.prod.example` to `backend/.env`
-3. Update the PostgreSQL configuration in `.env`:
-   ```env
-   APP_ENV=production
-   DB_DRIVER=pgsql
-   DB_HOST=localhost
-   DB_NAME=webapp_db
-   DB_USER=postgres
-   DB_PASS=your_password
-   DB_PORT=5432
-   ```
+### Backend
+- **PHP 8.4** avec programmation orientée objet
+- **Architecture MVC** claire et modulaire
+- **PDO** avec support multi-SGBD (SQLite/MySQL/PostgreSQL)
+- **JWT** pour l'authentification stateless
+- **Intervention/Image** pour le traitement d'images
 
-The application will automatically create the required `users` table for all database types.
+### Base de Données
+- **SQLite** par défaut (développement)
+- **MySQL/PostgreSQL** pour la production
+- **Migrations automatiques** pour la cohérence du schéma
 
-### Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Start PHP development server:
-   ```bash
-   php -S 0.0.0.0:3001 index.php
-   ```
-
-   ⚠️ **Important**: Utilisez `0.0.0.0:3001` au lieu de `localhost:3001` pour éviter les erreurs de connexion
-
-   Or configure your web server to serve the backend directory on port 3001.
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm start
-   ```
-
-   The React app will run on http://localhost:3002
-
-## Fonctionnalités Principales
-
-### 🌐 Internationalisation
-- **Support multilingue** : Français et Anglais
-- **Traduction dynamique** des codes d'erreur
-- **Changement de langue** en temps réel
-- **Sélecteur de langue** intégré dans l'interface
-
-### Gestion d'Authentification
-- **Système JWT** avec tokens sécurisés
-- **Rôles utilisateur** : administrateur, éleveur, consultant
-- **Comptes en attente** avec validation par administrateur
-- **Middleware d'authentification** sur toutes les routes protégées
-
-### Gestion d'Élevage
-- **CRUD complet** pour élevages, animaux, races et types
-- **Interface intuitive** avec formulaires validés
-- **Tableau de bord** avec vue d'ensemble des données
-- **Recherche et filtrage** avancés
-
-### Administration
-- **Panel d'administration** pour la gestion des utilisateurs
-- **Validation des nouveaux comptes**
-- **Gestion des permissions** et rôles
-- **Monitoring** des activités utilisateur
-
-### Technique
-- **Interface responsive** pour tous les appareils
-- **Validation double** côté client et serveur
-- **Gestion d'erreurs** robuste avec messages informatifs
-- **Performance optimisée** avec lazy loading
-
-## API REST
+## 📚 API REST
 
 ### Authentification
-- `POST /api/auth/login` - Connexion utilisateur
-- `POST /api/auth/register` - Inscription utilisateur
-- `POST /api/auth/logout` - Déconnexion
+```http
+POST /api/auth/login      # Connexion utilisateur
+POST /api/auth/register   # Inscription
+POST /api/auth/logout     # Déconnexion
+```
 
-### Gestion des Utilisateurs
-- `GET /api/users` - Liste des utilisateurs
-- `POST /api/users` - Création d'utilisateur
-- `PUT /api/users/{id}` - Modification d'utilisateur
-- `DELETE /api/users/{id}` - Suppression d'utilisateur
+### Utilisateurs
+```http
+GET    /api/users         # Liste des utilisateurs
+POST   /api/users         # Création
+PUT    /api/users/{id}    # Modification
+DELETE /api/users/{id}    # Suppression
+```
 
-### Gestion des Élevages
-- `GET /api/elevages` - Liste des élevages
-- `POST /api/elevages` - Création d'élevage
-- `GET /api/elevages/{id}` - Détail d'un élevage
-- `PUT /api/elevages/{id}` - Modification d'élevage
+### Élevages
+```http
+GET    /api/elevages      # Liste des élevages
+POST   /api/elevages      # Création
+GET    /api/elevages/{id} # Détail
+PUT    /api/elevages/{id} # Modification
+```
 
-### Gestion des Animaux
-- `GET /api/animals` - Liste des animaux
-- `POST /api/animals` - Ajout d'animal
-- `GET /api/animals/{id}` - Détail d'un animal
-- `PUT /api/animals/{id}` - Modification d'animal
+### Animaux
+```http
+GET    /api/animaux       # Liste des animaux
+POST   /api/animaux       # Ajout
+GET    /api/animaux/{id}  # Détail
+PUT    /api/animaux/{id}  # Modification
+POST   /api/animaux/{id}/photos  # Upload photo
+```
+
+### Logbook de Santé
+```http
+GET    /api/animaux/{id}/health-log           # Événements
+POST   /api/animaux/{id}/health-log           # Nouvel événement
+PUT    /api/animaux/{id}/health-log/{eventId} # Modification
+DELETE /api/animaux/{id}/health-log/{eventId} # Suppression
+```
 
 ### Référentiels
-- `GET /api/races` - Liste des races
-- `POST /api/races` - Création de race
-- `GET /api/types-animaux` - Types d'animaux
+```http
+GET /api/races           # Races d'animaux
+GET /api/types-animaux   # Types d'animaux (Ovin, Bovin, etc.)
+```
 
-## Documentation Complète
+## 🚀 Déploiement
+
+### Déploiement Automatisé
+
+```bash
+# 1. Exécuter le script de déploiement
+./deploy.sh
+
+# 2. Uploader le contenu de deploy/ vers votre serveur web
+# 3. Configurer le fichier .env en production
+```
+
+### Configuration Production
+
+```env
+# api/.env
+APP_ENV=production
+DB_DRIVER=mysql
+DB_HOST=localhost
+DB_NAME=animalignage_prod
+DB_USER=votre_utilisateur
+DB_PASS=votre_mot_de_passe
+JWT_SECRET=clé_très_sécurisée_256_bits
+CORS_ALLOWED_ORIGINS=https://votre-domaine.com
+```
+
+### Prérequis Serveur
+- **PHP 8.4+** avec extensions requises
+- **Serveur web** Apache/Nginx avec mod_rewrite
+- **HTTPS** obligatoire pour la sécurité JWT
+- **Base de données** MySQL/PostgreSQL
+
+## 🧪 Tests
+
+### Frontend (Jest + Vitest)
+```bash
+cd frontend
+
+# Tests unitaires
+npm test
+
+# Tests avec couverture
+npm run test:coverage
+
+# Tests E2E (Cypress)
+npm run test:e2e
+
+# Build de production
+npm run build
+```
+
+### Backend (PHPUnit)
+```bash
+cd backend
+
+# Tests PHP
+composer test
+
+# Avec couverture
+composer run test-coverage
+```
+
+### CI/CD GitHub Actions
+- ✅ **Tests automatiques** sur push/PR
+- ✅ **Couverture de code** avec rapports
+- ✅ **Tests E2E** multi-navigateurs
+- ✅ **Audit de sécurité** des dépendances
+- ✅ **Tests de performance** Lighthouse
+
+## 📖 Documentation
 
 ### Guides Techniques
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Architecture détaillée du système
-- **[CONVENTIONS.md](docs/CONVENTIONS.md)** - Conventions de code et bonnes pratiques
-- **[TESTING.md](./TESTING.md)** - Guide complet des tests et patterns 🧪
-- **[DATABASE.md](backend/DATABASE.md)** - Configuration et gestion de la base de données
-- **[PHP_8.4_MIGRATION.md](backend/PHP_8.4_MIGRATION.md)** - Guide de migration vers PHP 8.4
+- **[DEPLOIEMENT.md](docs/DEPLOIEMENT.md)** - Guide de déploiement complet
+- **[CONVENTIONS.md](docs/CONVENTIONS.md)** - Standards de code
+- **[DATABASE.md](backend/DATABASE.md)** - Configuration base de données
+- **[SECURITY.md](docs/SECURITY.md)** - Bonnes pratiques sécurité
 
-### Configuration Base de Données
-L'application détecte automatiquement l'environnement :
+### Fonctionnalités Détaillées
+- **[API.md](docs/API.md)** - Documentation complète de l'API
+- **[TESTS.md](docs/TESTS.md)** - Guide des tests et patterns
 
-- **Développement** : SQLite automatique (aucune configuration)
-- **Production** : MySQL/PostgreSQL via fichier `.env`
+## 🤝 Contribution
 
-Voir `DATABASE.md` pour les détails de configuration.
+### Standards de Code
+- **TypeScript** strict pour le frontend
+- **PSR-12** pour le code PHP
+- **Tests obligatoires** pour les nouvelles fonctionnalités
+- **Documentation** à jour pour les API
 
-### Tests
-
-#### Tests Frontend (Jest/React Testing Library)
+### Workflow Git
 ```bash
-cd frontend
+# 1. Fork et branche feature
+git checkout -b feature/nouvelle-fonctionnalite
 
-# Exécuter tous les tests
-npm test
+# 2. Développement avec tests
+npm test && composer test
 
-# Tests Redux (isolation pure - 159 tests)
-npm test -- src/store/slices/__tests__/
-
-# Tests de composants
-npm test -- src/components/__tests__/
-
-# Build et vérification TypeScript
-npm run build
+# 3. Pull Request avec description détaillée
 ```
 
-**État des tests frontend :**
-- ✅ **Redux**: 159/159 tests passent avec approche d'isolation pure
-- ✅ **Build**: Compilation TypeScript réussie
-- ✅ **CI/CD**: GitHub Actions configuré et fonctionnel
-- ⚠️ **Composants**: Problèmes MSW en cours de résolution
+## 📝 License
 
-#### Tests Backend (PHPUnit)
-```bash
-cd backend
+Ce projet est sous licence Apache 2.0 - voir le fichier LICENSE pour plus de détails.
 
-# Tests PHP (à configurer)
-composer test
-```
+## 👤 Auteur
 
-📖 **[Voir TESTING.md](./TESTING.md)** pour le guide complet des tests
+**Nicolas Jalibert**
 
-#### CI/CD GitHub Actions
-Le projet dispose d'un **système de tests automatiques** via GitHub Actions :
+---
 
-```yaml
-# Déclenchement automatique
-- Push sur master/develop
-- Pull Requests
-- Tests nocturnes quotidiens
-
-# Pipeline complet (5 étapes)
-1. 🐘 Tests PHP Backend (PHPUnit + couverture)
-2. ⚛️ Tests React Frontend (Jest + Redux)
-3. 🔒 Tests de Sécurité (audit npm/composer)
-4. 🔄 Tests E2E (Cypress Chrome/Firefox)
-5. ⚡ Tests Performance (Lighthouse)
-```
-
-**Statut des workflows** : ✅ Configuré et fonctionnel
-
-### Maintenance
-```bash
-# Audit des dépendances
-npm audit
-composer audit
-
-# Mise à jour des dépendances
-npm update
-composer update
-```
-
-## Development
-
-### Frontend Development
-- Built with React and TypeScript
-- Uses functional components with hooks
-- Styled with CSS modules
-
-### Backend Development
-- RESTful API built with PHP
-- Object-oriented architecture
-- PDO for database operations
-- CORS enabled for frontend communication
-
-## Démarrage Rapide
-
-### 1. Préparation de l'Environnement
-```bash
-# Cloner le dépôt
-git clone <repository-url> mouton2
-cd mouton2
-
-# Utiliser la version Node.js recommandée
-nvm use
-```
-
-### 2. Configuration du Backend
-```bash
-cd backend
-
-# Installer les dépendances PHP
-composer install
-
-# Configurer l'environnement (optionnel en dev)
-cp .env.dev.example .env
-
-# Démarrer le serveur PHP
-php -S localhost:3001
-```
-
-### 3. Configuration du Frontend
-```bash
-cd frontend
-
-# Installer les dépendances Node.js
-npm install
-
-# Démarrer l'application React
-npm start
-```
-
-### 4. Accès à l'Application
-- **Frontend** : http://localhost:3002
-- **API Backend** : http://localhost:3001
-- **Base de données** : Créée automatiquement en SQLite
-
-## Déploiement en Production
-
-### 1. Préparation de l'Application
-```bash
-# Build du frontend
-cd frontend
-npm run build
-
-# Installation des dépendances PHP (production)
-cd ../backend
-composer install --no-dev --optimize-autoloader
-```
-
-### 2. Configuration de Production
-```bash
-# Copier et configurer les variables d'environnement
-cp .env.prod.example .env
-
-# Éditer le fichier .env avec vos paramètres
-# APP_ENV=production
-# DB_DRIVER=mysql (ou pgsql)
-# DB_HOST=votre_host
-# DB_NAME=votre_base
-# DB_USER=votre_utilisateur
-# DB_PASS=votre_mot_de_passe
-```
-
-### 3. Configuration Serveur Web
-
-#### Apache (.htaccess inclus)
-```apache
-# Pointer DocumentRoot vers le dossier backend/
-# Le frontend build/ doit être accessible via le serveur web
-```
-
-#### Nginx
-```nginx
-server {
-    listen 80;
-    server_name votre-domaine.com;
-    root /path/to/animaLignage/backend;
-
-    location /api/ {
-        try_files $uri $uri/ /index.php$is_args$args;
-    }
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
-        fastcgi_index index.php;
-        include fastcgi_params;
-    }
-}
-```
-
-### 4. Sécurité de Production
-- **HTTPS obligatoire** pour la sécurité JWT
-- **Fichier .env** jamais accessible publiquement
-- **Permissions** restrictives sur les fichiers
-- **Firewall** configuré pour limiter l'accès
+> 🔧 **Version actuelle** : 2.1.1
+> 📅 **Dernière mise à jour** : Octobre 2025
+> 🌟 **Fonctionnalité récente** : Logbook de santé pour animaux
